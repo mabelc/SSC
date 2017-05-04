@@ -1,0 +1,33 @@
+Package: ssc
+Type: Package
+Title: Semi-Supervised Classification Methods
+Version: 1.0
+Authors@R: c(person("Mabel", "González", role = "aut",
+                    email = "mabelc@uclv.edu.cu"),
+             person("José Daniel", "Rodríguez", role = "aut",
+                    email = "josedaniel@uclv.cu"),
+             person("Osmani", "Rosado", role = "aut",
+                    email = "osmanir@uclv.cu"),
+             person("José Manuel", " Benítez", role = "ths"),
+             person("Christoph", "Bergmeir", role = c("ths", "cre"),
+                    email = "c.bergmeir@decsai.ugr.es"),
+             person("Isaac", "Triguero", role = "ctb"))
+Description: Provides a collection of self-labeled techniques for semi-supervised classification. In semi-supervised classification, both labeled and unlabeled data are used to train a classifier. This learning paradigm has obtained promising results, specifically in the presence of a reduced set of labeled examples. This package implements a collection of self-labeled techniques to construct a distance-based classification model. This family of techniques enlarges the original labeled set using the most confident predictions to classify unlabeled data. The techniques implemented can be applied to classification problems in several domains by the specification of a suitable base classifier and distance measure. At low ratios of labeled data, it can be shown to perform better than classical supervised classifiers.
+Depends: R (>= 2.4.0)
+Imports: stats, proxy
+Suggests: caret, e1071
+Maintainer: Christoph Bergmeir <c.bergmeir@decsai.ugr.es>
+License: GPL-2
+Date: 2016-10-05
+Encoding: UTF-8
+RoxygenNote: 5.0.1
+NeedsCompilation: no
+Packaged: 2016-10-04 22:54:35 UTC; bergmeir
+Author: Mabel González [aut],
+  José Daniel Rodríguez [aut],
+  Osmani Rosado [aut],
+  José Manuel Benítez [ths],
+  Christoph Bergmeir [ths, cre],
+  Isaac Triguero [ctb]
+Repository: CRAN
+Date/Publication: 2016-10-05 09:30:01
