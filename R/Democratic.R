@@ -63,7 +63,9 @@ democratic <- function(
   checkCommonParams(env = environment(), denv = temp)
   # check dist.use
   m$dist.use <- if(is.null(dist.use)){
-    matrix(TRUE, nrow = length(m$bclassifs), ncol = length(temp$dists.l))
+    dist.use <- matrix(FALSE, nrow = length(m$bclassifs), ncol = length(temp$dists.l))
+    diag(dist.use) <- TRUE
+    dist.use
   }else{
     if(nrow(dist.use) != length(m$bclassifs) || ncol(dist.use) != length(temp$dists.l)){
       stop("The number of rows and columns of 'dist.use' must be equal to the number of base algorithms and the number of matrices of distances respectively")
