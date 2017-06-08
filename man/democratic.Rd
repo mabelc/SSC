@@ -123,4 +123,3 @@ Yan Zhou and Sally Goldman.\cr
 In IEEE 16th International Conference on Tools with Artificial Intelligence (ICTAI),
 pages 594–602. IEEE, Nov 2004. doi: 10.1109/ICTAI.2004.48.
 }
-

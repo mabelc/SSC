@@ -28,4 +28,3 @@ Predicts the label of instances according to TriTraining model.
 \details{
 For additional help see \code{\link{triTraining}} examples.
 }
-

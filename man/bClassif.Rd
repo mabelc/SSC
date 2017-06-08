@@ -57,4 +57,3 @@ a vector with the predicted classes and \code{predProb} returns a matrix
 that contains the class probabilities. In this matrix, there is a column
 for each class and a row for each instance.
 }
-

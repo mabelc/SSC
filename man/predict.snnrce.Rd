@@ -28,4 +28,3 @@ Predicts the label of instances according to SNNRCE model.
 \details{
 For additional help see \code{\link{snnrce}} examples.
 }
-

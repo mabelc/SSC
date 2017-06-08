@@ -15,4 +15,3 @@ data(coffee)
 A dataset containing 56 times series z-normalized. Time series length is 286.
 }
 \keyword{datasets}
-

@@ -28,4 +28,3 @@ according to 1NN.
 This function predicts the class label of instances or its probability of
 pertaining to each class based on the distance matrix.
 }
-

@@ -18,4 +18,3 @@ a named list with the statistics values calculated
 Calculates the statistics:
 Accuracy, Cohen's kappa and F-measure
 }
-

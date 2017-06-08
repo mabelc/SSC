@@ -19,4 +19,3 @@ Build a model using the given data to be capable
 of predict the label or the probabilities of other instances,
 according to 1-NN algorithm.
 }
-

@@ -36,4 +36,3 @@ The attributes are (dontated to UCI repository by Riccardo Leardi, riclea@anchem
 }
 }
 \keyword{datasets}
-

@@ -87,4 +87,3 @@ ZhiHua Zhou and Ming Li.\cr
 \emph{Tri-training: exploiting unlabeled data using three classifiers.}\cr
 IEEE Transactions on Knowledge and Data Engineering, 17(11):1529–1541, Nov 2005. ISSN 1041-4347. doi: 10.1109/TKDE.2005. 186.
 }
-

@@ -94,4 +94,3 @@ In Advances in Knowledge Discovery and Data Mining, volume 3518 of Lecture Notes
 Computer Science, pages 611–621. Springer Berlin Heidelberg, 2005.
 ISBN 978-3-540-26076-9. doi: 10.1007/11430919 71.
 }
-

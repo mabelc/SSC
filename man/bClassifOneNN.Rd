@@ -14,4 +14,3 @@ A classifier specification built using
 Defines a 1-NN classifier specification for
 use in conjunction with the semi-supervised classifiers in this package.
 }
-

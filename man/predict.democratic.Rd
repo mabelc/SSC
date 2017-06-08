@@ -28,4 +28,3 @@ Predicts the label of instances according to Democratic model.
 \details{
 For additional help see \code{\link{democratic}} examples.
 }
-
