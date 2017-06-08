@@ -51,6 +51,38 @@ selectInst <- function(cantClass, probabilities){
   instSelected
 }
 
+selectInstances <- function(cantClass, probabilities){
+  len <- 0
+  class.idx <- numeric()
+  unlabeled.idx <- numeric()
+  prob.cls <- numeric()
+  
+  for (k in 1:sum(cantClass)) { # buscar el mejor por clase y etiquetarlo
+    best <- arrayInd(which.max(probabilities), dim(probabilities))
+    i <- best[1] # fila (instancia)
+    c <- best[2] # columna (clase)
+    if (probabilities[i,c] == -1){
+      break;
+    } 
+    
+    if (cantClass[c] > 0) {
+      len <- len + 1
+      class.idx[len] <- c
+      unlabeled.idx[len] <- i
+      prob.cls[len] <- probabilities[i, c]
+      
+      cantClass[c] <- cantClass[c] - 1
+      probabilities[i,] <- -1 # para que no se repita la instancia
+      if (cantClass[c] == 0)
+        probabilities[,c] <- -1 # para que no se repita la clase
+    }
+    
+  }
+  
+  r <- data.frame(class.idx = class.idx, unlabeled.idx = unlabeled.idx, prob.cls = prob.cls)
+  return(r)
+}
+
 #' @title the algorithm for obtaining a resample of the original
 #' labeled set guaranting the representation of each class
 #' @param indexInstTL the index of the instances labeled used for training and its classes

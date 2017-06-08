@@ -2,93 +2,42 @@
 % Please edit documentation in R/SelfTraining.R
 \name{selfTraining}
 \alias{selfTraining}
-\title{Train the Self-training model}
+\title{Train a Self-training model}
 \usage{
-selfTraining(x, y, bclassif = bClassifOneNN(), dist = "matrix",
-  min.amount = ceiling(length(which(is.na(y))) * 0.3), max.iter = 50)
+selfTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
+  max.iter = 50, perc.full = 0.7, thr.conf = 0.5, train.model = TRUE)
 }
 \arguments{
-\item{x}{A object that can be coerced as matrix.
-This object have various interpretations depending on the value set in \code{dist} argument.
-See \code{dist} argument.}
+\item{x}{A matrix or a dataframe with the training instances.}
 
 \item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
 are specified with the value \code{NA}.}
 
-\item{bclassif}{Base classifier specification. Default is \code{bClassifOneNN()}. For defining new base classifiers
-see \code{\link{bClassif}}.}
+\item{learner}{either a function or a string naming the function for 
+training a supervised base classifier}
 
-\item{dist}{Distance information. Valid options are:
-\itemize{
-   \item \code{"matrix"}: this string indicates that \code{x} is a distance matrix.
-   \item \emph{string}: the name of a distance method available in \code{proxy} package.
-   In this case \code{x} is interpreted as a matrix of instances.
-   \item \emph{function}: a function defined by the user that computes the distance between two vectors.
-   This function is called passing the vectors in the firsts two arguments. If the function have others arguments,
-   those arguments must be have default values.
-   In this case \code{x} is interpreted as a matrix of instances.
-}}
+\item{learner.pars}{A list with parameters that are to be passed to the \code{learner}
+function at each self-training iteration.}
 
-\item{min.amount}{Minimum number of unlabeled instances to stop the training process. When the size
-of unlabeled training instances reaches this number the self-labeling process is stopped. Default is
-0.3 * <number of unlabeled instances>.}
+\item{pred}{either a function or a string naming the function for
+predicting the probabilities per classes,
+using a base classifier trained with function \code{learner}.}
 
-\item{max.iter}{Maximum number of iterations to execute in the self-labeling process. Default is 50.}
-}
-\value{
-The trained model stored in a list with the following named values:
-\describe{
-  \item{base.m}{The model trained.}
-  \item{bclassif}{The value of \code{bclassif} argument.}
-  \item{dist}{The value of \code{dist} argument.
-  This value is optionally returned when the argument \code{dist} is different from "matrix".}
-  \item{included.insts}{The indexes of the training instances used to train \code{base.m} model.
-  Those indexes are relative to \code{x} argument.}
-  \item{tr.insts}{The training instances corresponding to the indexes returned in \code{included.insts}.
-  This value is optionally returned when the \code{dist} argument is different from "matrix".}
-  \item{labels.map}{An internal map used for the labels.}
-}
+\item{pred.pars}{A list with parameters that are to be passed to the \code{pred}
+function.}
+
+\item{max.iter}{Maximum number of iterations to execute the self-labeling process. 
+Default is 50.}
+
+\item{perc.full}{A number between 0 and 1. If the percentage 
+of new labeled examples reaches this value the self-training process is stopped.
+Default is 0.7.}
+
+\item{thr.conf}{A number between 0 and 1 that indicates the confidence theshold.
+At each iteration, only the new label examples with a confidence greater than 
+this value (\code{thr.conf}) are added to training set.}
 }
 \description{
-Builds and trains a model to predict the label of instances,
+Trains a model for classification,
 according to Self-training algorithm.
 }
-\examples{
-# This example is part of SelfTraining demo.
-# Use demo(SelfTraining) to see all the examples.
-
-## Load Wine data set
-data(wine)
-
-x <- wine[, -14] # instances without classes
-y <- wine[, 14] # the classes
-x <- scale(x) # scale the attributes
-
-## Prepare data
-set.seed(20)
-# Use 50\% of instances for training
-tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
-xtrain <- x[tra.idx,] # training instances
-ytrain <- y[tra.idx]  # classes of training instances
-# Use 70\% of train instances as unlabeled set
-tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
-ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
-
-# Use the other 50\% of instances for inductive testing
-tst.idx <- setdiff(1:length(y), tra.idx)
-xitest <- x[tst.idx,] # testing instances
-yitest <- y[tst.idx] # classes of testing instances
-
-## Example: Using the Euclidean distance in proxy package.
-m <- selfTraining(xtrain, ytrain, dist = "Euclidean")
-pred <- predict(m, xitest)
-caret::confusionMatrix(table(pred, yitest))
-
-}
-\references{
-David Yarowsky.\cr
-\emph{Unsupervised word sense disambiguation rivaling supervised methods.}\cr
-In Proceedings of the 33rd annual meeting on Association for Computational Linguistics,
-pages 189–196. Association for Computational Linguistics, 1995.
-}
-
