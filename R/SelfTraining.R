@@ -83,8 +83,8 @@ selfTraining <- function(
   
   # Init variables
   y.new <- y
-  y.new.prob <- matrix(nrow = 0, ncol = 1 + nclasses)
-  colnames(y.new.prob) <- c("y.index", classes)
+  y.new.info <- matrix(nrow = 0, ncol = 2 + nclasses)
+  colnames(y.new.info) <- c("y.index", "label", classes)
   
   iter <- 1
   while ((length(labeled) < count.full) && (length(unlabeled) >= totalPerIter) && (iter <= max.iter)) {
@@ -96,6 +96,10 @@ selfTraining <- function(
     # Predict probabilities per classes of unlabeled examples
     ppars <- c(list(model, x[unlabeled, ]), pred.pars)
     prob <- do.call(pred, ppars)
+    # Check probabilities matrix
+    if(!is.matrix(prob) || dim(prob) != c(length(unlabeled), nclasses)){
+      stop("Icorred result returned by the function in parameter pred.")
+    }
     
     # Select the instances with better class probability 
     pre.selection <- selectInstances(cantClass, prob)
@@ -109,16 +113,21 @@ selfTraining <- function(
     
     # Add selected instances to L
     labeled.prime <- unlabeled[selection$unlabeled.idx]
-    y.new[labeled.prime] <- classes[selection$class.idx]
+    sel.classes <- classes[selection$class.idx]
+    y.new[labeled.prime] <- sel.classes
     labeled <- c(labeled, labeled.prime)
     
     # Delete selected instances from U
     unlabeled <- unlabeled[-selection$unlabeled.idx]
     
     # Save probabilities of selected instances
-    y.new.prob <- rbind(
-      y.new.prob, cbind(labeled.prime, prob[selection$unlabeled.idx,])
-    )
+    sel.prob <- prob[selection$unlabeled.idx,]
+    if(length(selection$unlabeled.idx) == 1){
+      # Convert to matrix object
+      dim(sel.prob) = c(1, nclasses)
+    }
+    y.new.info <- rbind(y.new.info, 
+                        cbind(labeled.prime, sel.classes, sel.prob))
     
     iter <- iter + 1
   }  
@@ -142,18 +151,14 @@ selfTraining <- function(
     thr.conf = thr.conf,
     train.model = train.model
   )
-  blearner <- list(
+  result <- list(
+    model = model,
+    new.labels = as.data.frame(y.new.info),
     learner = learner,
     learner.pars = learner.pars,
     pred = pred,
-    pred.pars = pred.pars
-  )
-  result <- list(
-    model = model,
-    y = data.frame(y = y, y.new = y.new),
-    y.new.prob = as.data.frame(y.new.prob),
-    info = info,
-    blearner = blearner
+    pred.pars = pred.pars,
+    info = info
   )
   class(result) <- "selfTraining"
   
@@ -166,5 +171,8 @@ predict.selfTraining <- function(object, x, ...) {
   if(is.null(object$model)){
     stop("The model not exists.")
   }
-  predict(object$model, x, ...)
+  ppars <- c(list(object$model, x), object$pred.pars)
+  prob <- do.call(object$pred, ppars)
+  
+  return(prob)
 }
