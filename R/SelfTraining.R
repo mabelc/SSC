@@ -40,6 +40,10 @@ selfTraining <- function(
   if(!is.factor(y)){
     stop("Parameter y is not a factor. Use as.factor(y) to convert y to a factor.")
   }
+  # Check relation between x and y
+  if(nrow(x) != length(y)){
+    stop("The rows number of x must be equal to the length of y.")
+  }
   # Check max.iter
   if(max.iter < 1){
     stop("Parameter max.iter is less than 1. Expected a value greater than and equal to 1.")
