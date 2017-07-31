@@ -157,6 +157,7 @@ selfTraining <- function(
   )
   result <- list(
     model = model,
+    classes = classes,
     new.labels = as.data.frame(y.new.info),
     learner = learner,
     learner.pars = learner.pars,
@@ -178,5 +179,8 @@ predict.selfTraining <- function(object, x, ...) {
   ppars <- c(list(object$model, x), object$pred.pars)
   prob <- do.call(object$pred, ppars)
   
-  return(prob)
+  indexes <- apply(prob, MARGIN = 1, FUN = which.max)
+  r <- factor(object$classes[indexes], levels = object$classes)
+  
+  return(r)
 }
