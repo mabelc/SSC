@@ -8,14 +8,12 @@
 #' @return A model wish the data needed to use 1-NN
 #' @export
 oneNN <- function(x=NULL, y) {
-  if(! is.vector(y) ){
-    stop("y must be a vector")
+  if(! is.factor(y) ){
+     stop("y must be a factor")
   }
 
   m <- list()
   class(m) <- "OneNN"
-  m$classes <- unique(y)
-  m$y.map <- vapply(y, FUN = function(e){ which(e == m$classes)}, FUN.VALUE = 1)
   m$y <- y
   m
 }
@@ -54,12 +52,12 @@ predProb.OneNN <- function(m, dists) {
     stop("The columns number of 'dists' are different from the number of examples used to train 'm'.")
   }
 
-  probabilities <- matrix(nrow = nrow(dists), ncol = length(m$classes))
+  probabilities <- matrix(nrow = nrow(dists), ncol = length(levels(m$y)))
 
   for (q in 1:nrow(dists)) { #para cada instancia no etiquetada
     # buscar el mas cercano de cada clase a xi en L
     for (j in 1:length(m$y)) {
-      cj <- m$y.map[j] # clase
+      cj <- unclass(m$y[j]) # clase
       d <- dists[q, j] # distancia entre xq y xj
       if (is.na(probabilities[q,cj]) || d < probabilities[q,cj])
         probabilities[q,cj] <- d
