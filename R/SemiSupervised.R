@@ -1,6 +1,7 @@
 
 # store in labels.map the classes found in y
 #' @noRd
+# TODO: Delete this function
 normalizeLabels <- function(m, y) {
 	m$labels.map <- unique(y)
 	m
@@ -8,6 +9,7 @@ normalizeLabels <- function(m, y) {
 
 # map the labels in y using labels.map
 #' @noRd
+# TODO: Delete this function
 mapLabels <- function(m, y) {
   cls <- m$labels.map
   map <- vapply(y, FUN = function(e){ which(e == cls)}, FUN.VALUE = 1)
@@ -16,6 +18,7 @@ mapLabels <- function(m, y) {
 
 # unmap the labels in y using labels.map
 #' @noRd
+# TODO: Delete this function
 restoreLabels <- function(m, y) {
   r <- m$labels.map[as.numeric(y)]
   r
@@ -26,6 +29,7 @@ restoreLabels <- function(m, y) {
 #' @param probabilities A matrix of probabilities. See \link{probabilities}.
 #' @return A list containing a vector by each class of the indices (in indexInstTU) of the instances with major probability per class
 #' @noRd
+# TODO: Delete this function
 selectInst <- function(cantClass, probabilities){
   instSelected <- list() # lista de las posiciones en U de las instancias mas probables por clase
 
@@ -51,6 +55,7 @@ selectInst <- function(cantClass, probabilities){
   instSelected
 }
 
+# TODO: Write help for this function
 selectInstances <- function(cantClass, probabilities){
   len <- 0
   class.idx <- numeric()
@@ -89,6 +94,7 @@ selectInstances <- function(cantClass, probabilities){
 #' @param N is the number of bootstrap samples
 #' @return a set of bootstrap samples
 #' @noRd
+# TODO: Change the parameter indexInstTL for the parameters labeled and ynew
 resample <- function(indexInstTL, N){
 
   y <- indexInstTL[,2]
@@ -113,6 +119,7 @@ resample <- function(indexInstTL, N){
 #' @return a set of instances
 # @examples classRepresentationRandom(c(1,2,3), indexInstTL)
 #' @noRd
+# TODO: Change the parameter indexInstTL for the parameters labeled and ynew
 classRepresentationRandom1 <- function(classes, indexInstTL){
   indexs <- c()
 
@@ -133,6 +140,7 @@ classRepresentationRandom1 <- function(classes, indexInstTL){
 #' @return a set of instances
 # @example classRepresentationRandom(c(1,2,3),indexInstTL)
 #' @noRd
+# TODO: Change the parameter indexInstTL for the parameters labeled and ynew
 classRepresentationRandom2 <- function(classes, indexInstTL){
   indexs <- c()
   i <- 1
