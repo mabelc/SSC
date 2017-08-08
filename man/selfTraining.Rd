@@ -5,7 +5,7 @@
 \title{Train a Self-training model}
 \usage{
 selfTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
-  max.iter = 50, perc.full = 0.7, thr.conf = 0.5, train.model = TRUE)
+  max.iter = 50, perc.full = 0.7, thr.conf = 0.5)
 }
 \arguments{
 \item{x}{A matrix or a dataframe with the training instances.}
@@ -33,9 +33,12 @@ Default is 50.}
 of new labeled examples reaches this value the self-training process is stopped.
 Default is 0.7.}
 
-\item{thr.conf}{A number between 0 and 1 that indicates the confidence theshold.
+\item{thr.conf}{A number between 0 and 1 that indicates the theshold confidence.
 At each iteration, only the new label examples with a confidence greater than 
 this value (\code{thr.conf}) are added to training set.}
+}
+\value{
+The trained model.
 }
 \description{
 Trains a model for classification,

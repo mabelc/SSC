@@ -19,9 +19,10 @@
 #' @param perc.full A number between 0 and 1. If the percentage 
 #' of new labeled examples reaches this value the self-training process is stopped.
 #' Default is 0.7.
-#' @param thr.conf A number between 0 and 1 that indicates the confidence theshold.
+#' @param thr.conf A number between 0 and 1 that indicates the theshold confidence.
 #' At each iteration, only the new label examples with a confidence greater than 
 #' this value (\code{thr.conf}) are added to training set.
+#' @return The trained model.
 #' @export
 selfTraining <- function(
   x, y,
@@ -29,9 +30,9 @@ selfTraining <- function(
   pred, pred.pars = list(),
   max.iter = 50,
   perc.full = 0.7,
-  thr.conf = 0.5,
-  train.model = TRUE
+  thr.conf = 0.5
 ){
+  ### Check parameters ###
   # Check x
   if(!is.matrix(x) && !is.data.frame(x)){
     stop("Parameter x is neither a matrix or a data frame.")
@@ -57,12 +58,17 @@ selfTraining <- function(
     stop("Parameter thr.conf is not in the range 0 to 1.")
   }
   
-  # Determine the indexes of labeled instances
+  ### Init variables ###
+  # Identify the classes
+  classes <- levels(y)
+  nclasses <- length(classes)
+  
+  # Init variable to store the labels
+  ynew <- y
+
+  # Obtain the indexes of labeled and unlabeled instances
   labeled <- which(!is.na(y))
-  y.labeled.count <- length(labeled)
-  # Determine the indexes of unlabeled examples
   unlabeled <- which(is.na(y))
-  y.unlabeled.count <- length(unlabeled)
   ## Check the labeled and unlabeled sets
   if(length(labeled) == 0){   # labeled is empty
     stop("The labeled set is empty. All the values in y parameter are NA.")
@@ -70,47 +76,41 @@ selfTraining <- function(
   if(length(unlabeled) == 0){ # unlabeled is empty
     stop("The unlabeled set is empty. None value in y parameter is NA.")
   }
-  # Identify the classes
-  classes <- levels(y)
-  nclasses <- length(classes)
+  
+  ### Self Training algorithm ###
   
   # Count the examples per class
   cls.summary <- summary(y[labeled])
   # Determine the total of instances to include per iteration 
   cantClass <- round(cls.summary / min(cls.summary)) # divido por el valor minimo
   totalPerIter <- sum(cantClass)
-  
   # Compute count full
-  count.full <- length(labeled) + floor(length(unlabeled) * perc.full)
-  # round(3.5) = 4, round(4.5) = 4
-  # floor(3.5) = 3, round(4.5) = 4
-  
-  # Init variables
-  y.new <- y
-  y.new.info <- matrix(nrow = 0, ncol = 2 + nclasses)
-  colnames(y.new.info) <- c("y.index", "label", classes)
+  count.full <- length(labeled) + round(length(unlabeled) * perc.full)
   
   iter <- 1
   while ((length(labeled) < count.full) && (length(unlabeled) >= totalPerIter) && (iter <= max.iter)) {
     
     # Train classifier
-    lpars <- c(list(x[labeled, ], y.new[labeled]), learner.pars)
+    lpars <- c(list(x[labeled, ], ynew[labeled]), learner.pars)
     model <- do.call(learner, lpars)
     
     # Predict probabilities per classes of unlabeled examples
     ppars <- c(list(model, x[unlabeled, ]), pred.pars)
     prob <- do.call(pred, ppars)
+    
     # Check probabilities matrix
-    if(!is.matrix(prob) || dim(prob) != c(length(unlabeled), nclasses)){
-      stop("Icorred result returned by the function in parameter pred.")
+    if(!is.matrix(prob) ||
+       nrow(prob) != length(unlabeled) ||
+       length(intersect(classes, colnames(prob))) != nclasses){
+      stop("Incorrect value returned by pred function.")
     }
     
-    # Select the instances with better class probability 
-    pre.selection <- selectInstances(cantClass, prob)
+    # Select the instances with better class probability
+    pre.selection <- selectInstances(cantClass, prob[, classes])  
     
-    # 
+    # Select the instances with probability grather than the theshold confidence
     indexes <- which(pre.selection$prob.cls > thr.conf)
-    if(length(indexes) == 0){
+    if(length(indexes) == 0){ 
       next
     }
     selection <- pre.selection[indexes,]
@@ -118,52 +118,24 @@ selfTraining <- function(
     # Add selected instances to L
     labeled.prime <- unlabeled[selection$unlabeled.idx]
     sel.classes <- classes[selection$class.idx]
-    y.new[labeled.prime] <- sel.classes
+    ynew[labeled.prime] <- sel.classes
     labeled <- c(labeled, labeled.prime)
     
     # Delete selected instances from U
     unlabeled <- unlabeled[-selection$unlabeled.idx]
     
-    # Save probabilities of selected instances
-    sel.prob <- prob[selection$unlabeled.idx,]
-    if(length(selection$unlabeled.idx) == 1){
-      # Convert to matrix object
-      dim(sel.prob) = c(1, nclasses)
-    }
-    y.new.info <- rbind(y.new.info, 
-                        cbind(labeled.prime, sel.classes, sel.prob))
-    
     iter <- iter + 1
   }  
   
   # Build model
-  if(train.model){
-    lpars <- c(list(x[labeled, ], y.new[labeled]), learner.pars)
-    model <- do.call(learner, lpars) 
-  }else{
-    model <- NULL
-  }
+  lpars <- c(list(x[labeled, ], ynew[labeled]), learner.pars)
+  model <- do.call(learner, lpars)
   
   # Save result
-  info <- list(
-    y.labeled.count = y.labeled.count,
-    y.unlabeled.count = y.unlabeled.count,
-    perc.full = perc.full,
-    count.full = count.full,
-    max.iter = max.iter,
-    iter.count = iter - 1,
-    thr.conf = thr.conf,
-    train.model = train.model
-  )
   result <- list(
     model = model,
-    classes = classes,
-    new.labels = as.data.frame(y.new.info),
-    learner = learner,
-    learner.pars = learner.pars,
     pred = pred,
-    pred.pars = pred.pars,
-    info = info
+    pred.pars = pred.pars
   )
   class(result) <- "selfTraining"
   
@@ -173,14 +145,12 @@ selfTraining <- function(
 #' @export
 #' @importFrom stats predict
 predict.selfTraining <- function(object, x, ...) {
-  if(is.null(object$model)){
-    stop("The model not exists.")
-  }
   ppars <- c(list(object$model, x), object$pred.pars)
   prob <- do.call(object$pred, ppars)
   
   indexes <- apply(prob, MARGIN = 1, FUN = which.max)
-  r <- factor(object$classes[indexes], levels = object$classes)
+  cl <- colnames(prob)[indexes]
+  r <- factor(cl)
   
   return(r)
 }
