@@ -92,20 +92,24 @@ selfTraining <- function(
     
     # Train classifier
     lpars <- c(list(x[labeled, ], ynew[labeled]), learner.pars)
+    # TODO: Call learner function using a try cast function
     model <- do.call(learner, lpars)
     
     # Predict probabilities per classes of unlabeled examples
     ppars <- c(list(model, x[unlabeled, ]), pred.pars)
+    # TODO: Call pred function using a try cast function
     prob <- do.call(pred, ppars)
     
     # Check probabilities matrix
     if(!is.matrix(prob) ||
        nrow(prob) != length(unlabeled) ||
        length(intersect(classes, colnames(prob))) != nclasses){
+      # TODO: Explain the error cause in the next error message
       stop("Incorrect value returned by pred function.")
     }
     
     # Select the instances with better class probability
+    # TODO: Is always possible select the number of instances requested per class?
     pre.selection <- selectInstances(cantClass, prob[, classes])  
     
     # Select the instances with probability grather than the theshold confidence
@@ -127,8 +131,11 @@ selfTraining <- function(
     iter <- iter + 1
   }  
   
-  # Build model
+  ### Result ###
+  
+  # Train final model
   lpars <- c(list(x[labeled, ], ynew[labeled]), learner.pars)
+  # TODO: Call learner function using a try cast function
   model <- do.call(learner, lpars)
   
   # Save result
