@@ -9,8 +9,8 @@ snnrce(x, y, dist = "Euclidean", alpha = 0.1)
 \arguments{
 \item{x}{A matrix or a dataframe with the training instances.}
 
-\item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
-are specified with the value \code{NA}.}
+\item{y}{A vector with the labels of training instances. 
+In this vector the unlabeled instances are specified with the value \code{NA}.}
 
 \item{dist}{The name of a distance method available in \code{proxy} package or
 a function defined by the user that computes the distance between two instances.

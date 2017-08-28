@@ -3,8 +3,8 @@
 #' @description Trains a model for classification,
 #' according to SNNRCE algorithm.
 #' @param x A matrix or a dataframe with the training instances.
-#' @param y A vector with the labels of training instances. In this vector the unlabeled instances
-#' are specified with the value \code{NA}.
+#' @param y A vector with the labels of training instances. 
+#' In this vector the unlabeled instances are specified with the value \code{NA}.
 #' @param dist The name of a distance method available in \code{proxy} package or
 #' a function defined by the user that computes the distance between two instances.
 #' Default is Euclidean distance.
@@ -77,7 +77,8 @@ snnrce <- function(
   for (i in 1:length(unlabeled)) {
     w <- unlabeled[i]
     clase <- -1
-    good <- TRUE # todos los vecinos tienen la misma etiqueta
+    # w is good when it's neighbors have all the same label
+    good <- TRUE
     
     # Build RNG
     for (j in 1:labeledLen) {
@@ -90,8 +91,8 @@ snnrce <- function(
         }
       if (edge) {
         if (clase == -1)
-          clase <- y[labeled[j]]
-        else if (clase != y[labeled[j]]) {
+          clase <- y[a]
+        else if (clase != y[a]) {
           good <- FALSE
           break
         }
@@ -99,9 +100,9 @@ snnrce <- function(
     }
     
     if (good) {
-      # etiquetar y eliminar de unlabeled
+      # label w and delete it from unlabeled
       ynew[w] <- clase
-      rem <- c(rem,i)
+      rem <- c(rem,  i)
     }
   }
 
@@ -116,23 +117,22 @@ snnrce <- function(
   nmax <- min(max.per.class)
   count <- 0
   while (count < nmax) {
-    # Training 1-NN
+    # Predict prob using 1-NN
     model <- oneNN(y = ynew[labeled])
     prob <- predict(model, D[unlabeled, labeled], type = "prob")
     
-    # Select the instances with better class probability 
+    # Select one instance per class
     selection <- selectInstances(rep(1, nclasses), prob)
     
-    # Add selected instances to L
+    # Add selected instances to labeled
     labeled.prime <- unlabeled[selection$unlabeled.idx]
     sel.classes <- classes[selection$class.idx]
     ynew[labeled.prime] <- sel.classes
     labeled <- c(labeled, labeled.prime)
     
-    # Delete selected instances from U
+    # Delete selected instances from unlabeled
     unlabeled <- unlabeled[-selection$unlabeled.idx]
     
-    # Increment the number of labeled instances per class
     count <- count + 1
   }
   
@@ -176,7 +176,7 @@ snnrce <- function(
     u <- stats::qnorm(1-alpha/2)
     RCritico <- media + u * ds
     
-    relabel <- which(R[(labeledLen+1):len] > RCritico)
+    relabel <- which(R[(labeledLen + 1):len] > RCritico)
     for (i in relabel + labeledLen) {
       w <- -1
       if (nclasses > 2) {
@@ -198,6 +198,9 @@ snnrce <- function(
     rm(ady)
   }
   
+  ### Result ###
+  
+  # Save result
   result <- list(
     xtrain = x[labeled,],
     ytrain = ynew[labeled],
