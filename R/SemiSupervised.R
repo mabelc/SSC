@@ -55,7 +55,11 @@ selectInst <- function(cantClass, probabilities){
   instSelected
 }
 
-# TODO: Write help for this function
+#' @title Select best instances by classes according to its probabilities
+#' @param cantClass A vector indicating how many instances must be selected by class.
+#' @param probabilities A matrix of probabilities. See \link{probabilities}.
+#' @return A dataframe where the rows contains the information of the selected instances.
+#' @noRd
 selectInstances <- function(cantClass, probabilities){
   len <- 0
   class.idx <- numeric()
@@ -88,76 +92,83 @@ selectInstances <- function(cantClass, probabilities){
   return(r)
 }
 
-#' @title the algorithm for obtaining a resample of the original
+#' @title A algorithm for obtaining a resample of the original
 #' labeled set guaranting the representation of each class
-#' @param indexInstTL the index of the instances labeled used for training and its classes
+#' @param ylabeled a factor of instances labels
 #' @param N is the number of bootstrap samples
 #' @return a set of bootstrap samples
+#' @examples 
+#' ylabeled = factor(c('a','b','a','b','c','b','c','c'))
+#' resample(ylabeled, 3)
 #' @noRd
-# TODO: Change the parameter indexInstTL for the parameters labeled and ynew
-resample <- function(indexInstTL, N){
+resample <- function(ylabeled, N){
 
-  y <- indexInstTL[,2]
-  classes <- unique(y) #determino las diferentes clases
-  sizeB <- nrow(indexInstTL) - 2*length(classes)
+  classes <- levels(ylabeled) 
+  sizeB <- length(ylabeled) - 2 * length(classes)
 
   bootstrapList <- list()
   for (i in 1:N){
-    bootstrapList[[i]] <- indexInstTL[classRepresentationRandom2(classes, indexInstTL),]
+    indexes <- classRepresentationRandom2(ylabeled)
     if (sizeB > 0){ #si aun faltan por adicionar instancias
-      index <- sample(x = (1:nrow(indexInstTL)), size = sizeB, replace = TRUE) #selecciono los indices
-      bootstrapList[[i]] <- rbind(bootstrapList[[i]], indexInstTL[index,])#guardo las instancias correspondientes
+      # Select the indexes
+      c(
+        indexes, 
+        sample(x = 1:length(ylabeled), size = sizeB, replace = TRUE)
+      ) -> indexes
     }
+    bootstrapList[[i]] <- indexes
   }
 
-  bootstrapList
+  return(bootstrapList) 
 }
 
-#' @title the algorithm for obtaining a resample with exactly an instance of each class
-#' @param classes all classes in the supervised problem
-#' @param indexInstTL the index of the instances labeled used for training and its classes
-#' @return a set of instances
-# @examples classRepresentationRandom(c(1,2,3), indexInstTL)
+#' @title A algorithm for obtaining a resample with exactly an instance of each class
+#' @param ylabeled a factor of instances labels
+#' @return Indexes of selected instances from \code{ylabeled}
+#' @examples 
+#' ylabeled = factor(c(1,2,1,2,3,2))
+#' classRepresentationRandom1(ylabeled)
 #' @noRd
-# TODO: Change the parameter indexInstTL for the parameters labeled and ynew
-classRepresentationRandom1 <- function(classes, indexInstTL){
-  indexs <- c()
+classRepresentationRandom1 <- function(ylabeled){
+  indexes <- numeric()
 
-  for (c in 1:length(classes)){
-    allc <- which(indexInstTL[,2] == classes[c])
+  classes <- levels(ylabeled)
+  for (i in 1:length(classes)){
+    allc <- which(ylabeled == classes[i])
     if (length(allc) > 1)
-      indexs[c] <- sample(x = allc, size = 1)
+      indexes[i] <- sample(x = allc, size = 1)
     else
-      indexs[c] <- allc
+      indexes[i] <- allc
   }
 
-  indexs
+  return(indexes)
 }
 
-#' @title the algorithm for obtaining a resample with exactly two instances of each class
-#' @param classes all classes in the supervised problem
-#' @param indexInstTL the index of the instances labeled used for training and its classes
-#' @return a set of instances
-# @example classRepresentationRandom(c(1,2,3),indexInstTL)
+#' @title A algorithm for obtaining a resample with exactly two instances of each class
+#' @param ylabeled a factor of instances labels
+#' @return Indexes of selected instances from \code{ylabeled}
+#' @examples 
+#' ylabeled = factor(c(1,2,1,2,3,2))
+#' classRepresentationRandom2(ylabeled)
 #' @noRd
-# TODO: Change the parameter indexInstTL for the parameters labeled and ynew
-classRepresentationRandom2 <- function(classes, indexInstTL){
-  indexs <- c()
+classRepresentationRandom2 <- function(ylabeled){
   i <- 1
-  for (c in 1:length(classes)){
-    allc <- which(indexInstTL[,2] == classes[c])
-    if (length(allc) > 1){
+  indexes <- numeric()
+  
+  for (cls in levels(ylabeled)){
+    allc <- which(ylabeled == cls)
+    if (length(allc) > 1) {
       s <- sample(x = allc, size = 2)
-      indexs[i] <- s[1]
-      i <- i+1
-      indexs[i] <- s[2]
-      i <- i+1
-    }
-    else{
-      indexs[i] <- allc
-      i <- i+1
+      indexes[i] <- s[1]
+      i <- i + 1
+      indexes[i] <- s[2]
+      i <- i + 1
+    }  else {
+      indexes[i] <- allc
+      i <- i + 1
     }
   }
 
-  indexs
+  return(indexes)
 }
+
