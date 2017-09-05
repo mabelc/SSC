@@ -17,7 +17,7 @@ are specified with the value \code{NA}.}
 training a supervised base classifier}
 
 \item{learner.pars}{A list with parameters that are to be passed to the \code{learner}
-function at each self-training iteration.}
+function.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,

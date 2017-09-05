@@ -56,23 +56,6 @@ triTraining <- function(
   
   ### Tri-training algorithm ###
   
-  classify <- function(model, indexes){
-    ppars <- c(list(model, x[indexes, ]), pred.pars)
-    prob <- do.call(pred, ppars)
-    
-    # Check probabilities matrix
-    if(!is.matrix(prob) ||
-       nrow(prob) != length(indexes) ||
-       length(intersect(classes, colnames(prob))) != nclasses){
-      # TODO: Explain the error cause in the next error message
-      stop("Incorrect value returned by pred function.")
-    }
-    prob <- prob[, classes]
-    
-    map <- apply(prob, MARGIN = 1, FUN = which.max)
-    return(map)
-  }
-  
   # Init base classifiers
   Sind <- resample(y[labeled], N = 3)
   
@@ -80,9 +63,7 @@ triTraining <- function(
   for(i in 1:3){
     # Train classifier
     indexes <- labeled[Sind[[i]]] # vector of indexes
-    lpars <- c(list(x[indexes, ], y[indexes]), learner.pars)
-    # TODO: Call learner function using a try cast function
-    models[[i]] <- do.call(learner, lpars)
+    models[[i]] <- trainModel(x[indexes, ], y[indexes], learner, learner.pars)
   }
   
   ePrima <- rep(x = 0.5, times = 3)
@@ -109,14 +90,14 @@ triTraining <- function(
       k <- (i+1) %% 3 + 1
       
       # measure error
-      cj <- classify(models[[j]], labeled)
-      ck <- classify(models[[k]], labeled)
+      cj <- predClassIdx(models[[j]], x[labeled, ], pred, pred.pars, classes)
+      ck <- predClassIdx(models[[k]], x[labeled, ], pred, pred.pars, classes)
       e[i] <- measureError(cj, ck, ylabeled.map)
       
       if(e[i] < ePrima[i]){
         
-        cj <- classify(models[[j]], unlabeled)
-        ck <- classify(models[[k]], unlabeled)
+        cj <- predClassIdx(models[[j]], x[unlabeled, ], pred, pred.pars, classes)
+        ck <- predClassIdx(models[[k]], x[unlabeled, ], pred, pred.pars, classes)
         agree <- (which(cj == ck))
         
         Lind[[i]] <- unlabeled[agree]
@@ -147,11 +128,9 @@ triTraining <- function(
     for(i in 1:3){
       if (updateClassifier[i]){
         # Train classifier
-        ind <- c(labeled, Lind[[i]]) # vector of indexes
-        yi <- factor(classes[c(ylabeled.map, Lcls[[i]])], classes)
-        lpars <- c(list(x[ind, ], yi), learner.pars)
-        # TODO: Call learner function using a try cast function
-        models[[i]] <- do.call(learner, lpars)
+        models[[i]] <- trainModel(x[c(labeled, Lind[[i]]), ], 
+                                  factor(classes[c(ylabeled.map, Lcls[[i]])], classes),
+                                  learner, learner.pars)
         
         # update values for i
         ePrima[i] <- e[i]
@@ -181,15 +160,11 @@ predict.triTraining <- function(object, x, ...) {
   
   preds <- matrix(nrow = 3, ncol = nrow(x))
   for(i in 1:3){
-    ppars <- c(list(object$models[[i]], x), object$pred.pars)
-    prob <- do.call(object$pred, ppars)
-    
-    indexes <- apply(prob[, object$classes], MARGIN = 1, FUN = which.max)
-    preds[i,] <- indexes
+    preds[i,] <- predClass(object$models[[i]], x, object$pred, object$pred.pars, object$classes)
   }
   # get the mode of the predictions for every instance
   pred <- apply(X = preds, MARGIN = 2, FUN = statisticalMode)
-  pred <- factor(object$classes[pred], levels = object$classes)
+  pred <- factor(object$classes[pred], object$classes)
   
   return(pred)
 }

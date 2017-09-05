@@ -8,7 +8,7 @@
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier
 #' @param learner.pars A list with parameters that are to be passed to the \code{learner}
-#' function at each self-training iteration.
+#' function.
 #' @param pred either a function or a string naming the function for
 #' predicting the probabilities per classes,
 #' using a base classifier trained with function \code{learner}.
@@ -91,22 +91,10 @@ selfTraining <- function(
   while ((length(labeled) < count.full) && (length(unlabeled) >= totalPerIter) && (iter <= max.iter)) {
     
     # Train classifier
-    lpars <- c(list(x[labeled, ], ynew[labeled]), learner.pars)
-    # TODO: Call learner function using a try cast function
-    model <- do.call(learner, lpars)
+    model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
     
     # Predict probabilities per classes of unlabeled examples
-    ppars <- c(list(model, x[unlabeled, ]), pred.pars)
-    # TODO: Call pred function using a try cast function
-    prob <- do.call(pred, ppars)
-    
-    # Check probabilities matrix
-    if(!is.matrix(prob) ||
-       nrow(prob) != length(unlabeled) ||
-       length(intersect(classes, colnames(prob))) != nclasses){
-      # TODO: Explain the error cause in the next error message
-      stop("Incorrect value returned by pred function.")
-    }
+    prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
     
     # Select the instances with better class probability
     # TODO: Is always possible select the number of instances requested per class?
@@ -134,13 +122,12 @@ selfTraining <- function(
   ### Result ###
   
   # Train final model
-  lpars <- c(list(x[labeled, ], ynew[labeled]), learner.pars)
-  # TODO: Call learner function using a try cast function
-  model <- do.call(learner, lpars)
+  model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
   
   # Save result
   result <- list(
     model = model,
+    classes = classes,
     pred = pred,
     pred.pars = pred.pars
   )
@@ -152,12 +139,7 @@ selfTraining <- function(
 #' @export
 #' @importFrom stats predict
 predict.selfTraining <- function(object, x, ...) {
-  ppars <- c(list(object$model, x), object$pred.pars)
-  prob <- do.call(object$pred, ppars)
   
-  indexes <- apply(prob, MARGIN = 1, FUN = which.max)
-  cl <- colnames(prob)[indexes]
-  r <- factor(cl)
-  
+  r <- predClass(object$model, x, object$pred, object$pred.pars, object$classes)
   return(r)
 }
