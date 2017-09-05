@@ -97,7 +97,6 @@ selfTraining <- function(
     prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
     
     # Select the instances with better class probability
-    # TODO: Is always possible select the number of instances requested per class?
     pre.selection <- selectInstances(cantClass, prob[, classes])  
     
     # Select the instances with probability grather than the theshold confidence
