@@ -140,6 +140,8 @@ predProb <- function(model, x, pred, pred.pars, classes) {
     stop("Incorrect value returned by pred function.")
   }
   r <- prob[, classes]
+  if(nrow(prob) == 1) dim(r) <- dim(prob) 
+  colnames(r) <- classes
   
   return(r)
 }
