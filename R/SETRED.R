@@ -16,6 +16,7 @@
 #' function.
 #' @param dist The name of a distance method available in \code{proxy} package or
 #' a function defined by the user that computes the distance between two instances.
+#' @param theta Rejection threshold to test the critical region. Default is 0.1.
 #' @param max.iter Maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
 #' @param perc.full A number between 0 and 1. If the percentage 

@@ -30,6 +30,8 @@ function.}
 \item{dist}{The name of a distance method available in \code{proxy} package or
 a function defined by the user that computes the distance between two instances.}
 
+\item{theta}{Rejection threshold to test the critical region. Default is 0.1.}
+
 \item{max.iter}{Maximum number of iterations to execute the self-labeling process. 
 Default is 50.}
 
