@@ -102,13 +102,4 @@ predict.OneNN <- function(object, dists, type="class", ...){
   }
 }
 
-#' @title 1-NN classifier specification builder
-#' @description Defines a 1-NN classifier specification for
-#' use in conjunction with the semi-supervised classifiers in this package.
-#' @return A classifier specification built using
-#' \code{\link{bClassif}} function.
-#' @export
-bClassifOneNN <- function(){
-  bClassif(train = oneNN, predClass = predClass.OneNN, predProb = predProb.OneNN)
-}
 
