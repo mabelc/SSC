@@ -73,6 +73,7 @@ predProb.OneNN <- function(m, dists) {
     probabilities[q,] <- probabilities[q,]/sumatoria #normalizo las probabilidades
   }
 
+  colnames(probabilities) <- levels(m$y)
   probabilities
 }
 

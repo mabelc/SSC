@@ -1,4 +1,5 @@
 
+
 #' @title Train a model
 #' @param x matrix of training instances
 #' @param y factor of classes
@@ -17,47 +18,6 @@ trainModel <- function(x, y, learner, learner.pars){
   return(model)
 }
 
-#' @title Predict classes
-#' @param model supervised classifier
-#' @param x instances to predict
-#' @param pred either a function or a string naming the function for
-#' predicting the probabilities per classes, using a base classifier in \code{model}.
-#' @param pred.pars A list with parameters that are to be passed to the \code{pred}
-#' function.
-#' @param classes vector of possible classes
-#' @return a factor with the predicted classes
-#' @noRd
-predClass <- function(model, x, pred, pred.pars, classes){
-  # Predict probabilities
-  prob <- predProb(model, x, pred, pred.pars, classes)
-  # Obtain classes from probabilities
-  map <- apply(prob, MARGIN = 1, FUN = which.max)
-  # Convert classes indexes in a factor of classes
-  r <- factor(classes[map], classes)
-  
-  return(r)
-}
-
-#' @title Predict classes
-#' @param model supervised classifier
-#' @param x instances to predict
-#' @param pred either a function or a string naming the function for
-#' predicting the probabilities per classes, using a base classifier in \code{model}.
-#' @param pred.pars A list with parameters that are to be passed to the \code{pred}
-#' function.
-#' @param classes vector of possible classes
-#' @return a vector with indexes that correspont to \code{classes}. 
-#' This is a map of the predicted classes.
-#' @noRd
-predClassIdx <- function(model, x, pred, pred.pars, classes){
-  # Predict probabilities
-  prob <- predProb(model, x, pred, pred.pars, classes)
-  # Obtain classes from probabilities
-  map <- apply(prob, MARGIN = 1, FUN = which.max)
-  
-  return(map)
-}
-
 #' @title Predict probabilities per classes
 #' @param model supervised classifier
 #' @param x instances to predict
@@ -65,19 +25,26 @@ predClassIdx <- function(model, x, pred, pred.pars, classes){
 #' predicting the probabilities per classes, using a base classifier in \code{model}.
 #' @param pred.pars A list with parameters that are to be passed to the \code{pred}
 #' function.
-#' @param classes vector of possible classes
-#' @return a matrix of predicted probabilities with the column names equals 
-#' to \code{classes}
+#' @return a matrix of predicted probabilities
 #' @noRd
-predProb <- function(model, x, pred, pred.pars, classes) {
+predProb <- function(model, x, pred, pred.pars) {
   # Predict probabilities
   ppars <- c(list(model, x), pred.pars)
   # TODO: Call pred function using a try cast function
   prob <- do.call(pred, ppars)
   
+  return(prob)
+}
+
+#' @title Check and order a matrix of probabilities
+#' @param prob a probabilities matrix
+#' @param ninstances expected number of rows in \code{prob}
+#' @param classes expected columns names in \code{prob}
+#' @return the matrix \code{prob} with it columns in the order given by \code{classes} 
+getProb <- function(prob, ninstances, classes){
   # Check probabilities matrix
   if(!is.matrix(prob) ||
-     nrow(x) != nrow(prob) ||
+     ninstances != nrow(prob) ||
      length(classes) != length(intersect(classes, colnames(prob)))){
     # TODO: Explain the error cause in the next error message
     stop("Incorrect value returned by pred function.")
@@ -88,6 +55,38 @@ predProb <- function(model, x, pred, pred.pars, classes) {
   
   return(r)
 }
+
+#' @title Get classes from a matrix of probabilities
+#' @param prob a probabilities matrix
+#' @param ninstances expected number of rows in \code{prob}
+#' @param classes expected columns names in \code{prob}
+#' @return a factor with classes
+getClass <- function(prob, ninstances, classes){
+  # Check probabilities
+  prob <- getProb(prob, ninstances, classes)
+  # Obtain classes from probabilities
+  map <- apply(prob, MARGIN = 1, FUN = which.max)
+  # Convert classes indexes in a factor of classes
+  r <- factor(classes[map], classes)
+  
+  return(r)
+}
+
+#' @title Get classes from a matrix of probabilities and 
+#' return the classes indexes
+#' @param prob a probabilities matrix
+#' @param ninstances expected number of rows in \code{prob}
+#' @param classes expected columns names in \code{prob}
+#' @return a vector of indexes corresponding to \code{classes}
+getClassIdx <- function(prob, ninstances, classes){
+  # Check probabilities
+  prob <- getProb(prob, ninstances, classes)
+  # Obtain classes from probabilities
+  map <- apply(prob, MARGIN = 1, FUN = which.max)
+  
+  return(map)
+}
+
 
 #' @title Select best instances by classes according to its probabilities
 #' @param cantClass A vector indicating how many instances must be selected by class.
