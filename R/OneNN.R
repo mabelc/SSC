@@ -39,38 +39,72 @@ predClass.OneNN <- function(m, dists) {
 #' @param m a model of class OneNN built with \code{\link{oneNN}}
 #' @param dists a matrix of distances between the instances to classify (by rows) and
 #' the instances used to train the model (by column)
+#' @param distance.weighting the way in that the distances are used to compute the probabilities.
+#' Valid options are:
+#' \itemize{
+#'    \item \code{"none"}: distances are not used to compute probabilities.
+#'    \item \code{"reciprocal"}: the reciprocal for the distance (\emph{1/distance}) with the 1-nearest-neighbour is used 
+#'    to compute probabilities.
+#'    \item \code{"reciprocalexp"}: the reciprocal for the exponential function of the distance ((\emph{1/exp(distance)})) with
+#'    the 1-nearest-neighbour is used to compute probabilities.
+#' }
+#' @param initial.value the probabilities for each class are initiaized with this value. 
+#' Default is \code{1/(ncol(dists))}.
 #' @return a matrix of probabilities, with a row per instance and a column per class.
 #' @details The returned matrix has \code{nrow(dists)} rows and a column for every
 #' class, where each cell represents the probability that the instance belongs to the
 #' class, according to 1NN.
 #' @noRd
-predProb.OneNN <- function(m, dists) {
+predProb.OneNN <- function(m, dists, distance.weighting = "none", initial.value = 1/ncol(dists)) {
   if(!is.matrix(dists)){
     stop("The'dists' argument is not a matrix.")
   }
   if(ncol(dists) != length(m$y)){
     stop("The columns number of 'dists' are different from the number of examples used to train 'm'.")
   }
+  if(!(is.numeric(initial.value)) || (initial.value < 0) || (initial.value > 1)){
+    stop("Parameter initial.value must be a numeric value in the range 0 to 1.")
+  }
+  
+  probabilities <- matrix(data = initial.value, nrow = nrow(dists), ncol = length(levels(m$y)))
+  minDistances <- matrix(nrow = nrow(dists), ncol = length(levels(m$y)))
 
-  probabilities <- matrix(nrow = nrow(dists), ncol = length(levels(m$y)))
-
-  for (q in 1:nrow(dists)) { #para cada instancia no etiquetada
-    # buscar el mas cercano de cada clase a xi en L
+  for (q in 1:nrow(dists)) { # for each query instance
+    # find the most close instance to xi  for each class in dists
     for (j in 1:length(m$y)) {
       cj <- unclass(m$y[j]) # clase
-      d <- dists[q, j] # distancia entre xq y xj
-      if (is.na(probabilities[q,cj]) || d < probabilities[q,cj])
-        probabilities[q,cj] <- d
+      d <- dists[q, j] # distance between xq and xj
+      if (is.na(minDistances[q,cj]) || d < minDistances[q,cj])
+        minDistances[q,cj] <- d
     }
-  }#la matrix contiene las distancias minimas a cada clase
+  }# matrix contains the minimun distances for each class
 
-  maxE <- max(probabilities) #obtengo el mayor valor
-  probabilities <- probabilities/maxE #ahora he normalizado la matrix
+  if (distance.weighting == "none"){ #adds 1 vote in the pos of 1NN
+    probabilities <- probabilities + t(apply(X = minDistances, MARGIN = 1,FUN = function(f){
+      r <- vector(mode = "numeric",length = length(f))
+      indice <- which.min(f)
+      r[indice] <- 1
+      r
+    }))
+  }
+  else if (distance.weighting == "reciprocal"){#adds 1/distance vote in the pos of 1NN
+    probabilities <- probabilities + t(apply(X = minDistances, MARGIN = 1,FUN = function(f){
+      r <- vector(mode = "numeric",length = length(f))
+      indice <- which.min(f)
+      r[indice] <- 1/(f[indice]+0.000001) #to avoid div by zero
+      r
+    }))
+  }
+  else if (distance.weighting == "reciprocalexp"){
+    maxE <- max(minDistances) # get global max value
+    probabilities <- probabilities + minDistances/maxE #normalizing the matrix
+    probabilities <- exp(-probabilities) # computing 1/exp(dist)
+  }
+  else stop("The'distance.weighting' argument has not a valid value.")
 
-  for (q in 1:nrow(dists)){ #para cada instancia no etiquetada
-    probabilities[q,] <- exp(-probabilities[q,])
-    sumatoria <- sum(probabilities[q,])
-    probabilities[q,] <- probabilities[q,]/sumatoria #normalizo las probabilidades
+  for (q in 1:nrow(dists)){ # for each query instance
+    total <- sum(probabilities[q,])
+    probabilities[q,] <- probabilities[q,]/total #normalize the probabilities
   }
 
   colnames(probabilities) <- levels(m$y)
@@ -97,7 +131,7 @@ predict.OneNN <- function(object, dists, type="class", ...){
   if(type == "class"){
     predClass.OneNN(object, dists)
   }else if(type == "prob"){
-    predProb.OneNN(object, dists)
+    predProb.OneNN(object, dists, ...)
   }else{
     stop("'type' invalid.")
   }
