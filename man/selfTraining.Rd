@@ -2,34 +2,35 @@
 % Please edit documentation in R/SelfTraining.R
 \name{selfTraining}
 \alias{selfTraining}
-\title{Train a Self-training model}
+\title{Self-training method}
 \usage{
 selfTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
   x.dist = FALSE, max.iter = 50, perc.full = 0.7, thr.conf = 0.5)
 }
 \arguments{
-\item{x}{A matrix or a dataframe with the training instances.}
+\item{x}{A matrix or a dataframe with the training instances. 
+Each row represents a single instance.}
 
-\item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
-are specified with the value \code{NA}.}
+\item{y}{A vector with the labels of training instances. In this vector 
+the unlabeled instances are specified with the value \code{NA}.}
 
 \item{learner}{either a function or a string naming the function for 
-training a supervised base classifier}
+training a supervised base classifier.}
 
-\item{learner.pars}{A list with parameters that are to be passed to the \code{learner}
-function.}
+\item{learner.pars}{A list with additional parameters for the
+\code{learner} function if necessary.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,
-using a base classifier trained with function \code{learner}.}
+using the base classifier trained with the \code{learner} function.}
 
-\item{pred.pars}{A list with parameters that are to be passed to the \code{pred}
-function.}
+\item{pred.pars}{A list with additional parameters for the
+\code{pred} function if necessary.}
 
 \item{x.dist}{A boolean value that indicates if \code{x} is a distance matrix.
-By default, it value is false.}
+Default is \code{FALSE}.}
 
-\item{max.iter}{Maximum number of iterations to execute the self-labeling process. 
+\item{max.iter}{maximum number of iterations to execute the self-labeling process. 
 Default is 50.}
 
 \item{perc.full}{A number between 0 and 1. If the percentage 
@@ -37,13 +38,100 @@ of new labeled examples reaches this value the self-training process is stopped.
 Default is 0.7.}
 
 \item{thr.conf}{A number between 0 and 1 that indicates the theshold confidence.
-At each iteration, only the new label examples with a confidence greater than 
-this value (\code{thr.conf}) are added to training set.}
+At each iteration, only the new labeled examples with a confidence greater than 
+this value (\code{thr.conf}) are added to the training set.}
 }
 \value{
-The trained model.
+A list object of class "selfTraining" containing:
+\describe{
+  \item{model}{The final base classifier trained using the enlarged labeled set.}
+  \item{included.insts}{The indexes of the training instances used to 
+  train the \code{model}. These indexes include the initial labeled instances
+  and the newly labeled instances.
+  Those indexes are relative to \code{x} argument.}
+  \item{classes}{The levels of \code{y} factor.}
+  \item{pred}{The function provided in \code{pred} argument.}
+  \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+}
 }
 \description{
-Trains a model for classification,
-according to Self-training algorithm.
+Self-training is a simple and effective semi-supervised
+learning classification method. The self-training classifier is initially
+trained with a reduced set of labeled examples. Then it is iteratively retrained
+with its own most confident predictions over the unlabeled examples. 
+Self-training follows a wrapper methodology using one base supervised 
+classifier to establish the possible class of unlabeled instances.
+}
+\details{
+For predicting the most accurate instances per iteration, \code{selfTraining}
+uses the predictions obtained with the learner specified. To train a model 
+using the \code{learner} function, it is required a set of instances 
+(or a distance matrix between the instances if \code{x.dist} parameter is \code{TRUE})
+in conjunction with the corresponding classes. 
+Additionals parameters are provided to the \code{learner} function via the 
+\code{learner.pars} argument. The model obtained is a supervised classifier
+ready to predict new instances through the \code{pred} function. 
+Using a similar idea, the additional parameters to the \code{pred} function
+are provided using \code{pred.pars} argument. The \code{pred} function returns 
+the probabilities per classes for each new instance. The value of the 
+\code{thr.conf} argument controls the confidence of instances selected 
+to enlarge the labeled set for the next iteration.
+
+The stopping criterion is defined through the fulfillment of one of the following
+criteria: the algorithm reaches the number of iterations defined in \code{max.iter}
+parameter or the portion of unlabeled set, defined in \code{perc.full} parameter,
+is moved to the labeled set. In some cases, the process stopps and not instances 
+are added to the original labeled set. In this case, the user must to assign a more 
+flexible value to the \code{thr.conf} parameter.
+}
+\examples{
+
+## Load Wine data set
+data(wine)
+
+cls <- which(colnames(wine) == "Wine")
+x <- wine[, -cls] # instances without classes
+y <- wine[, cls] # the classes
+x <- scale(x) # scale the attributes
+
+## Prepare data
+set.seed(20)
+# Use 50\% of instances for training
+tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
+xtrain <- x[tra.idx,] # training instances
+ytrain <- y[tra.idx]  # classes of training instances
+# Use 70\% of train instances as unlabeled set
+tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
+ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
+
+# Use the other 50\% of instances for inductive testing
+tst.idx <- setdiff(1:length(y), tra.idx)
+xitest <- x[tst.idx,] # testing instances
+yitest <- y[tst.idx] # classes of testing instances
+
+## Example: Training from a set of instances with 1-NN as base classifier.
+m <- selfTraining(x = xtrain, y = ytrain, 
+                  learner = caret::knn3, 
+                  learner.pars = list(k = 1),
+                  pred = "predict")
+pred <- predict(m, xitest)
+caret::confusionMatrix(table(pred, yitest))
+
+## Example: Training from a distance matrix with 1-NN as base classifier.
+dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
+m2 <- selfTraining(x = dtrain, y = ytrain, x.dist = TRUE,
+                  learner = ssc::oneNN, 
+                  pred = "predict",
+                  pred.pars = list(type = "prob", initial.value = 0))
+ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+                      method = "euclidean", by_rows = TRUE)
+pred2 <- predict(m2, ditest)
+caret::confusionMatrix(table(pred2, yitest))
+
+}
+\references{
+David Yarowsky.\cr
+\emph{Unsupervised word sense disambiguation rivaling supervised methods.}\cr
+In Proceedings of the 33rd annual meeting on Association for Computational Linguistics,
+pages 189–196. Association for Computational Linguistics, 1995.
 }

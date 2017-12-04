@@ -2,22 +2,22 @@
 % Please edit documentation in R/SelfTraining.R
 \name{selfTrainingBase}
 \alias{selfTrainingBase}
-\title{Train a Self-training model}
+\title{Self-training base method}
 \usage{
 selfTrainingBase(y, learnerB, predB, max.iter = 50, perc.full = 0.7,
   thr.conf = 0.5)
 }
 \arguments{
-\item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
-are specified with the value \code{NA}.}
+\item{y}{A vector with the labels of training instances. In this vector the 
+unlabeled instances are specified with the value \code{NA}.}
 
-\item{learnerB}{a function for training a supervised base classifier
-This function must be two parameters, indexes and cls, where indexes
-indicate the instances to use and cls specify the classes of those instances.}
+\item{learnerB}{A function for training a supervised base classifier.
+This function needs two parameters, indexes and cls, where indexes indicates
+the instances to use and cls specifies the classes of those instances.}
 
 \item{predB}{a function for predicting the probabilities per classes.
-This function must be two parameters, model and indexes, where model
-provide the classifier trained with function \code{learner} and
+This function must be two parameters, model and indexes, where the model
+is a classifier trained with \code{learnerB} function and
 indexes indicate the instances to predict.}
 
 \item{max.iter}{Maximum number of iterations to execute the self-labeling process. 
@@ -32,9 +32,87 @@ At each iteration, only the new label examples with a confidence greater than
 this value (\code{thr.conf}) are added to training set.}
 }
 \value{
-The model trained with \code{learnerB} for the labeled set obtained.
+A list object of class "selfTrainingBase" containing:
+\describe{
+  \item{model}{The final base classifier trained using the enlarged labeled set.}
+  \item{included.insts}{The indexes of the training instances used to 
+  train the \code{model}. These indexes include the initial labeled instances
+  and the newly labeled instances.
+  Those indexes are relative to \code{y} argument.}
+}
 }
 \description{
-Trains a model for classification,
-according to Self-training algorithm.
+Self-training is a simple and effective semi-supervised
+learning classification method. The self-training classifier is initially
+trained with a reduced set of labeled examples. Then it is iteratively retrained
+with its own most confident predictions over the unlabeled examples. 
+Self-training follows a wrapper methodology using one base supervised 
+classifier to establish the possible class of unlabeled instances.
+}
+\details{
+SelfTrainingBase can be helpful in those cases where the method selected as 
+base classifier needs a \code{learner} and \code{pred} functions with other
+specifications. For more information about the general self-training method,
+please see \code{\link{selfTraining}} function. Essentially, \code{selfTraining}
+function is a wrapper of \code{selfTrainingBase} function.
+}
+\examples{
+library(ssc)
+
+## Load Wine data set
+data(wine)
+
+cls <- which(colnames(wine) == "Wine")
+x <- wine[, -cls] # instances without classes
+y <- wine[, cls] # the classes
+x <- scale(x) # scale the attributes
+
+## Prepare data
+set.seed(20)
+# Use 50\% of instances for training
+tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
+xtrain <- x[tra.idx,] # training instances
+ytrain <- y[tra.idx]  # classes of training instances
+# Use 70\% of train instances as unlabeled set
+tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
+ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
+
+# Use the other 50\% of instances for inductive testing
+tst.idx <- setdiff(1:length(y), tra.idx)
+xitest <- x[tst.idx,] # testing instances
+yitest <- y[tst.idx] # classes of testing instances
+
+## Example: Training from a set of instances with 1-NN (knn3) as base classifier.
+learnerB <- function(indexes, cls) 
+  caret::knn3(x = xtrain[indexes, ], y = cls, k = 1)
+predB <- function(model, indexes)  
+  predict(model, xtrain[indexes, ]) 
+
+md1 <- selfTrainingBase(y = ytrain, learnerB, predB)
+md1$model
+
+cls1 <- predict(md1$model, xitest, type = "class")
+caret::confusionMatrix(table(cls1, yitest))
+
+## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
+dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
+learnerB <- function(indexes, cls) {
+  m <- ssc::oneNN(y = cls)
+  attr(m, "tra.idxs") <- indexes
+  m
+}
+
+predB <- function(model, indexes)  {
+  tra.idxs <- attr(model, "tra.idxs")
+  d <- dtrain[indexes, tra.idxs]
+  prob <- predict(model, d, type = "prob",  initial.value = 0) 
+  prob
+}
+
+md2 <- selfTrainingBase(y = ytrain, learnerB, predB)
+ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
+                      method = "euclidean", by_rows = TRUE)
+cls2 <- predict(md2$model, ditest)
+caret::confusionMatrix(table(cls2, yitest))
+
 }
