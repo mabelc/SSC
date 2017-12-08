@@ -105,8 +105,12 @@ selfTrainingBase <- function(
 ){
   ### Check parameters ###
   # Check y 
-  if(!is.factor(y)){
-    stop("Parameter y is not a factor. Use as.factor(y) to convert y to a factor.")
+  if(!is.factor(y) ){
+    if(!is.vector(y)){
+      stop("Parameter y is neither a vector nor a factor.")  
+    }else{
+      y = as.factor(y)
+    }
   }
   # Check max.iter
   if(max.iter < 1){
@@ -322,7 +326,7 @@ selfTraining <- function(
   perc.full = 0.7,
   thr.conf = 0.5
 ){
-
+  ### Check parameters ###
   # Check x
   if(!is.matrix(x) && !is.data.frame(x)){
     stop("Parameter x is neither a matrix or a data frame.")
@@ -361,9 +365,10 @@ selfTraining <- function(
       return(prob)
     }
     
-    result <- selfTrainingBase(as.factor(y), learnerB, predB, max.iter, perc.full, thr.conf)
+    result <- selfTrainingBase(y, learnerB, predB, max.iter, perc.full, thr.conf)
   }
  
+  ### Result ###
   result$classes = levels(y)
   result$pred = pred
   result$pred.pars = pred.pars
