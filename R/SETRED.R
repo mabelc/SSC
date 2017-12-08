@@ -236,29 +236,29 @@ setred <- function(
       stop("The distance matrix x is not a square matrix.")
     } 
     
-    learnerB <- function(training.ints, cls){
+    learnerB1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
       return(r)
     }
-    predB <- function(r, testing.ints){
+    predB1 <- function(r, testing.ints){
       prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
       return(prob)
     }
     
-    result <- setredBase(y, D, learnerB, predB, theta, max.iter, perc.full, thr.conf)
+    result <- setredBase(y, D, learnerB1, predB1, theta, max.iter, perc.full, thr.conf)
     result$model <- result$model$m
   }else{
     # Instance matrix case
-    learnerB <- function(training.ints, cls){
+    learnerB2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
     }
-    predB <- function(m, testing.ints){
+    predB2 <- function(m, testing.ints){
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
-    result <- setredBase(y, D, learnerB, predB, theta, max.iter, perc.full, thr.conf)
+    result <- setredBase(y, D, learnerB2, predB2, theta, max.iter, perc.full, thr.conf)
   }
   
   ### Result ###
