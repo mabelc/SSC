@@ -1,57 +1,30 @@
 
-#' @title Train a SETRED model
-#' @description Trains a model for classification,
-#' according to SETRED algorithm.
-#' @param x A matrix or a dataframe with the training instances.
-#' @param y A vector with the labels of training instances. In this vector the unlabeled instances
-#' are specified with the value \code{NA}.
-#' @param learner either a function or a string naming the function for 
-#' training a supervised base classifier
-#' @param learner.pars A list with parameters that are to be passed to the \code{learner}
-#' function at each self-training iteration.
-#' @param pred either a function or a string naming the function for
-#' predicting the probabilities per classes,
-#' using a base classifier trained with function \code{learner}.
-#' @param pred.pars A list with parameters that are to be passed to the \code{pred}
-#' function.
-#' @param dist The name of a distance method available in \code{proxy} package or
-#' a function defined by the user that computes the distance between two instances.
-#' @param theta Rejection threshold to test the critical region. Default is 0.1.
-#' @param max.iter Maximum number of iterations to execute the self-labeling process. 
-#' Default is 50.
-#' @param perc.full A number between 0 and 1. If the percentage 
-#' of new labeled examples reaches this value the self-training process is stopped.
-#' Default is 0.7.
-#' @param thr.conf A number between 0 and 1 that indicates the confidence theshold.
-#' At each iteration, only the new label examples with a confidence greater than 
-#' this value (\code{thr.conf}) are added to training set.
-#' @return The trained model.
-#' @export
-setred <- function(
-  x, y,
-  learner, learner.pars = list(),
-  pred, pred.pars = list(),
-  dist = "Euclidean",
+setredBase <- function(
+  y, D, learnerB, predB, 
   theta = 0.1,
   max.iter = 50,
   perc.full = 0.7,
   thr.conf = 0.5
 ) {
   ### Check parameters ###
-  # Check x
-  if(!is.matrix(x) && !is.data.frame(x)){
-    stop("Parameter x is neither a matrix or a data frame.")
-  }
   # Check y 
-  if(!is.factor(y)){
-    stop("Parameter y is not a factor. Use as.factor(y) to convert y to a factor.")
+  if(!is.factor(y) ){
+    if(!is.vector(y)){
+      stop("Parameter y is neither a vector nor a factor.")  
+    }else{
+      y = as.factor(y)
+    }
   }
-  # Check relation between x and y
-  if(nrow(x) != length(y)){
-    stop("The rows number of x must be equal to the length of y.")
+  # Check distance matrix
+  if(!is.matrix(D)){
+    stop("Parameter D is not a matrix.")
+  }else if(nrow(D) != ncol(D)){
+    stop("The matrix D is not square.")
+  }else if(nrow(D) != length(y)){
+    stop(sprintf(paste("The dimensions of the matrix D is %i x %i", 
+                       "and it's expected %i according to the size of y."), 
+                 nrow(D), ncol(D), length(y)))
   }
-  # Check dist
-  ## This check is made by proxy::dist function in Init variables section
   # Check theta
   if(!(theta >= 0 && theta <= 1)) {
     stop("theta must be between 0 and 1")
@@ -70,11 +43,6 @@ setred <- function(
   }
   
   ### Init variables ###
-  # Compute distance matrix D
-  D <- as.matrix(
-    proxy::dist(x = x, method = dist, diag = TRUE, upper = TRUE, by_rows = TRUE)
-  )
-  
   # Identify the classes
   classes <- levels(y)
   nclasses <- length(classes)
@@ -94,7 +62,7 @@ setred <- function(
   }
   
   ### SETRED algorithm ###
-
+  
   # Count the examples per class
   cls.summary <- summary(y[labeled])
   # Ratio between count per class and the initial number of labeled instances
@@ -107,18 +75,23 @@ setred <- function(
   
   iter <- 1
   while ((length(labeled) < count.full) && (length(unlabeled) >= totalPerIter) && (iter <= max.iter)) {
-
+    
     # Train classifier
-    model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
-
+    #model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
+    model <- learnerB(labeled, ynew[labeled])
+    
     # Predict probabilities per classes of unlabeled examples
-    prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
+    #prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
+    prob <- predB(model, unlabeled)
+    prob <- getProb(prob, ninstances = length(unlabeled), classes)
     
     # Select the instances with better class probability 
     pre.selection <- selectInstances(cantClass, prob)
+    
     # Select the instances with probability grather than the theshold confidence
     indexes <- which(pre.selection$prob.cls > thr.conf)
     if(length(indexes) == 0){ 
+      iter <- iter + 1
       next
     }
     selection <- pre.selection[indexes,]
@@ -137,7 +110,7 @@ setred <- function(
     
     # Save count of labeled set after it's modification
     nlabeled.new <- length(labeled)
-
+    
     # Build a neighborhood graph G with L U L'
     ady <- vector("list", nlabeled.new) # Adjacency list of G
     
@@ -156,12 +129,12 @@ setred <- function(
         }
       }
     }
-
+    
     # Compute the bad examples and noise instances
     noise.insts <- c() # instances to delete from labeled set
     for (i in (nlabeled.old + 1):nlabeled.new) { # only on L'
       propi <- proportion[unclass(ynew[labeled[i]])]
-  
+      
       # calcular observacion Oi de Ji
       Oi <- 0
       nv <- W <- k <- 0
@@ -173,35 +146,127 @@ setred <- function(
           nv <- nv + 1
         }
       }
-
+      
       if (normalCriterion(theta, Oi, length(ady[[i]]), propi, W)){
         noise.insts <- c(noise.insts, i) 
       }
     }
-
+    
     # Delete from labeled the noise instances
     if (length(noise.insts) > 0){
       ynew[labeled[noise.insts]] <- NA
       labeled <- labeled[-noise.insts]
     }
-
+    
     iter <- iter + 1
   }
   
   ### Result ###
   
   # Train final model
-  model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
+  #model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
+  model <- learnerB(labeled, ynew[labeled])
   
   # Save result
   result <- list(
     model = model,
-    classes = classes,
-    pred = pred,
-    pred.pars = pred.pars
+    included.insts = labeled
   )
-  class(result) <- "setred"
+  class(result) <- "setredBase"
+  
+  result
+}
 
+#' @title Train a SETRED model
+#' @description Trains a model for classification,
+#' according to SETRED algorithm.
+#' @param x A matrix or a dataframe with the training instances.
+#' @param y A vector with the labels of training instances. In this vector the unlabeled instances
+#' are specified with the value \code{NA}.
+#' @param D 
+#' @param learner either a function or a string naming the function for 
+#' training a supervised base classifier
+#' @param learner.pars A list with parameters that are to be passed to the \code{learner}
+#' function at each self-training iteration.
+#' @param pred either a function or a string naming the function for
+#' predicting the probabilities per classes,
+#' using a base classifier trained with function \code{learner}.
+#' @param pred.pars A list with parameters that are to be passed to the \code{pred}
+#' function.
+#' @param x.dist A boolean value that indicates if \code{x} is a distance matrix.
+#' Default is \code{FALSE}. 
+#' @param theta Rejection threshold to test the critical region. Default is 0.1.
+#' @param max.iter Maximum number of iterations to execute the self-labeling process. 
+#' Default is 50.
+#' @param perc.full A number between 0 and 1. If the percentage 
+#' of new labeled examples reaches this value the self-training process is stopped.
+#' Default is 0.7.
+#' @param thr.conf A number between 0 and 1 that indicates the confidence theshold.
+#' At each iteration, only the new label examples with a confidence greater than 
+#' this value (\code{thr.conf}) are added to training set.
+#' @return The trained model.
+#' @export
+setred <- function(
+  x, y, D,
+  learner, learner.pars = list(),
+  pred, pred.pars = list(),
+  x.dist = FALSE,
+  theta = 0.1,
+  max.iter = 50,
+  perc.full = 0.7,
+  thr.conf = 0.5
+) {
+  ### Check parameters ###
+  # Check x
+  if(!is.matrix(x) && !is.data.frame(x)){
+    stop("Parameter x is neither a matrix or a data frame.")
+  }
+  # Check relation between x and y
+  if(nrow(x) != length(y)){
+    stop("The rows number of x must be equal to the length of y.")
+  }
+  
+  if(!is.factor(y)){
+    y = as.factor(y)
+  }
+  
+  if(x.dist){
+    # Distance matrix case
+    if(nrow(x) != ncol(x)){
+      stop("The distance matrix x is not a square matrix.")
+    } 
+    
+    learnerB <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
+      r <- list(m = m, training.ints = training.ints)
+      return(r)
+    }
+    predB <- function(r, testing.ints){
+      prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
+      return(prob)
+    }
+    
+    result <- setredBase(y, D, learnerB, predB, theta, max.iter, perc.full, thr.conf)
+    result$model <- result$model$m
+  }else{
+    # Instance matrix case
+    learnerB <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
+      return(m)
+    }
+    predB <- function(m, testing.ints){
+      prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
+      return(prob)
+    }
+    result <- setredBase(y, D, learnerB, predB, theta, max.iter, perc.full, thr.conf)
+  }
+  
+  ### Result ###
+  result$classes = levels(y)
+  result$pred = pred
+  result$pred.pars = pred.pars
+  class(result) <- "setred"
+  
   result
 }
 
@@ -209,10 +274,11 @@ setred <- function(
 #' @importFrom stats predict
 predict.setred <- function(object, x, ...) {
   
-  r <- predClass(object$model, x, object$pred, object$pred.pars, object$classes)
-  return(r)
+  prob <- predProb(object$model, x, object$pred, object$pred.pars)
+  result <- getClass(prob, ninstances = nrow(x), object$classes)
+  
+  return(result)
 }
-
 
 #' @title Normal criterion
 #' @details Computes the critical value using the normal distribution as the authors suggest

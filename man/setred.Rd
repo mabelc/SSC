@@ -4,8 +4,8 @@
 \alias{setred}
 \title{Train a SETRED model}
 \usage{
-setred(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
-  dist = "Euclidean", theta = 0.1, max.iter = 50, perc.full = 0.7,
+setred(x, y, D, learner, learner.pars = list(), pred, pred.pars = list(),
+  x.dist = FALSE, theta = 0.1, max.iter = 50, perc.full = 0.7,
   thr.conf = 0.5)
 }
 \arguments{
@@ -13,6 +13,8 @@ setred(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
 
 \item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
 are specified with the value \code{NA}.}
+
+\item{D}{}
 
 \item{learner}{either a function or a string naming the function for 
 training a supervised base classifier}
@@ -27,8 +29,8 @@ using a base classifier trained with function \code{learner}.}
 \item{pred.pars}{A list with parameters that are to be passed to the \code{pred}
 function.}
 
-\item{dist}{The name of a distance method available in \code{proxy} package or
-a function defined by the user that computes the distance between two instances.}
+\item{x.dist}{A boolean value that indicates if \code{x} is a distance matrix.
+Default is \code{FALSE}.}
 
 \item{theta}{Rejection threshold to test the critical region. Default is 0.1.}
 
