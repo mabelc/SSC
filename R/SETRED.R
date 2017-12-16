@@ -61,8 +61,8 @@ setredBase <- function(
     stop("The matrix D is not square.")
   }else if(nrow(D) != length(y)){
     stop(sprintf(paste("The dimensions of the matrix D is %i x %i", 
-                       "and it's expected %i according to the size of y."), 
-                 nrow(D), ncol(D), length(y)))
+                       "and it's expected %i x %i according to the size of y."), 
+                 nrow(D), ncol(D), length(y), length(y)))
   }
   # Check theta
   if(!(theta >= 0 && theta <= 1)) {
@@ -287,9 +287,9 @@ setred <- function(
   if(nrow(x) != length(y)){
     stop("The rows number of x must be equal to the length of y.")
   }
-  
-  if(!is.factor(y)){
-    y = as.factor(y)
+  # Check x.dist
+  if(!is.logical(x.dist)){
+    stop("Parameter x.dist is not logical.")
   }
   
   if(x.dist){

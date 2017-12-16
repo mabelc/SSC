@@ -335,6 +335,10 @@ selfTraining <- function(
   if(nrow(x) != length(y)){
     stop("The rows number of x must be equal to the length of y.")
   }
+  # Check x.dist
+  if(!is.logical(x.dist)){
+    stop("Parameter x.dist is not logical.")
+  }
   
   if(x.dist){
     # Distance matrix case
