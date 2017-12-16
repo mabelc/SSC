@@ -1,10 +1,49 @@
-
+#' @title SETRED base method
+#' @description SETRED is a variant of the self-training classification method 
+#' (\code{\link{selfTraining}}) with a different addition mechanism. 
+#' The SETRED classifier is initially trained with a 
+#' reduced set of labeled examples. Then it is iteratively retrained with its own most 
+#' confident predictions over the unlabeled examples. SETRED uses an amending scheme 
+#' to avoid the introduction of noisy examples into the enlarged labeled set. For each 
+#' iteration, the mislabeled examples are identified using the local information provided 
+#' by the neighborhood graph.
+#' @param y A vector with the labels of training instances. In this vector the 
+#' unlabeled instances are specified with the value \code{NA}.
+#' @param D A distance matrix between all the training instances. This matrix is used to 
+#' construct the neighborhood graph.
+#' @param learnerB A function for training a supervised base classifier.
+#' This function needs two parameters, indexes and cls, where indexes indicates
+#' the instances to use and cls specifies the classes of those instances.
+#' @param predB A function for predicting the probabilities per classes.
+#' This function must be two parameters, model and indexes, where the model
+#' is a classifier trained with \code{learnerB} function and
+#' indexes indicates the instances to predict.
+#' @param theta Rejection threshold to test the critical region. Default is 0.1.
+#' @param max.iter Maximum number of iterations to execute the self-labeling process. 
+#' Default is 50.
+#' @param perc.full A number between 0 and 1. If the percentage 
+#' of new labeled examples reaches this value the self-training process is stopped.
+#' Default is 0.7.
+#' @details 
+#' SetredBase can be helpful in those cases where the method selected as 
+#' base classifier needs a \code{learner} and \code{pred} functions with other
+#' specifications. For more information about the general setred method,
+#' please see \code{\link{setred}} function. Essentially, \code{setred}
+#' function is a wrapper of \code{setredBase} function.
+#' @return A list object of class "setredBase" containing:
+#' \describe{
+#'   \item{model}{The final base classifier trained using the enlarged labeled set.}
+#'   \item{included.insts}{The indexes of the training instances used to 
+#'   train the \code{model}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   Those indexes are relative to \code{y} argument.}
+#' }
+#' @export
 setredBase <- function(
   y, D, learnerB, predB, 
   theta = 0.1,
   max.iter = 50,
-  perc.full = 0.7,
-  thr.conf = 0.5
+  perc.full = 0.7
 ) {
   ### Check parameters ###
   # Check y 
@@ -36,10 +75,6 @@ setredBase <- function(
   # Check perc.full
   if(perc.full < 0 || perc.full > 1){
     stop("Parameter perc.full is not in the range 0 to 1.")
-  }
-  # Check perc.full
-  if(thr.conf < 0 || thr.conf > 1){
-    stop("Parameter thr.conf is not in the range 0 to 1.")
   }
   
   ### Init variables ###
@@ -86,15 +121,7 @@ setredBase <- function(
     prob <- getProb(prob, ninstances = length(unlabeled), classes)
     
     # Select the instances with better class probability 
-    pre.selection <- selectInstances(cantClass, prob)
-    
-    # Select the instances with probability grather than the theshold confidence
-    indexes <- which(pre.selection$prob.cls > thr.conf)
-    if(length(indexes) == 0){ 
-      iter <- iter + 1
-      next
-    }
-    selection <- pre.selection[indexes,]
+    selection <- selectInstances(cantClass, prob)
     
     # Save count of labeled set before it's modification
     nlabeled.old <- length(labeled)
@@ -177,34 +204,70 @@ setredBase <- function(
   result
 }
 
-#' @title Train a SETRED model
-#' @description Trains a model for classification,
-#' according to SETRED algorithm.
-#' @param x A matrix or a dataframe with the training instances.
-#' @param y A vector with the labels of training instances. In this vector the unlabeled instances
-#' are specified with the value \code{NA}.
-#' @param D 
+#' @title SETRED method
+#' @description SETRED (SElf-TRaining with EDiting) is a variant of the self-training 
+#' classification method (\code{\link{selfTraining}}) with a different addition mechanism. 
+#' The SETRED classifier is initially trained with a 
+#' reduced set of labeled examples. Then it is iteratively retrained with its own most 
+#' confident predictions over the unlabeled examples. SETRED uses an amending scheme 
+#' to avoid the introduction of noisy examples into the enlarged labeled set. For each 
+#' iteration, the mislabeled examples are identified using the local information provided 
+#' by the neighborhood graph.
+#' @param x A matrix or a dataframe with the training instances. 
+#' Each row represents a single instance.
+#' @param y A vector with the labels of training instances. In this vector 
+#' the unlabeled instances are specified with the value \code{NA}.
+#' @param D A distance matrix between all the training instances. This matrix is used to 
+#' construct the neighborhood graph.
 #' @param learner either a function or a string naming the function for 
-#' training a supervised base classifier
-#' @param learner.pars A list with parameters that are to be passed to the \code{learner}
-#' function at each self-training iteration.
+#' training a supervised base classifier.
+#' @param learner.pars A list with additional parameters for the
+#' \code{learner} function if necessary.
 #' @param pred either a function or a string naming the function for
 #' predicting the probabilities per classes,
-#' using a base classifier trained with function \code{learner}.
-#' @param pred.pars A list with parameters that are to be passed to the \code{pred}
-#' function.
+#' using the base classifier trained with the \code{learner} function.
+#' @param pred.pars A list with additional parameters for the
+#' \code{pred} function if necessary.
 #' @param x.dist A boolean value that indicates if \code{x} is a distance matrix.
 #' Default is \code{FALSE}. 
 #' @param theta Rejection threshold to test the critical region. Default is 0.1.
-#' @param max.iter Maximum number of iterations to execute the self-labeling process. 
+#' @param max.iter maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
 #' @param perc.full A number between 0 and 1. If the percentage 
 #' of new labeled examples reaches this value the self-training process is stopped.
 #' Default is 0.7.
-#' @param thr.conf A number between 0 and 1 that indicates the confidence theshold.
-#' At each iteration, only the new label examples with a confidence greater than 
-#' this value (\code{thr.conf}) are added to training set.
-#' @return The trained model.
+#' @details 
+#' SETRED initiates the self-labeling process by training a model from the original 
+#' labeled set. In each iteration, the \code{learner} function detects unlabeled 
+#' examples on wich it makes most confident prediction and labels those examples 
+#' according to the \code{pred} function. The identification of mislabeled examples is 
+#' performed using a neighborhood graph created from distance matrix \code{D}. 
+#' Most examples possess the same label in a neighborhood. So if an example locates 
+#' in a neighborhood with too many neighbors from different classes, this example should 
+#' be considered problematic. The value of the \code{theta} argument controls the confidence 
+#' of the candidates selected to enlarge the labeled set. The lower this value is, the more 
+#' restrictive it is the selection of the examples that are considered good.
+#' For more information about the self-labeled process and the remainders parameters, please 
+#' see \code{\link{selfTraining}}.
+#'  
+#' @return A list object of class "setred" containing:
+#' \describe{
+#'   \item{model}{The final base classifier trained using the enlarged labeled set.}
+#'   \item{included.insts}{The indexes of the training instances used to 
+#'   train the \code{model}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   Those indexes are relative to \code{x} argument.}
+#'   \item{classes}{The levels of \code{y} factor.}
+#'   \item{pred}{The function provided in \code{pred} argument.}
+#'   \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+#' }
+#' @references
+#' Ming Li and ZhiHua Zhou.\cr
+#' \emph{Setred: Self-training with editing.}\cr
+#' In Advances in Knowledge Discovery and Data Mining, volume 3518 of Lecture Notes in
+#' Computer Science, pages 611–621. Springer Berlin Heidelberg, 2005.
+#' ISBN 978-3-540-26076-9. doi: 10.1007/11430919 71.
+#' @examples 
 #' @export
 setred <- function(
   x, y, D,
@@ -213,8 +276,7 @@ setred <- function(
   x.dist = FALSE,
   theta = 0.1,
   max.iter = 50,
-  perc.full = 0.7,
-  thr.conf = 0.5
+  perc.full = 0.7
 ) {
   ### Check parameters ###
   # Check x
@@ -246,7 +308,7 @@ setred <- function(
       return(prob)
     }
     
-    result <- setredBase(y, D, learnerB1, predB1, theta, max.iter, perc.full, thr.conf)
+    result <- setredBase(y, D, learnerB1, predB1, theta, max.iter, perc.full)
     result$model <- result$model$m
   }else{
     # Instance matrix case
@@ -258,7 +320,7 @@ setred <- function(
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
-    result <- setredBase(y, D, learnerB2, predB2, theta, max.iter, perc.full, thr.conf)
+    result <- setredBase(y, D, learnerB2, predB2, theta, max.iter, perc.full)
   }
   
   ### Result ###

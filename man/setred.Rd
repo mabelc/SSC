@@ -2,53 +2,87 @@
 % Please edit documentation in R/SETRED.R
 \name{setred}
 \alias{setred}
-\title{Train a SETRED model}
+\title{SETRED method}
 \usage{
 setred(x, y, D, learner, learner.pars = list(), pred, pred.pars = list(),
-  x.dist = FALSE, theta = 0.1, max.iter = 50, perc.full = 0.7,
-  thr.conf = 0.5)
+  x.dist = FALSE, theta = 0.1, max.iter = 50, perc.full = 0.7)
 }
 \arguments{
-\item{x}{A matrix or a dataframe with the training instances.}
+\item{x}{A matrix or a dataframe with the training instances. 
+Each row represents a single instance.}
 
-\item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
-are specified with the value \code{NA}.}
+\item{y}{A vector with the labels of training instances. In this vector 
+the unlabeled instances are specified with the value \code{NA}.}
 
-\item{D}{}
+\item{D}{A distance matrix between all the training instances. This matrix is used to 
+construct the neighborhood graph.}
 
 \item{learner}{either a function or a string naming the function for 
-training a supervised base classifier}
+training a supervised base classifier.}
 
-\item{learner.pars}{A list with parameters that are to be passed to the \code{learner}
-function at each self-training iteration.}
+\item{learner.pars}{A list with additional parameters for the
+\code{learner} function if necessary.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,
-using a base classifier trained with function \code{learner}.}
+using the base classifier trained with the \code{learner} function.}
 
-\item{pred.pars}{A list with parameters that are to be passed to the \code{pred}
-function.}
+\item{pred.pars}{A list with additional parameters for the
+\code{pred} function if necessary.}
 
 \item{x.dist}{A boolean value that indicates if \code{x} is a distance matrix.
 Default is \code{FALSE}.}
 
 \item{theta}{Rejection threshold to test the critical region. Default is 0.1.}
 
-\item{max.iter}{Maximum number of iterations to execute the self-labeling process. 
+\item{max.iter}{maximum number of iterations to execute the self-labeling process. 
 Default is 50.}
 
 \item{perc.full}{A number between 0 and 1. If the percentage 
 of new labeled examples reaches this value the self-training process is stopped.
 Default is 0.7.}
-
-\item{thr.conf}{A number between 0 and 1 that indicates the confidence theshold.
-At each iteration, only the new label examples with a confidence greater than 
-this value (\code{thr.conf}) are added to training set.}
 }
 \value{
-The trained model.
+A list object of class "setred" containing:
+\describe{
+  \item{model}{The final base classifier trained using the enlarged labeled set.}
+  \item{included.insts}{The indexes of the training instances used to 
+  train the \code{model}. These indexes include the initial labeled instances
+  and the newly labeled instances.
+  Those indexes are relative to \code{x} argument.}
+  \item{classes}{The levels of \code{y} factor.}
+  \item{pred}{The function provided in \code{pred} argument.}
+  \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+}
 }
 \description{
-Trains a model for classification,
-according to SETRED algorithm.
+SETRED (SElf-TRaining with EDiting) is a variant of the self-training 
+classification method (\code{\link{selfTraining}}) with a different addition mechanism. 
+The SETRED classifier is initially trained with a 
+reduced set of labeled examples. Then it is iteratively retrained with its own most 
+confident predictions over the unlabeled examples. SETRED uses an amending scheme 
+to avoid the introduction of noisy examples into the enlarged labeled set. For each 
+iteration, the mislabeled examples are identified using the local information provided 
+by the neighborhood graph.
+}
+\details{
+SETRED initiates the self-labeling process by training a model from the original 
+labeled set. In each iteration, the \code{learner} function detects unlabeled 
+examples on wich it makes most confident prediction and labels those examples 
+according to the \code{pred} function. The identification of mislabeled examples is 
+performed using a neighborhood graph created from distance matrix \code{D}. 
+Most examples possess the same label in a neighborhood. So if an example locates 
+in a neighborhood with too many neighbors from different classes, this example should 
+be considered problematic. The value of the \code{theta} argument controls the confidence 
+of the candidates selected to enlarge the labeled set. The lower this value is, the more 
+restrictive it is the selection of the examples that are considered good.
+For more information about the self-labeled process and the remainders parameters, please 
+see \code{\link{selfTraining}}.
+}
+\references{
+Ming Li and ZhiHua Zhou.\cr
+\emph{Setred: Self-training with editing.}\cr
+In Advances in Knowledge Discovery and Data Mining, volume 3518 of Lecture Notes in
+Computer Science, pages 611–621. Springer Berlin Heidelberg, 2005.
+ISBN 978-3-540-26076-9. doi: 10.1007/11430919 71.
 }
