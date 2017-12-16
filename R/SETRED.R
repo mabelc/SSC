@@ -55,15 +55,19 @@ setredBase <- function(
     }
   }
   # Check distance matrix
+  if(class(D) == "dist"){
+    D <- proxy::as.matrix(D)
+  }
   if(!is.matrix(D)){
-    stop("Parameter D is not a matrix.")
-  }else if(nrow(D) != ncol(D)){
-    stop("The matrix D is not square.")
-  }else if(nrow(D) != length(y)){
+    stop("Parameter D is neither a matrix or a dist object.")
+  } else if(nrow(D) != ncol(D)){
+    stop("The distance matrix D is not a square matrix.")
+  } else if(nrow(D) != length(y)){
     stop(sprintf(paste("The dimensions of the matrix D is %i x %i", 
                        "and it's expected %i x %i according to the size of y."), 
                  nrow(D), ncol(D), length(y), length(y)))
   }
+  
   # Check theta
   if(!(theta >= 0 && theta <= 1)) {
     stop("theta must be between 0 and 1")
@@ -279,14 +283,6 @@ setred <- function(
   perc.full = 0.7
 ) {
   ### Check parameters ###
-  # Check x
-  if(!is.matrix(x) && !is.data.frame(x)){
-    stop("Parameter x is neither a matrix or a data frame.")
-  }
-  # Check relation between x and y
-  if(nrow(x) != length(y)){
-    stop("The rows number of x must be equal to the length of y.")
-  }
   # Check x.dist
   if(!is.logical(x.dist)){
     stop("Parameter x.dist is not logical.")
@@ -294,10 +290,20 @@ setred <- function(
   
   if(x.dist){
     # Distance matrix case
-    if(nrow(x) != ncol(x)){
+    # Check matrix distance in x
+    if(class(x) == "dist"){
+      x <- proxy::as.matrix(x)
+    }
+    if(!is.matrix(x)){
+      stop("Parameter x is neither a matrix or a dist object.")
+    } else if(nrow(x) != ncol(x)){
       stop("The distance matrix x is not a square matrix.")
-    } 
-    
+    } else if(nrow(x) != length(y)){
+      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
+                         "and it's expected %i x %i according to the size of y."), 
+                   nrow(x), ncol(x), length(y), length(y)))
+    }
+     
     learnerB1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
@@ -312,6 +318,15 @@ setred <- function(
     result$model <- result$model$m
   }else{
     # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+    
     learnerB2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
@@ -335,6 +350,9 @@ setred <- function(
 #' @export
 #' @importFrom stats predict
 predict.setred <- function(object, x, ...) {
+  if(class(x) == "dist"){
+    x <- proxy::as.matrix(x)
+  }
   
   prob <- predProb(object$model, x, object$pred, object$pred.pars)
   result <- getClass(prob, ninstances = nrow(x), object$classes)

@@ -25,7 +25,7 @@ xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
 # Compute distances between training instances
-D <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
+D <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 
 ## Example: Training from a set of instances with 1-NN as base classifier.
 m1 <- setred(x = xtrain, y = ytrain, D, 
