@@ -15,10 +15,10 @@ unlabeled instances are specified with the value \code{NA}.}
 This function needs two parameters, indexes and cls, where indexes indicates
 the instances to use and cls specifies the classes of those instances.}
 
-\item{predB}{a function for predicting the probabilities per classes.
+\item{predB}{A function for predicting the probabilities per classes.
 This function must be two parameters, model and indexes, where the model
 is a classifier trained with \code{learnerB} function and
-indexes indicate the instances to predict.}
+indexes indicates the instances to predict.}
 
 \item{max.iter}{Maximum number of iterations to execute the self-labeling process. 
 Default is 50.}

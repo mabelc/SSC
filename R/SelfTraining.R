@@ -11,10 +11,10 @@
 #' @param learnerB A function for training a supervised base classifier.
 #' This function needs two parameters, indexes and cls, where indexes indicates
 #' the instances to use and cls specifies the classes of those instances.
-#' @param predB a function for predicting the probabilities per classes.
+#' @param predB A function for predicting the probabilities per classes.
 #' This function must be two parameters, model and indexes, where the model
 #' is a classifier trained with \code{learnerB} function and
-#' indexes indicate the instances to predict.
+#' indexes indicates the instances to predict.
 #' @param max.iter Maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
 #' @param perc.full A number between 0 and 1. If the percentage 
@@ -120,7 +120,7 @@ selfTrainingBase <- function(
   if(perc.full < 0 || perc.full > 1){
     stop("Parameter perc.full is not in the range 0 to 1.")
   }
-  # Check perc.full
+  # Check thr.conf
   if(thr.conf < 0 || thr.conf > 1){
     stop("Parameter thr.conf is not in the range 0 to 1.")
   }
