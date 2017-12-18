@@ -240,6 +240,8 @@ snnrce <- function(
     }
     
     result <- snnrceBase(D = x, y, alpha)
+    result$x.dist = TRUE
+    class(result) <- "snnrce"
   }else{
     # Instance matrix case
     # Check x
@@ -257,10 +259,10 @@ snnrce <- function(
       y, 
       alpha
     )
-    
-    class(result) <- "snnrce"
+    result$x.dist = FALSE
     result$xtrain <- x[result$included.insts, ]
     result$dist <- dist
+    class(result) <- "snnrce"
   }
   
   return(result)
@@ -269,10 +271,14 @@ snnrce <- function(
 #' @export
 #' @importFrom stats predict
 predict.snnrce <- function(object, x, ...) {
-  D <- proxy::dist(x, y = object$xtrain, method = object$dist, 
-                   diag = TRUE, upper = TRUE, by_rows = TRUE)
+  if(object$x.dist == FALSE){
+    D <- proxy::dist(x, y = object$xtrain, method = object$dist, 
+                     diag = TRUE, upper = TRUE, by_rows = TRUE)
+    cls <- predict(object$model, D, type = "class")  
+  }else{
+    cls <- predict(object$model, x, type = "class")
+  }
   
-  cls <- predict(object$model, D, type = "class")
   return(cls)
 }
 
