@@ -1,4 +1,24 @@
-
+#' @title SNNRCE base method
+#' @description SNNRCE is a variant of the self-training classification 
+#' method (\code{\link{selfTraining}}) with a different 
+#' addition mechanism and a fixed learning scheme (1-NN). SNNRCE uses an amending scheme 
+#' to avoid the introduction of noisy examples into the enlarged labeled set.
+#' The mislabeled examples are identified using the local information provided 
+#' by the neighborhood graph. A statistical test using cut edge weight is used to modify 
+#' the labels of the missclassified examples.
+#' @param D A distance matrix between all the training instances. This matrix is used to 
+#' construct the neighborhood graph.
+#' @param y A vector with the labels of training instances. In this vector the 
+#' unlabeled instances are specified with the value \code{NA}.
+#' @param alpha Rejection threshold to test the critical region. Default is 0.1.
+#' @return A list object of class "snnrceBase" containing:
+#' \describe{
+#'   \item{model}{The final base classifier trained using the enlarged labeled set.}
+#'   \item{included.insts}{The indexes of the training instances used to 
+#'   train the \code{model}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   Those indexes are relative to \code{y} argument.}
+#' }
 snnrceBase <- function(
   D, y,
   alpha = 0.1
@@ -210,6 +230,93 @@ predict.snnrceBase <- function(object, D, ...) {
   return(cls)
 }
 
+#' @title SNNRCE method
+#' @description SNNRCE (Self-training Nearest Neighbor Rule using Cut Edges) is a variant 
+#' of the self-training classification method (\code{\link{selfTraining}}) with a different 
+#' addition mechanism and a fixed learning scheme (1-NN). SNNRCE uses an amending scheme 
+#' to avoid the introduction of noisy examples into the enlarged labeled set.
+#' The mislabeled examples are identified using the local information provided 
+#' by the neighborhood graph. A statistical test using cut edge weight is used to modify 
+#' the labels of the missclassified examples.
+#' @param x A object that can be coerced as matrix. This object has two possible 
+#' interpretations according to the value set in \code{x.dist} argument: 
+#' a matrix distance between the training examples or a matrix with the 
+#' training instances where each row represents a single instance.
+#' @param y A vector with the labels of the training instances. In this vector 
+#' the unlabeled instances are specified with the value \code{NA}.
+#' @param dist A distance function available in \code{proxy} package to compute 
+#' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
+#' Default is \code{FALSE}.
+#' @param alpha Rejection threshold to test the critical region. Default is 0.1.
+#' @details 
+#' SNNRCE initiates the self-labeling process by training a 1-NN from the original 
+#' labeled set. This method attempts to reduce the noise examples by labeling those instances 
+#' with no cut edges in the initial stages of self-labeling learning. 
+#' These highly confident examples are added into the training set. 
+#' The remaining examples follow the standard self-training process until a minimum number 
+#' of examples will be labeled for each class. A statistical test using cut edge weight is used 
+#' to modify the labels of the missclassified examples The value of the \code{alpha} argument 
+#' defines the critical region where the candidates examples are tested. The higher this value 
+#' is, the more relaxed it is the selection of the examples that are considered mislabeled.
+#'
+#' @return A list object of class "snnrce" containing:
+#' \describe{
+#'   \item{model}{The final base classifier trained using the enlarged labeled set.}
+#'   \item{included.insts}{The indexes of the training instances used to 
+#'   train the \code{model}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   Those indexes are relative to \code{x} argument.}
+#'   \item{classes}{The levels of \code{y} factor.}
+#'   \item{x.dist}{The value provided in \code{x.dist} argument.}
+#'   \item{dist}{The value provided in \code{dist} argument when x.dist is \code{FALSE}.}
+#'   \item{xtrain}{A matrix with the subset of training instances referenced by the indexes 
+#'   \code{included.insts} when x.dist is \code{FALSE}.}
+#' }
+#' @references
+#' Yu Wang, Xiaoyan Xu, Haifeng Zhao, and Zhongsheng Hua.\cr
+#' \emph{Semisupervised learning based on nearest neighbor rule and cut edges.}\cr
+#' Knowledge-Based Systems, 23(6):547–554, 2010. ISSN 0950-7051. doi: http://dx.doi.org/10.1016/j.knosys.2010.03.012.
+#' @examples
+#' 
+#' library(ssc)
+#' 
+#' ## Load Wine data set
+#' data(wine)
+#' 
+#' cls <- which(colnames(wine) == "Wine")
+#' x <- wine[, -cls] # instances without classes
+#' y <- wine[, cls] # the classes
+#' x <- scale(x) # scale the attributes
+#' 
+#' ## Prepare data
+#' set.seed(20)
+#' # Use 50% of instances for training
+#' tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
+#' xtrain <- x[tra.idx,] # training instances
+#' ytrain <- y[tra.idx]  # classes of training instances
+#' # Use 70% of train instances as unlabeled set
+#' tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
+#' ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
+#' 
+#' # Use the other 50% of instances for inductive testing
+#' tst.idx <- setdiff(1:length(y), tra.idx)
+#' xitest <- x[tst.idx,] # testing instances
+#' yitest <- y[tst.idx] # classes of testing instances
+#' 
+#' ## Example: Training from a set of instances with 1-NN as base classifier.
+#' m1 <- snnrce(x = xtrain, y = ytrain,  dist = "Euclidean")
+#' pred1 <- predict(m1, xitest)
+#' caret::confusionMatrix(table(pred1, yitest))
+#' 
+#' ## Example: Training from a distance matrix with 1-NN as base classifier.
+#' dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
+#' m2 <- snnrce(x = dtrain, y = ytrain, x.dist = TRUE)
+#' ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+#'                       method = "euclidean", by_rows = TRUE)
+#' pred2 <- predict(m2, ditest)
+#' caret::confusionMatrix(table(pred2, yitest))
+#' 
 #' @export
 snnrce <- function(
   x, y,
@@ -240,8 +347,7 @@ snnrce <- function(
     }
     
     result <- snnrceBase(D = x, y, alpha)
-    result$x.dist = TRUE
-    class(result) <- "snnrce"
+    
   }else{
     # Instance matrix case
     # Check x
@@ -259,15 +365,27 @@ snnrce <- function(
       y, 
       alpha
     )
-    result$x.dist = FALSE
+    
     result$xtrain <- x[result$included.insts, ]
     result$dist <- dist
-    class(result) <- "snnrce"
-  }
   
+  }
+  result$classes = levels(y)
+  result$x.dist = x.dist
+  class(result) <- "snnrce"
   return(result)
 }
 
+#' @title Predictions of the SNNRCE method
+#' @description Predicts the label of instances according to the \code{snnrce} model.
+#' @details For additional help see \code{\link{snnrce}} examples.
+#' @param object SNNRCE model built with the \code{\link{snnrce}} function.
+#' @param x A object that can be coerced as matrix.
+#' Depending on how was the model built, \code{x} is interpreted as a matrix 
+#' with the distances between the unseen instances and the selected training instances, 
+#' or a matrix of instances.
+#' @param ... This parameter is included for compatibility reasons.
+#' @return Vector with the labels assigned.
 #' @export
 #' @importFrom stats predict
 predict.snnrce <- function(object, x, ...) {
