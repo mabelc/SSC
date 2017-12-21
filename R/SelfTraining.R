@@ -211,9 +211,11 @@ selfTrainingBase <- function(
 #' with its own most confident predictions over the unlabeled examples. 
 #' Self-training follows a wrapper methodology using one base supervised 
 #' classifier to establish the possible class of unlabeled instances. 
-#' @param x A matrix or a dataframe with the training instances. 
-#' Each row represents a single instance.
-#' @param y A vector with the labels of training instances. In this vector 
+#' @param x A object that can be coerced as matrix. This object has two possible 
+#' interpretations according to the value set in \code{x.dist} argument: 
+#' a matrix distance between the training examples or a matrix with the 
+#' training instances where each row represents a single instance.
+#' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier.
@@ -224,7 +226,7 @@ selfTrainingBase <- function(
 #' using the base classifier trained with the \code{learner} function.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
-#' @param x.dist A boolean value that indicates if \code{x} is a distance matrix.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
 #' Default is \code{FALSE}. 
 #' @param max.iter maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
@@ -392,6 +394,16 @@ selfTraining <- function(
   return(result)
 }
 
+#' @title Predictions of the Self-training method
+#' @description Predicts the label of instances according to the \code{selfTraining} model.
+#' @details For additional help see \code{\link{selfTraining}} examples.
+#' @param object Self-training model built with the \code{\link{selfTraining}} function.
+#' @param x A object that can be coerced as matrix.
+#' Depending on how was the model built, \code{x} is interpreted as a matrix 
+#' with the distances between the unseen instances and the selected training instances, 
+#' or a matrix of instances.
+#' @param ... This parameter is included for compatibility reasons.
+#' @return Vector with the labels assigned.
 #' @export
 #' @importFrom stats predict
 predict.selfTraining <- function(object, x, ...) {

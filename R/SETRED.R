@@ -279,9 +279,11 @@ setredBase <- function(
 #' to avoid the introduction of noisy examples into the enlarged labeled set. For each 
 #' iteration, the mislabeled examples are identified using the local information provided 
 #' by the neighborhood graph.
-#' @param x A matrix or a dataframe with the training instances. 
-#' Each row represents a single instance.
-#' @param y A vector with the labels of training instances. In this vector 
+#' @param x A object that can be coerced as matrix. This object has two possible 
+#' interpretations according to the value set in \code{x.dist} argument: 
+#' a matrix distance between the training examples or a matrix with the 
+#' training instances where each row represents a single instance.
+#' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
 #' @param D A distance matrix between all the training instances. This matrix is used to 
 #' construct the neighborhood graph.
@@ -294,7 +296,7 @@ setredBase <- function(
 #' using the base classifier trained with the \code{learner} function.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
-#' @param x.dist A boolean value that indicates if \code{x} is a distance matrix.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
 #' Default is \code{FALSE}. 
 #' @param theta Rejection threshold to test the critical region. Default is 0.1.
 #' @param max.iter maximum number of iterations to execute the self-labeling process. 
@@ -456,6 +458,16 @@ setred <- function(
   result
 }
 
+#' @title Predictions of the SETRED method
+#' @description Predicts the label of instances according to the \code{setred} model.
+#' @details For additional help see \code{\link{setred}} examples.
+#' @param object SETRED model built with the \code{\link{setred}} function.
+#' @param x A object that can be coerced as matrix.
+#' Depending on how was the model built, \code{x} is interpreted as a matrix 
+#' with the distances between the unseen instances and the selected training instances, 
+#' or a matrix of instances.
+#' @param ... This parameter is included for compatibility reasons.
+#' @return Vector with the labels assigned.
 #' @export
 #' @importFrom stats predict
 predict.setred <- function(object, x, ...) {
