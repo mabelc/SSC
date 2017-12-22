@@ -8,10 +8,12 @@ setred(x, y, D, learner, learner.pars = list(), pred, pred.pars = list(),
   x.dist = FALSE, theta = 0.1, max.iter = 50, perc.full = 0.7)
 }
 \arguments{
-\item{x}{A matrix or a dataframe with the training instances. 
-Each row represents a single instance.}
+\item{x}{A object that can be coerced as matrix. This object has two possible 
+interpretations according to the value set in \code{x.dist} argument: 
+a matrix distance between the training examples or a matrix with the 
+training instances where each row represents a single instance.}
 
-\item{y}{A vector with the labels of training instances. In this vector 
+\item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
 \item{D}{A distance matrix between all the training instances. This matrix is used to 
@@ -30,7 +32,7 @@ using the base classifier trained with the \code{learner} function.}
 \item{pred.pars}{A list with additional parameters for the
 \code{pred} function if necessary.}
 
-\item{x.dist}{A boolean value that indicates if \code{x} is a distance matrix.
+\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
 Default is \code{FALSE}.}
 
 \item{theta}{Rejection threshold to test the critical region. Default is 0.1.}
