@@ -2,33 +2,71 @@
 % Please edit documentation in R/TriTraining.R
 \name{triTraining}
 \alias{triTraining}
-\title{Train a Tri-training model}
+\title{Tri-training method}
 \usage{
-triTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list())
+triTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
+  x.dist = FALSE)
 }
 \arguments{
-\item{x}{A matrix or a dataframe with the training instances.}
+\item{x}{A object that can be coerced as matrix. This object has two possible 
+interpretations according to the value set in \code{x.dist} argument: 
+a matrix distance between the training examples or a matrix with the 
+training instances where each row represents a single instance.}
 
-\item{y}{A vector with the labels of training instances. In this vector the unlabeled instances
-are specified with the value \code{NA}.}
+\item{y}{A vector with the labels of the training instances. In this vector 
+the unlabeled instances are specified with the value \code{NA}.}
 
 \item{learner}{either a function or a string naming the function for 
-training a supervised base classifier}
+training the supervised base classifiers.}
 
-\item{learner.pars}{A list with parameters that are to be passed to the \code{learner}
-function.}
+\item{learner.pars}{A list with additional parameters for the
+\code{learner} function if necessary.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,
-using a base classifier trained with the \code{learner} function.}
+using the base classifiers trained with the \code{learner} function.}
 
-\item{pred.pars}{A list with parameters that are to be passed to the \code{pred}
-function.}
+\item{pred.pars}{A list with additional parameters for the
+\code{pred} function if necessary.}
+
+\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
+Default is \code{FALSE}.}
 }
 \value{
-The trained model.
+A list object of class "triTraining" containing:
+\describe{
+  \item{model}{The final base classifier trained using the enlarged labeled set.}
+  \item{included.insts}{The indexes of the training instances used to 
+  train the \code{model}. These indexes include the initial labeled instances
+  and the newly labeled instances.
+  Those indexes are relative to \code{x} argument.}
+  \item{classes}{The levels of \code{y} factor.}
+  \item{pred}{The function provided in \code{pred} argument.}
+  \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+}
 }
 \description{
-Trains a model for classification,
-according to Tri-training algorithm.
+Tri-training is a semi-supervised learning algorithm with a co-training 
+style. This algorithm trains three classifiers with the same learning scheme from a 
+reduced set of labeled examples. For each iteration, an unlabeled example is labeled 
+for a classifier if the other two classifiers agree on the labeling proposed.
+}
+\details{
+SETRED initiates the self-labeling process by training a model from the original 
+labeled set. In each iteration, the \code{learner} function detects unlabeled 
+examples on wich it makes most confident prediction and labels those examples 
+according to the \code{pred} function. The identification of mislabeled examples is 
+performed using a neighborhood graph created from distance matrix \code{D}. 
+Most examples possess the same label in a neighborhood. So if an example locates 
+in a neighborhood with too many neighbors from different classes, this example should 
+be considered problematic. The value of the \code{theta} argument controls the confidence 
+of the candidates selected to enlarge the labeled set. The lower this value is, the more 
+restrictive it is the selection of the examples that are considered good.
+For more information about the self-labeled process and the remainders parameters, please 
+see \code{\link{selfTraining}}.
+}
+\references{
+ZhiHua Zhou and Ming Li.\cr
+\emph{Tri-training: exploiting unlabeled data using three classifiers.}\cr
+IEEE Transactions on Knowledge and Data Engineering, 17(11):1529–1541, Nov 2005. ISSN 1041-4347. doi: 10.1109/TKDE.2005. 186.
 }

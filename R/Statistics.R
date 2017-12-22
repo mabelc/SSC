@@ -73,6 +73,12 @@ recall <- function(mConfusion){
 
 }
 
+#' @export
+getmode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
 #' @title Statistical mode
 #' @noRd
 statisticalMode <- function(a){
