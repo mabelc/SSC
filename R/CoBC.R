@@ -1,48 +1,22 @@
 
-#' @title Train the Co-bagging model
-#' @description Trains a model for classification,
-#' according to Co-bagging algorithm.
-#' @param x A matrix or a dataframe with the training instances.
-#' @param y A vector with the labels of training instances. In this vector the unlabeled instances
-#' are specified with the value \code{NA}.
-#' @param learner either a function or a string naming the function for 
-#' training a supervised base classifier
-#' @param learner.pars A list with parameters that are to be passed to the \code{learner}
-#' function at each Co-bagging iteration.
-#' @param pred either a function or a string naming the function for
-#' predicting the probabilities per classes,
-#' using a base classifier trained with function \code{learner}.
-#' @param pred.pars A list with parameters that are to be passed to the \code{pred}
-#' function.
-#' @param N The number of classifiers used as committee members. Default is 3.
-#' @param perc.full A number between 0 and 1. If the percentage 
-#' of new labeled examples reaches this value the Co-bagging process is stopped.
-#' Default is 0.7.
-#' @param u Number of unlabeled instances in the pool. Default is 100.
-#' @param max.iter Maximum number of iterations to execute the self-labeling process. 
-#' Default is 50.
 #' @export
-coBC <- function(
-  x, y,
-  learner, learner.pars = list(),
-  pred, pred.pars = list(),
+coBCBase <- function(
+  y,
+  learnerB,
+  predB,
   N = 3,
   perc.full = 0.7,
   u = 100, 
   max.iter = 50
-) {
+){
   ### Check parameters ###
-  # Check x
-  if(!is.matrix(x) && !is.data.frame(x)){
-    stop("Parameter x is neither a matrix or a data frame.")
-  }
   # Check y 
-  if(!is.factor(y)){
-    stop("Parameter y is not a factor. Use as.factor(y) to convert y to a factor.")
-  }
-  # Check relation between x and y
-  if(nrow(x) != length(y)){
-    stop("The rows number of x must be equal to the length of y.")
+  if(!is.factor(y) ){
+    if(!is.vector(y)){
+      stop("Parameter y is neither a vector nor a factor.")  
+    }else{
+      y = as.factor(y)
+    }
   }
   # Check N
   if(N <= 0){
@@ -98,7 +72,7 @@ coBC <- function(
   for (i in 1:N) {
     # Train model
     indexes <- labeled[s[[i]]]
-    H[[i]] <- trainModel(x[indexes, ], y[indexes], learner, learner.pars)
+    H[[i]] <- learnerB(indexes, y[indexes])
     # Save instances info
     Lind[[i]] <- indexes
     Lcls[[i]] <- y.map[indexes]
@@ -120,9 +94,15 @@ coBC <- function(
         # Obtain the committee for the classifier i
         committee <- setdiff(1:length(H), i)
         # Predict probabilities for unlabeled prime instances
-        prob <- H.prob(models = H[committee],
-                       x = x[pool, ], 
-                       pred, pred.pars, classes)
+        models <- H[committee]
+        ninstances = length(pool)
+        h.prob <- lapply(X = 1:length(models), 
+               FUN =  function(i) {
+                 prob <- predB(models[[i]], pool)
+                 prob <- getProb(prob, ninstances, classes)
+               }
+        )
+        prob <- H.prob(h.prob, ninstances, nclasses)
         # Select instances
         # labeledPrima[[i]] -> sel
         sel <- selectInstances(cantClass = cantClass, probabilities = prob)
@@ -130,9 +110,14 @@ coBC <- function(
         
         ## Verify with the initial training set
         # Predict probabilities
-        prob <- H.prob(models = HO, 
-                       x = x[selected, ], 
-                       pred, pred.pars, classes)
+        ninstances = length(selected)
+        h.prob <- lapply(X = 1:N, 
+                         FUN =  function(i) {
+                           prob <- predB(HO[[i]], selected)
+                           prob <- getProb(prob, ninstances, classes)
+                         }
+        )
+        prob <- H.prob(h.prob, ninstances, nclasses)
         # Compute classes
         cls.idx <- sapply(X = 1:nrow(prob), FUN = function(i) which.max(prob[i, ]) )
         # Compare 
@@ -155,21 +140,113 @@ coBC <- function(
       # Train classifier
       ind <- Lind[[i]] # indexes of intances
       yi <- classes[Lcls[[i]]] # indexes of classes
-      H[[i]] <- trainModel(x[ind, ], factor(yi, classes), learner, learner.pars)
+      H[[i]] <- learnerB(ind, factor(yi, classes))
     }
-
+    
     iter <- iter + 1
-  }#end del while principal
+  }# End of main while
   
   ### Result ###
+  
+  # determine labeled instances
+  included.insts <- c()
+  for(i in 1:N){
+    included.insts <- union(Lind[[i]], included.insts)
+  }
+  # map indexes respect to m$included.insts
+  indexes <- vector(mode = "list", length = N)
+  for(i in 1:N){
+    indexes[[i]] <- vapply(Lind[[i]], FUN.VALUE = 1,
+                           FUN = function(e){ which(e == included.insts)})
+  }
   
   # Save result
   result <- list(
     models = H,
-    classes = classes,
-    pred = pred,
-    pred.pars = pred.pars
+    indexes = indexes,
+    included.insts = included.insts 
   )
+  class(result) <- "coBCBase"
+  
+  return(result)
+}
+
+#' @export
+coBC <- function(
+  x, y,
+  learner, learner.pars = list(),
+  pred, pred.pars = list(),
+  x.dist = FALSE,
+  N = 3,
+  perc.full = 0.7,
+  u = 100, 
+  max.iter = 50
+) {
+
+  ### Check parameters ###
+  # Check x.dist
+  if(!is.logical(x.dist)){
+    stop("Parameter x.dist is not logical.")
+  }
+  
+  if(x.dist){
+    # Distance matrix case
+    # Check matrix distance in x
+    if(class(x) == "dist"){
+      x <- proxy::as.matrix(x)
+    }
+    if(!is.matrix(x)){
+      stop("Parameter x is neither a matrix or a dist object.")
+    } else if(nrow(x) != ncol(x)){
+      stop("The distance matrix x is not a square matrix.")
+    } else if(nrow(x) != length(y)){
+      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
+                         "and it's expected %i x %i according to the size of y."), 
+                   nrow(x), ncol(x), length(y), length(y)))
+    }
+    
+    learnerB1 <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
+      r <- list(m = m, training.ints = training.ints)
+      return(r)
+    }
+    predB1 <- function(r, testing.ints){
+      prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
+      return(prob)
+    }
+    
+    result <- coBCBase(y, learnerB1, predB1, N, perc.full, u, max.iter)
+    for(i in 1:N){
+      result$models[[i]] <- result$models[[i]]$m 
+    }
+  }else{
+    # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+    
+    learnerB2 <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
+      return(m)
+    }
+    predB2 <- function(m, testing.ints){
+      prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
+      return(prob)
+    }
+    
+    result <- coBCBase(y, learnerB2, predB2, N, perc.full, u, max.iter)
+  }
+  
+  ### Result ###
+  result$classes = levels(y)
+  result$pred = pred
+  result$pred.pars = pred.pars
+  result$x.dist = x.dist
   class(result) <- "coBC"
   
   return(result)
@@ -179,8 +256,19 @@ coBC <- function(
 #' @importFrom stats predict
 predict.coBC <- function(object, x, ...){
   
-  prob <- H.prob(object$models, x,
-                 object$pred, object$pred.pars, object$classes)
+  h.prob <- list()
+  ninstances = nrow(x)
+  for(i in 1:length(object$models)){
+    if(object$x.dist){
+      prob <- predProb(object$models[[i]], x[, object$indexes[[i]]], object$pred, object$pred.pars)  
+    } else{
+      prob <- predProb(object$models[[i]], x, object$pred, object$pred.pars)  
+    }
+  
+    h.prob[[i]] <- getProb(prob, ninstances, object$classes)
+  }
+  
+  prob <- H.prob(h.prob, ninstances, nclasses = length(object$classes))
   
   cls.idx <- sapply(X = 1:nrow(prob), FUN = function(i) which.max(prob[i, ]) )
   
@@ -191,24 +279,15 @@ predict.coBC <- function(object, x, ...){
 
 #' TODO: Write help
 #' @noRd
-H.prob <- function(models, x, pred, pred.pars, classes){
-  
-  nunlabeled <- nrow(x)
-  nclasses <- length(classes)
-  
-  lapply(X = 1:length(models), 
-         FUN =  function(i) {
-           predProb(models[[i]], x, pred, pred.pars, classes)
-         }
-  ) -> h.prob
-  
-  H.pro <- matrix(nrow = nunlabeled, ncol = nclasses)
-  for(u in 1:nunlabeled){
-    sapply(X = 1:nclasses, 
+H.prob <- function(h.prob, ninstances, nclasses){
+
+  H.pro <- matrix(nrow = ninstances, ncol = nclasses)
+  for(u in 1:ninstances){
+    H.pro[u, ] <- sapply(X = 1:nclasses, 
            FUN = function(c) {
              H.xu.wc(h.prob, u, c, nclasses) 
            }
-    ) -> H.pro[u, ]
+    )
   }
   
   return(H.pro)
