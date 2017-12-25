@@ -70,9 +70,9 @@ ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
 
 pred <- list()
 for(i in 1:3){
-  pred[[i]] <- predict(md2$models[[i]], 
-                       ditest[, md2$indexes[[i]]], 
-                       type = "class")
+  m <- md2$models[[i]]
+  D <- ditest[, md2$indexes[[i]]]
+  pred[[i]] <- predict(m, D, type = "class")
 }
 cls2 <- c()
 for(i in 1:nrow(xitest)){

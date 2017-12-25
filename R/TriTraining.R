@@ -330,14 +330,14 @@ predict.triTraining <- function(object, x, ...) {
   preds <- matrix(nrow = 3, ncol = nrow(x))
   ninstances = nrow(x)
   for(i in 1:3){
-    #predClass(object$models[[i]], x, object$pred, object$pred.pars, object$classes)
-    if(object$x.dist){
-      prob <- predProb(object$models[[i]], x[, object$indexes[[i]]], object$pred, object$pred.pars)  
-    } else{
-      prob <- predProb(object$models[[i]], x, object$pred, object$pred.pars)  
-    }
-    
-    preds[i,] <- getClassIdx(prob, ninstances, object$classes)
+    preds[i,] <- getClassIdx(
+      prob <- predProb(
+        object$models[[i]], 
+        if(object$x.dist) x[, object$indexes[[i]]] else x,
+        object$pred, 
+        object$pred.pars
+      ), 
+     ninstances, object$classes)
   }
   # get the mode of the predictions for every instance
   pred <- apply(X = preds, MARGIN = 2, FUN = statisticalMode)
