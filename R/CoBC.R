@@ -96,13 +96,12 @@ coBCBase <- function(
         # Predict probabilities for unlabeled prime instances
         models <- H[committee]
         ninstances = length(pool)
-        h.prob <- lapply(X = 1:length(models), 
-               FUN =  function(i) {
-                 prob <- predB(models[[i]], pool)
-                 prob <- checkProb(prob, ninstances, classes)
-               }
+        h.prob <- lapply(
+          X = 1:length(models), 
+          FUN =  function(i)
+            checkProb(prob = predB(models[[i]], pool), ninstances, classes)
         )
-        prob <- H.prob(h.prob, ninstances, nclasses)
+        prob <- H.prob(h.prob)
         # Select instances
         # labeledPrima[[i]] -> sel
         sel <- selectInstances(cantClass = cantClass, probabilities = prob)
@@ -111,13 +110,12 @@ coBCBase <- function(
         ## Verify with the initial training set
         # Predict probabilities
         ninstances = length(selected)
-        h.prob <- lapply(X = 1:N, 
-                         FUN =  function(i) {
-                           prob <- predB(HO[[i]], selected)
-                           prob <- checkProb(prob, ninstances, classes)
-                         }
+        h.prob <- lapply(
+          X = 1:N, 
+          FUN =  function(i) 
+            checkProb(prob = predB(HO[[i]], selected), ninstances, classes)
         )
-        prob <- H.prob(h.prob, ninstances, nclasses)
+        prob <- H.prob(h.prob)
         # Compute classes
         cls.idx <- sapply(X = 1:nrow(prob), FUN = function(i) which.max(prob[i, ]) )
         # Compare 
@@ -256,32 +254,42 @@ coBC <- function(
 #' @export
 #' @importFrom stats predict
 predict.coBC <- function(object, x, ...){
-  
-  h.prob <- list()
   ninstances = nrow(x)
-  for(i in 1:length(object$models)){
-    if(object$x.dist){
-      prob <- predProb(object$models[[i]], x[, object$indexes[[i]]], object$pred, object$pred.pars)  
-    } else{
-      prob <- predProb(object$models[[i]], x, object$pred, object$pred.pars)  
-    }
-  
-    h.prob[[i]] <- checkProb(prob, ninstances, object$classes)
+  # Predict probabilities per instances using each model
+  FUN = function(i){
+    checkProb(  # check matrix of prob
+      predProb( # predict prob using model i
+        object$models[[i]], 
+        if(object$x.dist) x[, object$indexes[[i]]] else x, 
+        object$pred, 
+        object$pred.pars
+      ),
+      ninstances, 
+      object$classes
+    ) 
   }
-  
-  prob <- H.prob(h.prob, ninstances, nclasses = length(object$classes))
-  
-  cls.idx <- sapply(X = 1:nrow(prob), FUN = function(i) which.max(prob[i, ]) )
-  
+  h.prob <- lapply(X = 1:length(object$models), FUN)
+  # Combine probability matrices
+  prob <- H.prob(h.prob)
+  # Get class per instance
+  cls.idx <- apply(X = prob, MARGIN = 1, FUN = which.max)
   pred <- factor(object$classes[cls.idx], object$classes)
   
   return(pred)
 }
 
-#' TODO: Write help
-#' @noRd
-H.prob <- function(h.prob, ninstances, nclasses){
-
+#' TODO: Complete help
+#' @title 
+#' @description 
+#' @param h.prob a list of probability matrices
+#' @param ninstnces The number of rows of each matrix in \code{h.prob}
+#' @param nclasses The number of columns of each matrix in \code{h.prob}
+#' @return A probability matrix
+#' @export
+H.prob <- function(h.prob, 
+                   ninstances = nrow(h.prob[[1]]), 
+                   nclasses = ncol(h.prob[[1]])){
+  
   H.pro <- matrix(nrow = ninstances, ncol = nclasses)
   for(u in 1:ninstances){
     H.pro[u, ] <- sapply(X = 1:nclasses, 
@@ -294,11 +302,13 @@ H.prob <- function(h.prob, ninstances, nclasses){
   return(H.pro)
 }
 
-#' @title Compute the probability assigned by the committee H that xu belongs to class c
-#' @param h.prob is the list containing the probability matrix  of each base classifier
-#' @param u the unlabeled instance
-#' @param c the class
-#' @param classes The number of classes
+#' @title Compute the probability assigned by the committee H 
+#' that xu belongs to class c
+#' @param h.prob a list containing the probability matrix 
+#' of each base classifier
+#' @param u The unlabeled instance
+#' @param c The class
+#' @param nclasses The number of classes
 #' @return The probability
 #' @noRd
 H.xu.wc <- function(h.prob, u, c, nclasses){

@@ -54,11 +54,13 @@ pred <- function(m, x){
   prob <- attr(r, "probabilities")
   prob
 }
+set.seed(1)
 m3 <- coBC(x = xtrain, y = ytrain, learner, learner.pars, pred)
 pred3 <- predict(m3, xitest)
 caret::confusionMatrix(table(pred3, yitest))
 
 ## Example: Training from a set of instances with Naive-Bayes as base classifier.
+set.seed(1)
 m4 <- coBC(x = xtrain, y = ytrain, 
            learner = function(x, y) e1071::naiveBayes(x, y), 
            pred = "predict",
@@ -67,6 +69,7 @@ pred4 <- predict(m4, xitest)
 caret::confusionMatrix(table(pred4, yitest))
 
 ## Example: Training from a set of instances with C5.0 as base classifier.
+set.seed(1)
 m5 <- coBC(x = xtrain, y = ytrain, 
            learner = C50::C5.0, 
            pred = "predict",
