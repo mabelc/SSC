@@ -36,18 +36,28 @@ predProb <- function(model, x, pred, pred.pars) {
   return(prob)
 }
 
-#' @title Check and order a matrix of probabilities
+#' @title Check a matrix of probabilities
+#' @description Check the number of rows and the columns names
+#' of a matrix of probabilities. If the columns are
+#' unordered, they are ordered according to \code{classes}.
 #' @param prob a probabilities matrix
 #' @param ninstances expected number of rows in \code{prob}
 #' @param classes expected columns names in \code{prob}
 #' @return the matrix \code{prob} with it columns in the order given by \code{classes} 
-getProb <- function(prob, ninstances, classes){
+#' @export
+checkProb <- function(prob, ninstances, classes){
   # Check probabilities matrix
-  if(!is.matrix(prob) ||
-     ninstances != nrow(prob) ||
-     length(classes) != length(intersect(classes, colnames(prob)))){
-    # TODO: Explain the error cause in the next error message
-    stop("Incorrect value returned by pred function.")
+  if(!is.matrix(prob)){
+    stop(sprintf("prob is an object of class %s", class(prob), 
+                 ". Expected an object of class matrix."))
+  }
+  if(ninstances != nrow(prob)){
+    stop(sprintf("The rows number of prob is %s", nrow(prob), 
+                 ". Expected a number egual to ninstances (%i)", ninstances))
+  }
+  
+  if(length(classes) != length(intersect(classes, colnames(prob)))){
+    stop("The columns names of prob is a set not equal to classes set.")
   }
   r <- prob[, classes]
   if(nrow(prob) == 1) dim(r) <- dim(prob) 
@@ -63,7 +73,7 @@ getProb <- function(prob, ninstances, classes){
 #' @return a factor with classes
 getClass <- function(prob, ninstances, classes){
   # Check probabilities
-  prob <- getProb(prob, ninstances, classes)
+  prob <- checkProb(prob, ninstances, classes)
   # Obtain classes from probabilities
   map <- apply(prob, MARGIN = 1, FUN = which.max)
   # Convert classes indexes in a factor of classes
@@ -80,7 +90,7 @@ getClass <- function(prob, ninstances, classes){
 #' @return a vector of indexes corresponding to \code{classes}
 getClassIdx <- function(prob, ninstances, classes){
   # Check probabilities
-  prob <- getProb(prob, ninstances, classes)
+  prob <- checkProb(prob, ninstances, classes)
   # Obtain classes from probabilities
   map <- apply(prob, MARGIN = 1, FUN = which.max)
   

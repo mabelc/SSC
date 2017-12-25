@@ -183,8 +183,7 @@ setredBase <- function(
     
     # Predict probabilities per classes of unlabeled examples
     #prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
-    prob <- predB(model, unlabeled)
-    prob <- getProb(prob, ninstances = length(unlabeled), classes)
+    prob <- checkProb(prob = predB(model, unlabeled), ninstances = length(unlabeled), classes)
     
     # Select the instances with better class probability 
     selection <- selectInstances(cantClass, prob)

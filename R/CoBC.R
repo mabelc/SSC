@@ -99,7 +99,7 @@ coBCBase <- function(
         h.prob <- lapply(X = 1:length(models), 
                FUN =  function(i) {
                  prob <- predB(models[[i]], pool)
-                 prob <- getProb(prob, ninstances, classes)
+                 prob <- checkProb(prob, ninstances, classes)
                }
         )
         prob <- H.prob(h.prob, ninstances, nclasses)
@@ -114,7 +114,7 @@ coBCBase <- function(
         h.prob <- lapply(X = 1:N, 
                          FUN =  function(i) {
                            prob <- predB(HO[[i]], selected)
-                           prob <- getProb(prob, ninstances, classes)
+                           prob <- checkProb(prob, ninstances, classes)
                          }
         )
         prob <- H.prob(h.prob, ninstances, nclasses)
@@ -164,6 +164,7 @@ coBCBase <- function(
   result <- list(
     models = H,
     indexes = indexes,
+    classes = classes,
     included.insts = included.insts 
   )
   class(result) <- "coBCBase"
@@ -265,7 +266,7 @@ predict.coBC <- function(object, x, ...){
       prob <- predProb(object$models[[i]], x, object$pred, object$pred.pars)  
     }
   
-    h.prob[[i]] <- getProb(prob, ninstances, object$classes)
+    h.prob[[i]] <- checkProb(prob, ninstances, object$classes)
   }
   
   prob <- H.prob(h.prob, ninstances, nclasses = length(object$classes))
