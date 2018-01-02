@@ -327,20 +327,30 @@ predict.triTraining <- function(object, x, ...) {
     x <- proxy::as.matrix(x)
   }
   
-  preds <- matrix(nrow = 3, ncol = nrow(x))
+  # Classify the instances using each classifier
+  # The result is a matrix of indexes that indicates the classes
+  # The matrix have one column per classifier and one row per instance
   ninstances = nrow(x)
-  for(i in 1:3){
-    preds[i,] <- getClassIdx(
-      prob <- predProb(
-        object$models[[i]], 
-        if(object$x.dist) x[, object$indexes[[i]]] else x,
-        object$pred, 
-        object$pred.pars
-      ), 
-     ninstances, object$classes)
+  if(object$x.dist){
+    FUN = function(model, indexes){
+      getClassIdx(
+        predProb(model, x[, indexes], object$pred, object$pred.pars), 
+        ninstances, object$classes
+      ) 
+    }
+    preds <- mapply(FUN, object$models, object$indexes)
+  }else{
+    FUN = function(model){
+      getClassIdx(
+        predProb(model, x, object$pred, object$pred.pars), 
+        ninstances, object$classes
+      ) 
+    }
+    preds <- mapply(FUN, object$models)
   }
-  # get the mode of the predictions for every instance
-  pred <- apply(X = preds, MARGIN = 2, FUN = statisticalMode)
+  
+  # Get the mode of preds for every instance (by rows)
+  pred <- apply(X = preds, MARGIN = 1, FUN = statisticalMode)
   pred <- factor(object$classes[pred], object$classes)
   
   return(pred)
