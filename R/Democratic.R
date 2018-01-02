@@ -1,52 +1,27 @@
 
-#' @title Train a Democratic model
-#' @description Trains a model for classification,
-#' according to Democratic algorithm.
-#' @param x A matrix or a dataframe with the training instances.
-#' @param y A vector with the labels of training instances. In this vector the unlabeled instances
-#' are specified with the value \code{NA}.
-#' @param learners A list of learner functions from diferents learning squemes.
-#' The learners are used to train supervised base classifiers.
-#' @param learners.pars A list of parameter sets, 
-#' where each set is used with its corresponding learner,
-#' according to the order in \code{learners}.
-#' @param preds A list of prediction functions to obtain the probabilities per classes.
-#' Each function is used in conjuntion with the trained model provided in \code{learners}.
-#' @param preds.pars A list of parameter sets for the functions in \code{preds} list. 
-#' According to the position, each parameter set corresponds with a specific function.
-#' @return The trained model.
 #' @export
-democratic <- function(
-  x, y,
-  learners,
-  learners.pars,
-  preds,
-  preds.pars
+democraticBase <- function(
+  y,
+  learnersB,
+  predsB
 ) {
   ### Check parameters ###
-  # Check x
-  if(!is.matrix(x) && !is.data.frame(x)){
-    stop("Parameter x is neither a matrix or a data frame.")
-  }
   # Check y 
-  if(!is.factor(y)){
-    stop("Parameter y is not a factor. Use as.factor(y) to convert y to a factor.")
-  }
-  # Check relation between x and y
-  if(nrow(x) != length(y)){
-    stop("The rows number of x must be equal to the length of y.")
+  if(!is.factor(y) ){
+    if(!is.vector(y)){
+      stop("Parameter y is neither a vector nor a factor.")  
+    }else{
+      y = as.factor(y)
+    }
   }
   # Check lengths
-  if(!(length(learners) == length(learners.pars) &&
-       length(preds) == length(preds.pars) &&
-       length(learners) == length(preds))){
-    stop("The lists: learners, learners.pars, preds and preds.pars must be of the same length.")
+  if(length(learnersB) != length(predsB)){
+    stop("The length of learnersB is not equal to the length of predsB.")
   }
-  N <- length(learners) 
-  if (N <= 1) {
-    stop("learners must contain at least two base classifiers.") 
+  nclassifiers <- length(learnersB) 
+  if (nclassifiers <= 1) {
+    stop("learnersB must contain at least two base classifiers.") 
   }
-  
   
   ### Init variables ###
   # Identify the classes
@@ -67,18 +42,17 @@ democratic <- function(
   if(length(unlabeled) == 0){ # unlabeled is empty
     stop("The unlabeled set is empty. None value in y parameter is NA.")
   }
-  
+
   ### Democratic algorithm ###
   
   y.map <- unclass(y)
   
-  H <- vector(mode = "list", length = N)
-  Lind <- vector(mode = "list", length = N)
-  Lcls <- vector(mode = "list", length = N)
-  e <- vector(mode = "numeric", length = N)
-  for (i in 1:N) {
-    H[[i]] <- trainModel(x[labeled, ], y[labeled], 
-                         learners[[i]], learners.pars[[i]])
+  H <- vector(mode = "list", length = nclassifiers)
+  Lind <- vector(mode = "list", length = nclassifiers)
+  Lcls <- vector(mode = "list", length = nclassifiers)
+  e <- vector(mode = "numeric", length = nclassifiers)
+  for (i in 1:nclassifiers) {
+    H[[i]] <- learnersB[[i]](labeled, y[labeled])
     Lind[[i]] <- labeled
     Lcls[[i]] <- y.map[labeled]
     e[i] <- 0
@@ -90,32 +64,35 @@ democratic <- function(
     
     changes <- FALSE
     
-    LindPrima <- vector(mode = "list", length = N)
-    LclsPrima <- vector(mode = "list", length = N)
+    LindPrima <- vector(mode = "list", length = nclassifiers)
+    LclsPrima <- vector(mode = "list", length = nclassifiers)
     
     # Internal classify
-    predU <- matrix(nrow = N, ncol = nunlabeled)
+    predU <- matrix(nrow = nclassifiers, ncol = nunlabeled)
     
-    for (i in 1:N) {
-      predU[i,] <- predClassIdx(H[[i]], x[unlabeled, ], 
-                               preds[[i]], preds.pars[[i]], classes)
+    for (i in 1:nclassifiers) {
+      prob <- predsB[[i]](H[[i]], unlabeled)
+      predU[i,] <- getClassIdx(prob, ninstances = length(unlabeled), classes)
     }
     
     cls <- vote(predU, nclasses) # etiquetas votadas
     
     # End Internal classify
-  
+    
     # compute the confidence interval over the original set L
-    W <- sapply(1:N, function(i){
-      predL <- predClassIdx(H[[i]], x[labeled,], preds[[i]], preds.pars[[i]], classes)
-      confidenceInterval(predL, y.map[labeled])$W}
+    W <- sapply(X = 1:nclassifiers, 
+                FUN = function(i){
+                  prob <- predsB[[i]](H[[i]], labeled)
+                  predL <- getClassIdx(prob, ninstances = length(labeled), classes)
+                  confidenceInterval(predL, y.map[labeled])$W
+                }
     )
     
     for (i in 1:nunlabeled) { #for each unlabeled example x in U
       # is the sum of the mean confidence values of the learners in the majority
       # group greater than the sum of the mean confidence values in the minority group??
       sumW <- rep(0, nclasses)
-      for (j in 1:N) #for each classifier
+      for (j in 1:nclassifiers) #for each classifier
         sumW[predU[j,i]] <- sumW[predU[j,i]] + W[j]
       
       # Calculate the maximum confidence with different label to predicted.
@@ -127,7 +104,7 @@ democratic <- function(
       
       if (sumW[lab] > sumW[Max]) {
         # if the classifier i does not label this X unlabeled as predicted, add it to Li.
-        for (j in 1:N)
+        for (j in 1:nclassifiers)
           if (predU[j,i] != lab) {# wrong label
             LindPrima[[j]] <- c(LindPrima[[j]], unlabeled[i])
             LclsPrima[[j]] <- c(LclsPrima[[j]], lab)
@@ -139,35 +116,37 @@ democratic <- function(
     # Estimate if adding Li' to Li improves the accuracy
     # AQUI
     
-    LindUnion <- vector(mode = "list", length = N)
-    LclsUnion <- vector(mode = "list", length = N)
+    LindUnion <- vector(mode = "list", length = nclassifiers)
+    LclsUnion <- vector(mode = "list", length = nclassifiers)
     
-    for (i in 1:N) {
-      repeated <- intersect(Lind[[i]],LindPrima[[i]])
+    for (i in 1:nclassifiers) {
+      repeated <- intersect(Lind[[i]], LindPrima[[i]])
       if (length(repeated) != 0){#elimino instancias que ya esten en temp$idxInstLi
-        indexesToRemove <- sapply( X=repeated, FUN = function(r){
+        indexesToRemove <- sapply(X = repeated, FUN = function(r){
           which(LindPrima[[i]] == r)
         })
         LindPrima[[i]] <- LindPrima[[i]][-indexesToRemove]
         LclsPrima[[i]] <- LclsPrima[[i]][-indexesToRemove]
       }
       if (!is.null(LindPrima[[i]])){
-        LindUnion[[i]] <- c(Lind[[i]],LindPrima[[i]])
-        LclsUnion[[i]] <- c(Lcls[[i]],LclsPrima[[i]])
+        LindUnion[[i]] <- c(Lind[[i]], LindPrima[[i]])
+        LclsUnion[[i]] <- c(Lcls[[i]], LclsPrima[[i]])
       } else{
         LindUnion[[i]] <- Lind[[i]]
         LclsUnion[[i]] <- Lcls[[i]]
       }
-        
     }
     
-    L <- sapply(1:N, function(i){
-      predLi <- predClassIdx(H[[i]], x[Lind[[i]],], preds[[i]], preds.pars[[i]], classes)
-      confidenceInterval(predLi, Lcls[[i]])$L
-    })
+    L <- sapply(X = 1:nclassifiers, 
+                FUN = function(i){
+                  prob <- predsB[[i]](H[[i]], Lind[[i]])
+                  predLi <- getClassIdx(prob, ninstances = length(Lind[[i]]), classes)
+                  confidenceInterval(predLi, Lcls[[i]])$L
+                }
+    )
     
     q <- ep <- qp <- NULL
-    for (i in 1:N) { # for each classifier
+    for (i in 1:nclassifiers) { # for each classifier
       sizeLi <- length(Lind[[i]])
       sizeLLP <- length(LindUnion[[i]])
       if (sizeLLP > sizeLi) { #hay instancias nuevas eb LiPrima
@@ -183,28 +162,157 @@ democratic <- function(
           changes <- TRUE
           # entrenar clasificador i
           yi <- classes[Lcls[[i]]]
-          H[[i]] <- trainModel(x[Lind[[i]], ], factor(yi, classes), 
-                               learners[[i]], learners.pars[[i]])
+          H[[i]] <- learnersB[[i]](Lind[[i]], factor(yi, classes))
         }
       }
     } # end for each classifier
     iter <- iter + 1
   } # End while
-
+  
   ### Result ###
-  W <- sapply(1:N, function(i){
-    predL <- predClassIdx(H[[i]], x[labeled,], preds[[i]], preds.pars[[i]], classes)
-    confidenceInterval(predL, y.map[labeled])$W}
+  # determine labeled instances
+  included.insts <- c()
+  for(i in 1:nclassifiers){
+    included.insts <- union(included.insts, Lind[[i]])
+  }
+  # map indexes respect to m$included.insts
+  indexes <- vector(mode = "list", length = nclassifiers)
+  for(i in 1:nclassifiers){
+    indexes[[i]] <- vapply(Lind[[i]], FUN.VALUE = 1,
+                           FUN = function(e){ which(e == included.insts)})
+  }
+  
+  W <- sapply(X = 1:nclassifiers, 
+              FUN = function(i){
+                prob <- predsB[[i]](H[[i]], labeled)
+                predL <- getClassIdx(prob, ninstances = length(labeled), classes)
+                confidenceInterval(predL, y.map[labeled])$W
+              }
   )
   
   # Save result
   result <- list(
     models = H,
-    classes = classes,
-    preds = preds,
-    preds.pars = preds.pars,
+    indexes = indexes,
+    included.insts = included.insts,
     W = W
   )
+  class(result) <- "democraticBase"
+  
+  return(result)
+}
+
+#' @export
+democratic <- function(
+  x, y,
+  learners, learners.pars,
+  preds, preds.pars,
+  x.dist = FALSE
+) {
+  ### Check parameters ###
+  # Check x.dist
+  if(!is.logical(x.dist)){
+    stop("Parameter x.dist is not logical.")
+  }
+  # Check learners
+  if (length(learners)  <= 1) {
+    stop("Parameter learners must contain at least two base classifiers.") 
+  }
+  if(!(length(learners) == length(learners.pars) &&
+       length(preds) == length(preds.pars) &&
+       length(learners) == length(preds))){
+    stop("The lists: learners, learners.pars, preds and preds.pars must be of the same length.")
+  }
+  
+  if(x.dist){
+    # Distance matrix case
+    # Check matrix distance in x
+    if(class(x) == "dist"){
+      x <- proxy::as.matrix(x)
+    }
+    if(!is.matrix(x)){
+      stop("Parameter x is neither a matrix or a dist object.")
+    } else if(nrow(x) != ncol(x)){
+      stop("The distance matrix x is not a square matrix.")
+    } else if(nrow(x) != length(y)){
+      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
+                         "and it's expected %i x %i according to the size of y."), 
+                   nrow(x), ncol(x), length(y), length(y)))
+    }
+    
+    # Build learner base functions
+    d_learners_base <- mapply(
+      FUN = function(learner, learner.pars){
+        learner_base <- function(training.ints, cls){
+          m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
+          r <- list(m = m, training.ints = training.ints)
+          return(r)
+        }
+        return(learner_base)
+      }, 
+      learners, learners.pars, 
+      SIMPLIFY = FALSE
+    )
+    # Build pred base functions 
+    d_preds_base <- mapply(
+      FUN = function(pred, pred.pars){
+        pred_base <- function(r, testing.ints){
+          prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
+          return(prob)
+        }    
+        return(pred_base)
+      }, 
+      preds, preds.pars,
+      SIMPLIFY = FALSE
+    )
+    # Call base method
+    result <- democraticBase(y, d_learners_base, d_preds_base)
+    # Extract model from list created in learnerB
+    result$models <- lapply(X = result$models, FUN = function(e) e$m)
+  }else{
+    # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+    
+    # Build learner base functions
+    m_learners_base <- mapply(
+      FUN = function(learner, learner.pars){
+        learner_base <- function(training.ints, cls){
+          m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
+          return(m)
+        }
+        return(learner_base)
+      }, 
+      learners, learners.pars, 
+      SIMPLIFY = FALSE
+    )
+    # Build pred base functions 
+    m_preds_base <- mapply(
+      FUN = function(pred, pred.pars){
+        pred_base <-  function(m, testing.ints){
+          prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
+          return(prob)
+        }
+        return(pred_base)
+      }, 
+      preds, preds.pars,
+      SIMPLIFY = FALSE
+    )
+    # Call base method
+    result <- democraticBase(y, m_learners_base, m_preds_base)
+  }
+  
+  ### Result ###
+  result$classes = levels(y)
+  result$preds = preds
+  result$preds.pars = preds.pars
+  result$x.dist = x.dist
   class(result) <- "democratic"
   
   return(result)
@@ -213,26 +321,42 @@ democratic <- function(
 #' @export
 #' @importFrom stats predict
 predict.democratic <- function(object, x, ...){
-  if(!is.matrix(x)){
+  if(class(x) == "integer"){
     x <- matrix(x, nrow = 1)
+  } else if(class(x) == "dist"){
+    x <- proxy::as.matrix(x)
   }
   
-  N <- length(object$models)
-  pred <- matrix(nrow = N, ncol = nrow(x))
-  
-  for (i in 1:N) {
-    pred[i,] <- predClassIdx(object$models[[i]], x, 
-                             object$preds[[i]], object$preds.pars[[i]],
-                             object$classes)
-  }  
+  # Classify the instances using each classifier
+  # The result is a matrix of indexes that indicates the classes
+  # The matrix have one column per classifier and one row per instance
+  ninstances = nrow(x)
+  if(object$x.dist){
+    FUN = function(model, indexes, pred, pred.pars){
+      getClassIdx(
+        predProb(model, x[, indexes], pred, pred.pars), 
+        ninstances, object$classes
+      ) 
+    }
+    pred <- mapply(FUN, object$models, object$indexes, object$preds, object$preds.pars)
+  }else{
+    FUN = function(model, pred, pred.pars){
+      getClassIdx(
+        predProb(model, x, pred, pred.pars), 
+        ninstances, object$classes
+      ) 
+    }
+    pred <- mapply(FUN, object$models, object$preds, object$preds.pars)
+  }
   
   map <- vector(mode = "numeric", length = nrow(x))
   
-  for (i in 1:nrow(x)) {#for each example x in U
+  nclassifiers <- length(object$models)
+  for (i in 1:ninstances) {#for each example x in U
     pertenece <- wz <- rep(0, length(object$classes))
     
-    for (j in 1:N) {#para cada clasificador
-      z = pred[j,i]
+    for (j in 1:nclassifiers) {#para cada clasificador
+      z = pred[i, j]
       if (object$W[j] > 0.5) {
         # Allocate this classifier to group Gz
         pertenece[z] <- pertenece[z] + 1
