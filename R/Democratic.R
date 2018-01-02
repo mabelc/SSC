@@ -68,32 +68,32 @@ democraticBase <- function(
     LclsPrima <- vector(mode = "list", length = nclassifiers)
     
     # Internal classify
-    predU <- matrix(nrow = nclassifiers, ncol = nunlabeled)
-    
-    for (i in 1:nclassifiers) {
-      prob <- predsB[[i]](H[[i]], unlabeled)
-      predU[i,] <- getClassIdx(prob, ninstances = length(unlabeled), classes)
+    FUN = function(model, pred){
+      getClassIdx(pred(model, unlabeled), 
+                  ninstances = length(unlabeled), classes)
     }
+    predU <- mapply(FUN, H, predsB)
     
     cls <- vote(predU, nclasses) # etiquetas votadas
     
     # End Internal classify
     
     # compute the confidence interval over the original set L
-    W <- sapply(X = 1:nclassifiers, 
-                FUN = function(i){
-                  prob <- predsB[[i]](H[[i]], labeled)
-                  predL <- getClassIdx(prob, ninstances = length(labeled), classes)
-                  confidenceInterval(predL, y.map[labeled])$W
-                }
-    )
+    FUN = function(model, pred){
+      confidenceInterval(
+        getClassIdx(pred(model, labeled), 
+                    ninstances = length(labeled), classes), 
+        y.map[labeled]
+      )$W
+    }
+    W <- mapply(FUN, H, predsB)
     
     for (i in 1:nunlabeled) { #for each unlabeled example x in U
       # is the sum of the mean confidence values of the learners in the majority
       # group greater than the sum of the mean confidence values in the minority group??
       sumW <- rep(0, nclasses)
       for (j in 1:nclassifiers) #for each classifier
-        sumW[predU[j,i]] <- sumW[predU[j,i]] + W[j]
+        sumW[predU[i, j]] <- sumW[predU[i, j]] + W[j]
       
       # Calculate the maximum confidence with different label to predicted.
       lab <- cls[[i]][which.max(sumW[cls[[i]]])] #se devuelve la etiqueta mas probable
@@ -105,7 +105,7 @@ democraticBase <- function(
       if (sumW[lab] > sumW[Max]) {
         # if the classifier i does not label this X unlabeled as predicted, add it to Li.
         for (j in 1:nclassifiers)
-          if (predU[j,i] != lab) {# wrong label
+          if (predU[i, j] != lab) {# wrong label
             LindPrima[[j]] <- c(LindPrima[[j]], unlabeled[i])
             LclsPrima[[j]] <- c(LclsPrima[[j]], lab)
           }
@@ -137,13 +137,14 @@ democraticBase <- function(
       }
     }
     
-    L <- sapply(X = 1:nclassifiers, 
-                FUN = function(i){
-                  prob <- predsB[[i]](H[[i]], Lind[[i]])
-                  predLi <- getClassIdx(prob, ninstances = length(Lind[[i]]), classes)
-                  confidenceInterval(predLi, Lcls[[i]])$L
-                }
-    )
+    FUN = function(model, pred){
+      confidenceInterval(
+        getClassIdx(pred(model, Lind[[i]]), 
+                    ninstances = length(Lind[[i]]), classes), 
+        Lcls[[i]]
+      )$L
+    }
+    L <- mapply(FUN, H, predsB)
     
     q <- ep <- qp <- NULL
     for (i in 1:nclassifiers) { # for each classifier
@@ -182,13 +183,14 @@ democraticBase <- function(
                            FUN = function(e){ which(e == included.insts)})
   }
   
-  W <- sapply(X = 1:nclassifiers, 
-              FUN = function(i){
-                prob <- predsB[[i]](H[[i]], labeled)
-                predL <- getClassIdx(prob, ninstances = length(labeled), classes)
-                confidenceInterval(predL, y.map[labeled])$W
-              }
-  )
+  FUN = function(model, pred){
+    confidenceInterval(
+      getClassIdx(pred(model, labeled), 
+                  ninstances = length(labeled), classes), 
+      y.map[labeled]
+    )$W
+  }
+  W <- mapply(FUN, H, predsB)
   
   # Save result
   result <- list(
@@ -395,10 +397,10 @@ confidenceInterval <- function(pred, conf.cls) {
 vote <- function(pred, ncls){
   lab <- list() # etiquetas
   
-  for (i in 1:ncol(pred)) { # para cada instancia
-    perClass <- rep(0,ncls)
-    for (j in 1:nrow(pred)) # para cada clasificador
-      perClass[pred[j,i]] <- perClass[pred[j,i]] + 1
+  for (i in 1:nrow(pred)) { # para cada instancia
+    perClass <- rep(0, ncls)
+    for (j in 1:ncol(pred)) # para cada clasificador
+      perClass[pred[i,j]] <- perClass[pred[i,j]] + 1
     
     l <- which.max(perClass)
     lab[[i]] <- which(perClass == perClass[l])
