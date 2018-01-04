@@ -68,25 +68,30 @@ democraticBase <- function(
     LclsPrima <- vector(mode = "list", length = nclassifiers)
     
     # Internal classify
-    FUN = function(model, pred){
-      getClassIdx(pred(model, unlabeled), 
-                  ninstances = length(unlabeled), classes)
-    }
-    predU <- mapply(FUN, H, predsB)
+    predU <- mapply(    
+      FUN = function(model, pred){
+        getClassIdx(pred(model, unlabeled), 
+                    ninstances = length(unlabeled), classes)
+      },
+      H, predsB
+    )
     
     cls <- vote(predU, nclasses) # etiquetas votadas
     
     # End Internal classify
     
     # compute the confidence interval over the original set L
-    FUN = function(model, pred){
-      confidenceInterval(
-        getClassIdx(pred(model, labeled), 
-                    ninstances = length(labeled), classes), 
-        y.map[labeled]
-      )$W
-    }
-    W <- mapply(FUN, H, predsB)
+    W <- mapply(
+      FUN = function(model, pred){
+        confidenceInterval(
+          getClassIdx(pred(model, labeled), 
+                      ninstances = length(labeled), 
+                      classes), 
+          y.map[labeled]
+        )$W
+      },
+      H, predsB
+    )
     
     for (i in 1:nunlabeled) { #for each unlabeled example x in U
       # is the sum of the mean confidence values of the learners in the majority
@@ -121,10 +126,13 @@ democraticBase <- function(
     
     for (i in 1:nclassifiers) {
       repeated <- intersect(Lind[[i]], LindPrima[[i]])
-      if (length(repeated) != 0){#elimino instancias que ya esten en temp$idxInstLi
-        indexesToRemove <- sapply(X = repeated, FUN = function(r){
-          which(LindPrima[[i]] == r)
-        })
+      if (length(repeated) != 0){
+        indexesToRemove <- sapply(
+          X = repeated, 
+          FUN = function(r) {
+            which(LindPrima[[i]] == r)
+          }
+        )
         LindPrima[[i]] <- LindPrima[[i]][-indexesToRemove]
         LclsPrima[[i]] <- LclsPrima[[i]][-indexesToRemove]
       }
@@ -137,23 +145,26 @@ democraticBase <- function(
       }
     }
     
-    FUN = function(model, pred){
-      confidenceInterval(
-        getClassIdx(pred(model, Lind[[i]]), 
-                    ninstances = length(Lind[[i]]), classes), 
-        Lcls[[i]]
-      )$L
-    }
-    L <- mapply(FUN, H, predsB)
+    L <- mapply(
+      FUN = function(model, pred){
+        confidenceInterval(
+          getClassIdx(pred(model, Lind[[i]]), 
+                      ninstances = length(Lind[[i]]), 
+                      classes), 
+          Lcls[[i]]
+        )$L
+      },
+      H, predsB
+    )
     
     q <- ep <- qp <- NULL
     for (i in 1:nclassifiers) { # for each classifier
       sizeLi <- length(Lind[[i]])
       sizeLLP <- length(LindUnion[[i]])
       if (sizeLLP > sizeLi) { #hay instancias nuevas eb LiPrima
-        q[i] <- sizeLi * (1 - 2*(e[i]/sizeLi))^2				# est. of error rate
+        q[i] <- sizeLi * (1 - 2 * ( e[i] / sizeLi)) ^ 2				# est. of error rate
         ep[i] <- (1 - mean(L[-i])) * length(LindPrima[[i]])			# est. of new error rate
-        qp[i] <- sizeLLP * (1 - 2*(e[i]+ep[i])/sizeLLP)^2		# if Li' added
+        qp[i] <- sizeLLP * (1 - 2 * (e[i] + ep[i]) / sizeLLP) ^ 2		# if Li' added
         
         if (qp[i] > q[i]) {
           #cat("Add", sizeLLP - sizeLi,"instances to",class(BaseL[[i]]),"\n")
@@ -179,18 +190,26 @@ democraticBase <- function(
   # map indexes respect to m$included.insts
   indexes <- vector(mode = "list", length = nclassifiers)
   for(i in 1:nclassifiers){
-    indexes[[i]] <- vapply(Lind[[i]], FUN.VALUE = 1,
-                           FUN = function(e){ which(e == included.insts)})
+    indexes[[i]] <- vapply(
+      Lind[[i]], 
+      FUN.VALUE = 1,
+      FUN = function(e){
+        which(e == included.insts)
+      }
+    )
   }
-  
-  FUN = function(model, pred){
-    confidenceInterval(
-      getClassIdx(pred(model, labeled), 
-                  ninstances = length(labeled), classes), 
-      y.map[labeled]
-    )$W
-  }
-  W <- mapply(FUN, H, predsB)
+  # compute W
+  W <- mapply(
+    FUN = function(model, pred){
+      confidenceInterval(
+        getClassIdx(pred(model, labeled), 
+                    ninstances = length(labeled), 
+                    classes), 
+        y.map[labeled]
+      )$W
+    },
+    H, predsB
+  )
   
   # Save result
   result <- list(
@@ -253,7 +272,8 @@ democratic <- function(
         }
         return(learner_base)
       }, 
-      learners, learners.pars, 
+      learners,
+      learners.pars,
       SIMPLIFY = FALSE
     )
     # Build pred base functions 
@@ -265,7 +285,8 @@ democratic <- function(
         }    
         return(pred_base)
       }, 
-      preds, preds.pars,
+      preds,
+      preds.pars,
       SIMPLIFY = FALSE
     )
     # Call base method
@@ -292,7 +313,8 @@ democratic <- function(
         }
         return(learner_base)
       }, 
-      learners, learners.pars, 
+      learners,
+      learners.pars,
       SIMPLIFY = FALSE
     )
     # Build pred base functions 
@@ -304,7 +326,8 @@ democratic <- function(
         }
         return(pred_base)
       }, 
-      preds, preds.pars,
+      preds,
+      preds.pars,
       SIMPLIFY = FALSE
     )
     # Call base method
