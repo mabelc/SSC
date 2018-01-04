@@ -24,18 +24,36 @@ tst.idx <- setdiff(1:length(y), tra.idx)
 xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
-## Example: Training from a set of instances with 1-NN as base classifier.
-learners <- list(caret::knn3, kernlab::ksvm)
-learners.pars = list(list(k = 1), list(prob.model = TRUE))
-preds = list("predict", kernlab::predict)
-preds.pars = list(NULL, list(type = "probabilities"))
+## Example: Training from a set of instances with 
+# 1-NN and C-svc (SVM) as base classifiers.
+# knn3 learner
+library(caret)
+knn <- knn3             # learner function
+knn.pars <- list(k = 1) # parameters for learner function
+knn.prob <- predict     # function to predict probabilities
+knn.prob.pars <- NULL   # parameters for prediction function
 
+# ksvm learner
+library(kernlab)
+svm <- ksvm             # learner function
+svm.pars <- list(       # parameters for learner function
+  prob.model = TRUE,
+  type = "C-svc",  C = 1, 
+  kernel = "rbfdot", kpar = list(sigma = 0.048)
+)
+svm.prob <- predict     # function to predict probabilities
+svm.prob.pars <- list(  # parameters for prediction function
+  type = "probabilities"
+)
+
+# train a model
 set.seed(1)
 m1 <- democratic(x = xtrain, y = ytrain, 
-                 learners, learners.pars,
-                 preds, preds.pars)
-pred1 <- predict(m1, xitest)
-caret::confusionMatrix(table(pred1, yitest))
-
-
+                 learners = list(knn, svm), 
+                 learners.pars = list(knn.pars, svm.pars), 
+                 preds = list(knn.prob, svm.prob), 
+                 preds.pars = list(knn.prob.pars, svm.prob.pars))
+# predict classes
+m1.pred <- predict(m1, xitest)
+caret::confusionMatrix(table(m1.pred, yitest))
 
