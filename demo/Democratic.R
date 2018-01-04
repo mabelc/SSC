@@ -37,9 +37,10 @@ knn.prob.pars <- NULL   # parameters for prediction function
 library(kernlab)
 svm <- ksvm             # learner function
 svm.pars <- list(       # parameters for learner function
-  prob.model = TRUE,
   type = "C-svc",  C = 1, 
-  kernel = "rbfdot", kpar = list(sigma = 0.048)
+  kernel = "rbfdot", kpar = list(sigma = 0.048),
+  prob.model = TRUE,
+  scaled = FALSE
 )
 svm.prob <- predict     # function to predict probabilities
 svm.prob.pars <- list(  # parameters for prediction function
@@ -47,12 +48,11 @@ svm.prob.pars <- list(  # parameters for prediction function
 )
 
 # train a model
-set.seed(1)
 m <- democratic(x = xtrain, y = ytrain, 
-                 learners = list(knn, svm), 
-                 learners.pars = list(knn.pars, svm.pars), 
-                 preds = list(knn.prob, svm.prob), 
-                 preds.pars = list(knn.prob.pars, svm.prob.pars))
+                learners = list(knn, svm), 
+                learners.pars = list(knn.pars, svm.pars), 
+                preds = list(knn.prob, svm.prob), 
+                preds.pars = list(knn.prob.pars, svm.prob.pars))
 # predict classes
 m.pred <- predict(m, xitest)
 caret::confusionMatrix(table(m.pred, yitest))

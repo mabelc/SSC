@@ -1,5 +1,3 @@
-#TODO: revisar los ejemplos a y b no dan igual resultado
-# La diferencia esta en las maquinas de soporte vectorial.
 library(ssc)
 
 ## Load Wine data set
@@ -44,7 +42,7 @@ knn.prob <- function(model, indexes) {
 library(kernlab)
 # learner function
 svm <- function(indexes, cls) {
-  ksvm(x = xtrain[indexes, ], y = cls,
+  ksvm(x = xtrain[indexes, ], y = cls, scaled = FALSE,
        type = "C-svc",  C = 1,
        kernel = "rbfdot", kpar = list(sigma = 0.048),
        prob.model = TRUE)
@@ -55,7 +53,6 @@ svm.prob <- function(model, indexes) {
 }
 
 ### Train
-set.seed(1)
 m1 <- democraticBase(y = ytrain, 
                      learnersB = list(knn, svm), 
                      predsB = list(knn.prob, svm.prob))
@@ -75,7 +72,7 @@ caret::confusionMatrix(table(cls1, yitest))
 ### Define knn2 base classifier using oneNN from ssc package
 library(ssc)
 # Compute distance matrix D
-# D is used in knn2.prob and to compute kernel matrix
+# D is used in knn2.prob
 library(proxy)
 D <- as.matrix(dist(x = xtrain, method = "euclidean", by_rows = TRUE))
 # learner function
@@ -96,8 +93,8 @@ library(kernlab)
 
 # Compute kernel matrix K
 # K is used in svm2 and svm2.prob functions
-sigma <- 0.048
-K <- as.kernelMatrix(exp(- sigma * D * D))
+rbfkernel = rbfdot(sigma = 0.048)
+K <- kernelMatrix(rbfkernel, x = xtrain)
 
 # learner function
 svm2 <- function(indexes, cls) {
@@ -118,7 +115,6 @@ svm2.prob <- function(model, indexes)  {
 }
 
 ### Train
-set.seed(1)
 m2 <- democraticBase(y = ytrain, 
                      learnersB = list(knn2, svm2), 
                      predsB = list(knn2.prob, svm2.prob))
@@ -127,16 +123,18 @@ m2 <- democraticBase(y = ytrain,
 # Compute distance matrix Ditest
 Ditest <- dist(x = xitest, y = xtrain[m2$included.insts,],
                method = "euclidean", by_rows = TRUE)
-class(Ditest) <- "matrix" # unable to change class using as.matrix
 # predict using classifier 1
 m2.pred1 <- predict(m2$models[[1]], Ditest[, m2$indexes[[1]]])
 
 # Compute kernel matrix Kitest
-Kitest <- exp(- sigma * Ditest * Ditest)
+sv.idxs <- m2$included.insts[
+  m2$indexes[[2]][
+    SVindex(m2$models[[2]])
+  ]
+]
+Kitest <- kernelMatrix(rbfkernel, x = xitest, y = xtrain[sv.idxs, ])
 # predict using classifier 2
-tra.idxs <- m2$indexes[[2]]
-sv.idxs <- tra.idxs[SVindex(m2$models[[2]])]
-m2.pred2 <- predict(m2$models[[2]], as.kernelMatrix(Kitest[, sv.idxs]))
+m2.pred2 <- predict(m2$models[[2]], Kitest)
 
 # Combine predictions
 m2.pred <- list(m2.pred1, m2.pred2)
