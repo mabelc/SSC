@@ -19,6 +19,7 @@
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{y} argument.}
 #' }
+#' @noRd
 snnrceBase <- function(
   D, y,
   alpha = 0.1
