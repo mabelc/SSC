@@ -197,7 +197,8 @@ democraticBase <- function(
     models = H,
     indexes = indexes,
     included.insts = included.insts,
-    W = W
+    W = W,
+    classes = classes
   )
   class(result) <- "democraticBase"
   
@@ -329,40 +330,81 @@ predict.democratic <- function(object, x, ...){
     x <- proxy::as.matrix(x)
   }
   
+  # Select classifiers for prediction
+  selected <- object$W > 0.5 # TODO: create a parameter for 0.5 lower limit
+  W.selected <- object$W[selected]
+  
   # Classify the instances using each classifier
   # The result is a matrix of indexes that indicates the classes
-  # The matrix have one column per classifier and one row per instance
+  # The matrix have one column per selected classifier 
+  # and one row per instance
   ninstances = nrow(x)
   if(object$x.dist){
-    FUN = function(model, indexes, pred, pred.pars){
-      getClassIdx(
-        predProb(model, x[, indexes], pred, pred.pars), 
-        ninstances, object$classes
-      ) 
-    }
-    pred <- mapply(FUN, object$models, object$indexes, object$preds, object$preds.pars)
+    pred <- mapply(
+      FUN = function(model, indexes, pred, pred.pars){
+        getClassIdx(
+          predProb(model, x[, indexes], pred, pred.pars), 
+          ninstances, object$classes
+        ) 
+      },
+      object$models[selected], 
+      object$indexes[selected], 
+      object$preds[selected], 
+      object$preds.pars[selected]
+    )
   }else{
-    FUN = function(model, pred, pred.pars){
-      getClassIdx(
-        predProb(model, x, pred, pred.pars), 
-        ninstances, object$classes
-      ) 
-    }
-    pred <- mapply(FUN, object$models, object$preds, object$preds.pars)
+    pred <- mapply(
+      FUN = function(model, pred, pred.pars){
+        getClassIdx(
+          predProb(model, x, pred, pred.pars), 
+          ninstances, object$classes
+        ) 
+      },
+      object$models[selected],
+      object$preds[selected],
+      object$preds.pars[selected]
+    )
   }
+  
+  # Combining predictions
+  map <- vector(mode = "numeric", length = ninstances)
+  
+  for (i in 1:nrow(pred)) {#for each example x in U
+    pertenece <- wz <- rep(0, length(object$classes))
+
+    for (j in 1:ncol(pred)) {#para cada clasificador
+      z = pred[i, j]
+      # Allocate this classifier to group Gz
+      pertenece[z] <- pertenece[z] + 1
+      wz[z] <- wz[z] + W.selected[j]
+    }
+
+    # Compute group average mean confidence
+    countGj <- (pertenece + 0.5) / (pertenece + 1) * (wz / pertenece)
+    map[i] <- which.max(countGj)
+  }# end for
+
+  cls <- factor(object$classes[map], object$classes)
+
+  return(cls)
+}
+
+#' @export
+democraticCombining <- function(pred, W, classes){
   
   map <- vector(mode = "numeric", length = nrow(x))
   
-  nclassifiers <- length(object$models)
+  ninstances <- length(pred[[1]])
+  nclassifiers <- length(W)
   for (i in 1:ninstances) {#for each example x in U
-    pertenece <- wz <- rep(0, length(object$classes))
+    pertenece <- wz <- rep(0, length(classes))
     
     for (j in 1:nclassifiers) {#para cada clasificador
-      z = pred[i, j]
-      if (object$W[j] > 0.5) {
+      z <- which(pred[[j]][i] == classes)
+      if (W[j] > 0.5) {
         # Allocate this classifier to group Gz
         pertenece[z] <- pertenece[z] + 1
-        wz[z] <- wz[z] + object$W[j]
+        wz[z] <- wz[z] + W[j]
       }
     }
     
@@ -371,9 +413,7 @@ predict.democratic <- function(object, x, ...){
     map[i] <- which.max(countGj)
   }# end for
   
-  cls <- factor(object$classes[map], object$classes)
-  
-  return(cls)
+  factor(classes[map], classes)
 }
 
 #' @title Compute the 95\% confidence interval of the classifier
