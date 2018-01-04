@@ -48,12 +48,12 @@ svm.prob.pars <- list(  # parameters for prediction function
 
 # train a model
 set.seed(1)
-m1 <- democratic(x = xtrain, y = ytrain, 
+m <- democratic(x = xtrain, y = ytrain, 
                  learners = list(knn, svm), 
                  learners.pars = list(knn.pars, svm.pars), 
                  preds = list(knn.prob, svm.prob), 
                  preds.pars = list(knn.prob.pars, svm.prob.pars))
 # predict classes
-m1.pred <- predict(m1, xitest)
-caret::confusionMatrix(table(m1.pred, yitest))
+m.pred <- predict(m, xitest)
+caret::confusionMatrix(table(m.pred, yitest))
 
