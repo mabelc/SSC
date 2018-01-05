@@ -371,8 +371,19 @@ predict.democratic <- function(object, x, ...){
   }
   
   # Select classifiers for prediction
-  selected <- object$W > 0.5 # TODO: create a parameter for 0.5 lower limit
+  lower.limit <- 0.5
+  selected <- object$W > lower.limit # TODO: create a parameter for 0.5 lower limit
   W.selected <- object$W[selected]
+  if(length(W.selected) == 0){
+    stop(
+      sprintf(
+        "%s %s %f",
+        "Any classifier selected according model's W values.", 
+        "The classifiers are selected when it's W value is greater than",
+        lower.limit
+      )
+    )
+  }
   
   # Classify the instances using each classifier
   # The result is a matrix of indexes that indicates the classes
