@@ -4,14 +4,10 @@
 \alias{getClass}
 \title{Get classes from a matrix of probabilities}
 \usage{
-getClass(prob, ninstances, classes)
+getClass(prob)
 }
 \arguments{
 \item{prob}{a probabilities matrix}
-
-\item{ninstances}{expected number of rows in \code{prob}}
-
-\item{classes}{expected columns names in \code{prob}}
 }
 \value{
 a factor with classes

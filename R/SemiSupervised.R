@@ -55,28 +55,29 @@ checkProb <- function(prob, ninstances, classes){
     stop(sprintf("The rows number of prob is %s", nrow(prob), 
                  ". Expected a number egual to ninstances (%i)", ninstances))
   }
-  
   if(length(classes) != length(intersect(classes, colnames(prob)))){
     stop("The columns names of prob is a set not equal to classes set.")
+  } else if(any(classes != colnames(prob))){
+    # order columns by classes
+    prob <- prob[, classes]
+    if(!is.matrix(prob)){
+      # when nrow of prob is 1
+      dim(prob) <- c(1, length(prob))
+    }
+    colnames(prob) <- classes 
   }
-  r <- prob[, classes]
-  if(nrow(prob) == 1) dim(r) <- dim(prob) 
-  colnames(r) <- classes
   
-  return(r)
+  return(prob)
 }
 
 #' @title Get classes from a matrix of probabilities
 #' @param prob a probabilities matrix
-#' @param ninstances expected number of rows in \code{prob}
-#' @param classes expected columns names in \code{prob}
 #' @return a factor with classes
-getClass <- function(prob, ninstances, classes){
-  # Check probabilities
-  prob <- checkProb(prob, ninstances, classes)
+getClass <- function(prob){
   # Obtain classes from probabilities
   map <- apply(prob, MARGIN = 1, FUN = which.max)
   # Convert classes indexes in a factor of classes
+  classes <- colnames(prob)
   r <- factor(classes[map], classes)
   
   return(r)
@@ -85,12 +86,8 @@ getClass <- function(prob, ninstances, classes){
 #' @title Get classes from a matrix of probabilities and 
 #' return the classes indexes
 #' @param prob a probabilities matrix
-#' @param ninstances expected number of rows in \code{prob}
-#' @param classes expected columns names in \code{prob}
 #' @return a vector of indexes corresponding to \code{classes}
-getClassIdx <- function(prob, ninstances, classes){
-  # Check probabilities
-  prob <- checkProb(prob, ninstances, classes)
+getClassIdx <- function(prob){
   # Obtain classes from probabilities
   map <- apply(prob, MARGIN = 1, FUN = which.max)
   

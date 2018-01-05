@@ -42,7 +42,7 @@ for(i in 1:length(md1$models)){
   h.prob[[i]] <- ssc::checkProb(prob, ninstances, md1$classes)
 }
 # Combine probability matrices
-prob <- ssc::H.prob(h.prob)
+prob <- ssc::H.prob(h.prob, ninstances, md1$classes)
 # Get class per instance
 cls1 <- md1$classes[apply(prob, 1, which.max)]
 caret::confusionMatrix(table(cls1, yitest))
@@ -79,7 +79,7 @@ for(i in 1:length(md2$models)){
   h.prob[[i]] <- ssc::checkProb(prob, ninstances, md2$classes)
 }
 # Combine probability matrices
-prob <- ssc::H.prob(h.prob)
+prob <- ssc::H.prob(h.prob, ninstances, md2$classes)
 # Get class per instance
 cls2 <- md2$classes[apply(prob, 1, which.max)]
 caret::confusionMatrix(table(cls2, yitest))

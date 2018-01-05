@@ -96,12 +96,15 @@ coBCBase <- function(
         # Predict probabilities for unlabeled prime instances
         models <- H[committee]
         ninstances = length(pool)
-        h.prob <- lapply(
-          X = 1:length(models), 
-          FUN =  function(i)
-            checkProb(prob = predB(models[[i]], pool), ninstances, classes)
+        prob <- H.prob(
+          h.prob = lapply(
+            X = 1:length(models), 
+            FUN =  function(i)
+              checkProb(prob = predB(models[[i]], pool), ninstances, classes)
+          ),
+          ninstances,
+          classes
         )
-        prob <- H.prob(h.prob)
         # Select instances
         # labeledPrima[[i]] -> sel
         sel <- selectInstances(cantClass = cantClass, probabilities = prob)
@@ -110,12 +113,15 @@ coBCBase <- function(
         ## Verify with the initial training set
         # Predict probabilities
         ninstances = length(selected)
-        h.prob <- lapply(
-          X = 1:N, 
-          FUN =  function(i) 
-            checkProb(prob = predB(HO[[i]], selected), ninstances, classes)
+        prob <- H.prob(
+          h.prob = lapply(
+            X = 1:N, 
+            FUN =  function(i) 
+              checkProb(prob = predB(HO[[i]], selected), ninstances, classes)
+          ), 
+          ninstances, 
+          classes
         )
-        prob <- H.prob(h.prob)
         # Compute classes
         cls.idx <- sapply(X = 1:nrow(prob), FUN = function(i) which.max(prob[i, ]) )
         # Compare 
@@ -256,24 +262,37 @@ coBC <- function(
 predict.coBC <- function(object, x, ...){
   ninstances = nrow(x)
   # Predict probabilities per instances using each model
-  FUN = function(i){
-    checkProb(  # check matrix of prob
-      predProb( # predict prob using model i
-        object$models[[i]], 
-        if(object$x.dist) x[, object$indexes[[i]]] else x, 
-        object$pred, 
-        object$pred.pars
-      ),
-      ninstances, 
-      object$classes
-    ) 
+  if(object$x.dist){
+    h.prob <- mapply(
+      FUN = function(model, indexes){
+        checkProb(
+          predProb(model, x[, indexes], object$pred, object$pred.pars), 
+          ninstances, 
+          object$classes
+        )
+      },
+      object$models,
+      object$indexes,
+      SIMPLIFY = FALSE
+    )
+  }else{
+    h.prob <- mapply(
+      FUN = function(model){
+        checkProb(
+          predProb(model, x, object$pred, object$pred.pars), 
+          ninstances, 
+          object$classes
+        )
+      },
+      object$models,
+      SIMPLIFY = FALSE
+    )
   }
-  h.prob <- lapply(X = 1:length(object$models), FUN)
-  # Combine probability matrices
-  prob <- H.prob(h.prob)
-  # Get class per instance
-  cls.idx <- apply(X = prob, MARGIN = 1, FUN = which.max)
-  pred <- factor(object$classes[cls.idx], object$classes)
+  
+  pred <- getClass(
+    # Combine probability matrices
+    H.prob(h.prob, ninstances, object$classes)
+  )
   
   return(pred)
 }
@@ -283,21 +302,25 @@ predict.coBC <- function(object, x, ...){
 #' @description 
 #' @param h.prob a list of probability matrices
 #' @param ninstnces The number of rows of each matrix in \code{h.prob}
-#' @param nclasses The number of columns of each matrix in \code{h.prob}
+#' @param classes The classes in the columns of each matrix in \code{h.prob}
 #' @return A probability matrix
 #' @export
-H.prob <- function(h.prob, 
-                   ninstances = nrow(h.prob[[1]]), 
-                   nclasses = ncol(h.prob[[1]])){
+H.prob <- function(h.prob, ninstances, classes){
+  
+  nclasses <- length(classes)
   
   H.pro <- matrix(nrow = ninstances, ncol = nclasses)
   for(u in 1:ninstances){
-    H.pro[u, ] <- sapply(X = 1:nclasses, 
-           FUN = function(c) {
-             H.xu.wc(h.prob, u, c, nclasses) 
-           }
+    H.pro[u, ] <- vapply(
+      X = 1:nclasses, 
+      FUN = function(c) {
+        H.xu.wc(h.prob, u, c, nclasses) 
+      },
+      FUN.VALUE = 0
     )
   }
+  
+  colnames(H.pro) <- classes
   
   return(H.pro)
 }

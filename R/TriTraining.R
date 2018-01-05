@@ -100,20 +100,37 @@ triTrainingBase <- function(
       k <- (i+1) %% 3 + 1
       
       # measure error
-      prob <- predB(models[[j]], labeled)
-      cj <- getClassIdx(prob, ninstances = length(labeled), classes)
-      
-      prob <- predB(models[[k]], labeled)
-      ck <- getClassIdx(prob, ninstances = length(labeled), classes)
+      cj <- getClassIdx(
+        checkProb(
+          prob = predB(models[[j]], labeled), 
+          ninstances = length(labeled), 
+          classes
+        )
+      )
+      ck <- getClassIdx(
+        checkProb(
+          prob = predB(models[[k]], labeled), 
+          ninstances = length(labeled), 
+          classes
+        )
+      )
       e[i] <- measureError(cj, ck, ylabeled.map)
       
       if(e[i] < ePrima[i]){
-        
-        prob <- predB(models[[j]], unlabeled)  
-        cj <- getClassIdx(prob, ninstances = length(unlabeled), classes)
-        
-        prob <- predB(models[[j]], unlabeled)  
-        ck <- getClassIdx(prob, ninstances = length(unlabeled), classes)
+        cj <- getClassIdx(
+          checkProb(
+            prob = predB(models[[j]], unlabeled), 
+            ninstances = length(unlabeled), 
+            classes
+          )
+        )
+        ck <- getClassIdx(
+          checkProb(
+            prob = predB(models[[j]], unlabeled), 
+            ninstances = length(unlabeled), 
+            classes
+          )
+        )
         agree <- (which(cj == ck))
         
         Lind[[i]] <- unlabeled[agree]
@@ -332,21 +349,32 @@ predict.triTraining <- function(object, x, ...) {
   # The matrix have one column per classifier and one row per instance
   ninstances = nrow(x)
   if(object$x.dist){
-    FUN = function(model, indexes){
-      getClassIdx(
-        predProb(model, x[, indexes], object$pred, object$pred.pars), 
-        ninstances, object$classes
-      ) 
-    }
-    preds <- mapply(FUN, object$models, object$indexes)
+    preds <- mapply(
+      FUN = function(model, indexes){
+        getClassIdx(
+          checkProb(
+            predProb(model, x[, indexes], object$pred, object$pred.pars), 
+            ninstances, 
+            object$classes
+          )
+        ) 
+      },
+      object$models,
+      object$indexes
+    )
   }else{
-    FUN = function(model){
-      getClassIdx(
-        predProb(model, x, object$pred, object$pred.pars), 
-        ninstances, object$classes
-      ) 
-    }
-    preds <- mapply(FUN, object$models)
+    preds <- mapply(
+      FUN = function(model){
+        getClassIdx(
+          checkProb(
+            predProb(model, x, object$pred, object$pred.pars), 
+            ninstances, 
+            object$classes
+          )
+        ) 
+      },
+      object$models
+    )
   }
   
   # Get the mode of preds for every instance (by rows)

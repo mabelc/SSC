@@ -474,8 +474,13 @@ predict.setred <- function(object, x, ...) {
     x <- proxy::as.matrix(x)
   }
   
-  prob <- predProb(object$model, x, object$pred, object$pred.pars)
-  result <- getClass(prob, ninstances = nrow(x), object$classes)
+  result <- getClass(
+    checkProb(
+      predProb(object$model, x, object$pred, object$pred.pars), 
+      ninstances = nrow(x), 
+      object$classes
+    )
+  )
   
   return(result)
 }

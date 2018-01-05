@@ -5,14 +5,10 @@
 \title{Get classes from a matrix of probabilities and 
 return the classes indexes}
 \usage{
-getClassIdx(prob, ninstances, classes)
+getClassIdx(prob)
 }
 \arguments{
 \item{prob}{a probabilities matrix}
-
-\item{ninstances}{expected number of rows in \code{prob}}
-
-\item{classes}{expected columns names in \code{prob}}
 }
 \value{
 a vector of indexes corresponding to \code{classes}

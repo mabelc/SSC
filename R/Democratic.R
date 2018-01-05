@@ -70,8 +70,13 @@ democraticBase <- function(
     # Internal classify
     predU <- mapply(    
       FUN = function(model, pred){
-        getClassIdx(pred(model, unlabeled), 
-                    ninstances = length(unlabeled), classes)
+        getClassIdx(
+          checkProb(
+            prob = pred(model, unlabeled),
+            ninstances = length(unlabeled), 
+            classes
+          )
+        )
       },
       H, predsB
     )
@@ -84,9 +89,13 @@ democraticBase <- function(
     W <- mapply(
       FUN = function(model, pred){
         confidenceInterval(
-          getClassIdx(pred(model, labeled), 
-                      ninstances = length(labeled), 
-                      classes), 
+          getClassIdx(
+            checkProb(
+              prob = pred(model, labeled), 
+              ninstances = length(labeled), 
+              classes
+            )
+          ),
           y.map[labeled]
         )$W
       },
@@ -148,9 +157,13 @@ democraticBase <- function(
     L <- mapply(
       FUN = function(model, pred){
         confidenceInterval(
-          getClassIdx(pred(model, Lind[[i]]), 
-                      ninstances = length(Lind[[i]]), 
-                      classes), 
+          getClassIdx(
+            checkProb(
+              prob = pred(model, Lind[[i]]), 
+              ninstances = length(Lind[[i]]), 
+              classes
+            )
+          ),
           Lcls[[i]]
         )$L
       },
@@ -202,9 +215,13 @@ democraticBase <- function(
   W <- mapply(
     FUN = function(model, pred){
       confidenceInterval(
-        getClassIdx(pred(model, labeled), 
-                    ninstances = length(labeled), 
-                    classes), 
+        getClassIdx(
+          checkProb(
+            prob = pred(model, labeled), 
+            ninstances = length(labeled), 
+            classes
+          )
+        ),
         y.map[labeled]
       )$W
     },
@@ -366,8 +383,11 @@ predict.democratic <- function(object, x, ...){
     pred <- mapply(
       FUN = function(model, indexes, pred, pred.pars){
         getClassIdx(
-          predProb(model, x[, indexes], pred, pred.pars), 
-          ninstances, object$classes
+          checkProb(
+            predProb(model, x[, indexes], pred, pred.pars), 
+            ninstances, 
+            object$classes
+          )
         ) 
       },
       object$models[selected], 
@@ -379,8 +399,11 @@ predict.democratic <- function(object, x, ...){
     pred <- mapply(
       FUN = function(model, pred, pred.pars){
         getClassIdx(
-          predProb(model, x, pred, pred.pars), 
-          ninstances, object$classes
+          checkProb(
+            predProb(model, x, pred, pred.pars), 
+            ninstances, 
+            object$classes 
+          )
         ) 
       },
       object$models[selected],
