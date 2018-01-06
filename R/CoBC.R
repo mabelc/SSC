@@ -269,6 +269,11 @@ coBCBase <- function(
 #'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
 #'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
 #' }
+#' @references
+#' Avrim Blum and Tom Mitchell.\cr
+#' \emph{Combining labeled and unlabeled data with co-training.}\cr
+#' In Eleventh Annual Conference on Computational Learning Theory, COLT’ 98, pages 92–100, New York, NY, USA, 1998. ACM.
+#' ISBN 1-58113-057-0. doi: 10.1145/279943.279962.
 #' @examples
 #' @export
 coBC <- function(
