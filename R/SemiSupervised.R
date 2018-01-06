@@ -151,10 +151,10 @@ resample <- function(ylabeled, N){
     indexes <- classRepresentationRandom2(ylabeled)
     if (sizeB > 0){ #si aun faltan por adicionar instancias
       # Select the indexes
-      c(
+      indexes <- c(
         indexes, 
         sample(x = 1:length(ylabeled), size = sizeB, replace = TRUE)
-      ) -> indexes
+      )
     }
     bootstrapList[[i]] <- indexes
   }

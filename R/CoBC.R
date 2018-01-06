@@ -106,7 +106,6 @@ coBCBase <- function(
           classes
         )
         # Select instances
-        # labeledPrima[[i]] -> sel
         sel <- selectInstances(cantClass = cantClass, probabilities = prob)
         selected <- pool[sel$unlabeled.idx]
         
