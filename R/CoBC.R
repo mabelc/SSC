@@ -1,4 +1,46 @@
 
+#' @title CoBC base method
+#' @description CoBC is a semi-supervised learning algorithm with a co-training 
+#' style. This algorithm trains \code{N} classifiers with the learning scheme defined in 
+#' \code{learnerB} using a reduced set of labeled examples. For each iteration, an unlabeled 
+#' example is labeled for a classifier if the most confident classifications assigned by the 
+#' other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
+#' candidates are selected randomly from a pool of size \code{u}.
+#' @param y A vector with the labels of training instances. In this vector the 
+#' unlabeled instances are specified with the value \code{NA}.
+#' @param learnerB A function for training \code{N} supervised base classifiers.
+#' This function needs two parameters, indexes and cls, where indexes indicates
+#' the instances to use and cls specifies the classes of those instances.
+#' @param predB A function for predicting the probabilities per classes.
+#' This function must be two parameters, model and indexes, where the model
+#' is a classifier trained with \code{learnerB} function and
+#' indexes indicates the instances to predict.
+#' @param N The number of classifiers used as committee members. All these classifiers 
+#' are trained using the \code{learnerB} function. Default is 3.
+#' @param perc.full A number between 0 and 1. If the percentage 
+#' of new labeled examples reaches this value the self-labeling process is stopped.
+#' Default is 0.7.
+#' @param u Number of unlabeled instances in the pool. Default is 100.
+#' @param max.iter Maximum number of iterations to execute in the self-labeling process. 
+#' Default is 50.
+#' @details 
+#' coBCBase can be helpful in those cases where the method selected as 
+#' base classifier needs a \code{learner} and \code{pred} functions with other
+#' specifications. For more information about the general coBC method,
+#' please see \code{\link{coBC}} function. Essentially, \code{coBC}
+#' function is a wrapper of \code{coBCBase} function.
+#' @return A list object of class "coBCBase" containing:
+#' \describe{
+#'   \item{models}{The final three base classifiers trained using the enlarged labeled set.}
+#'   \item{included.insts}{The indexes of the total of training instances used to 
+#'   train the three \code{models}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   These indexes are relative to the \code{y} argument.}
+#'   \item{indexes}{List of three vectors of indexes related to the training instances 
+#'   used per each classifier. These indexes are relative to \code{included.insts}.}
+#'   \item{classes}{The levels of \code{y} factor.}
+#' }
+#' @examples
 #' @export
 coBCBase <- function(
   y,
@@ -175,6 +217,59 @@ coBCBase <- function(
   return(result)
 }
 
+#' @title CoBC method
+#' @description Co-Training by Committee (CoBC) is a semi-supervised learning algorithm 
+#' with a co-training style. This algorithm trains \code{N} classifiers with the learning 
+#' scheme defined in \code{learner} argument using a reduced set of labeled examples. For 
+#' each iteration, an unlabeled 
+#' example is labeled for a classifier if the most confident classifications assigned by the 
+#' other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
+#' candidates are selected randomly from a pool of size \code{u}.
+#' @param x A object that can be coerced as matrix. This object has two possible 
+#' interpretations according to the value set in \code{x.dist} argument: 
+#' a matrix distance between the training examples or a matrix with the 
+#' training instances where each row represents a single instance.
+#' @param y A vector with the labels of the training instances. In this vector 
+#' the unlabeled instances are specified with the value \code{NA}.
+#' @param learner either a function or a string naming the function for 
+#' training the supervised base classifiers.
+#' @param learner.pars A list with additional parameters for the
+#' \code{learner} function if necessary.
+#' @param pred either a function or a string naming the function for
+#' predicting the probabilities per classes,
+#' using the base classifiers trained with the \code{learner} function.
+#' @param pred.pars A list with additional parameters for the
+#' \code{pred} function if necessary.
+#' @param N The number of classifiers used as committee members. All these classifiers 
+#' are trained using the \code{learnerB} function. Default is 3.
+#' @param perc.full A number between 0 and 1. If the percentage 
+#' of new labeled examples reaches this value the self-labeling process is stopped.
+#' Default is 0.7.
+#' @param u Number of unlabeled instances in the pool. Default is 100.
+#' @param max.iter Maximum number of iterations to execute in the self-labeling process. 
+#' Default is 50.
+#' @details
+#' This method trains an ensemble of diverse classifiers. To promote the initial diversity 
+#' the classifiers are trained from the reduced set of labeled examples by Bagging.
+#' The stopping criterion is defined through the fulfillment of one of the following
+#' criteria: the algorithm reaches the number of iterations defined in \code{max.iter}
+#' parameter or the portion of unlabeled set, defined in \code{perc.full} parameter,
+#' is moved to the enlarged labeled set of the classifiers.
+#' @return A list object of class "coBC" containing:
+#' \describe{
+#'   \item{models}{The final three base classifiers trained using the enlarged labeled set.}
+#'   \item{included.insts}{The indexes of the total of training instances used to 
+#'   train the three \code{models}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   These indexes are relative to the \code{y} argument.}
+#'   \item{indexes}{List of three vectors of indexes related to the training instances 
+#'   used per each classifier. These indexes are relative to \code{included.insts}.}
+#'   \item{classes}{The levels of \code{y} factor.}
+#'   \item{pred}{The function provided in the \code{pred} argument.}
+#'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
+#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
+#' }
+#' @examples
 #' @export
 coBC <- function(
   x, y,
@@ -247,7 +342,6 @@ coBC <- function(
   }
   
   ### Result ###
-  result$classes = levels(y)
   result$pred = pred
   result$pred.pars = pred.pars
   result$x.dist = x.dist
@@ -256,6 +350,16 @@ coBC <- function(
   return(result)
 }
 
+#' @title Predictions of the coBC method
+#' @description Predicts the label of instances according to the \code{coBC} model.
+#' @details For additional help see \code{\link{coBC}} examples.
+#' @param object coBC model built with the \code{\link{coBC}} function.
+#' @param x A object that can be coerced as matrix.
+#' Depending on how was the model built, \code{x} is interpreted as a matrix 
+#' with the distances between the unseen instances and the selected training instances, 
+#' or a matrix of instances.
+#' @param ... This parameter is included for compatibility reasons.
+#' @return Vector with the labels assigned.
 #' @export
 #' @importFrom stats predict
 predict.coBC <- function(object, x, ...){
@@ -296,12 +400,13 @@ predict.coBC <- function(object, x, ...){
   return(pred)
 }
 
-#' TODO: Complete help
-#' @title 
-#' @description 
-#' @param h.prob a list of probability matrices
-#' @param ninstnces The number of rows of each matrix in \code{h.prob}
-#' @param classes The classes in the columns of each matrix in \code{h.prob}
+#' @title Combining the hypothesis
+#' @description This function combines the probabilities predicted by the committee of 
+#' classifiers.
+#' @param h.prob A list of probability matrices.
+#' @param ninstances The number of rows of each matrix in \code{h.prob}.
+#' @param classes The classes in the same order that appear 
+#' in the columns of each matrix in \code{h.prob}.
 #' @return A probability matrix
 #' @export
 coBCCombine <- function(h.prob, ninstances, classes){

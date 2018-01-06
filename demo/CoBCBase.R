@@ -31,7 +31,6 @@ predB1 <- function(model, indexes)
 
 set.seed(1)
 md1 <- coBCBase(y = ytrain, learnerB1, predB1)
-names(md1)
 
 # Predict probabilities per instances using each model
 h.prob <- list()
@@ -64,7 +63,6 @@ predB2 <- function(model, indexes)  {
 
 set.seed(1)
 md2 <- coBCBase(y = ytrain, learnerB2, predB2)
-names(md2)
 
 # Predict probabilities per instances using each model
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
