@@ -33,16 +33,13 @@ predB <- function(model, indexes)
 set.seed(1)
 md1 <- triTrainingBase(y = ytrain, learnerB, predB)
 
-# Predict
-pred <- list()
-for(i in 1:3){
-  pred[[i]] <- predict(md1$models[[i]], xitest, type = "class")
-}
-cls1 <- c()
-for(i in 1:nrow(xitest)){
-  a <- c(pred[[1]][i], pred[[2]][i], pred[[3]][i])
-  cls1[i] <- ssc::getmode(a)
-}
+# Predict testing instances using the three classifiers
+pred <- lapply(
+  X = md1$models, 
+  FUN = function(m) predict(m, xitest, type = "class")
+)
+# Combine the predictions
+cls1 <- triTrainingCombine(pred)
 caret::confusionMatrix(table(cls1, yitest))
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
@@ -68,15 +65,16 @@ md2 <- triTrainingBase(y = ytrain, learnerB, predB)
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
                       method = "euclidean", by_rows = TRUE)
 
-pred <- list()
-for(i in 1:3){
-  m <- md2$models[[i]]
-  D <- ditest[, md2$indexes[[i]]]
-  pred[[i]] <- predict(m, D, type = "class")
-}
-cls2 <- c()
-for(i in 1:nrow(xitest)){
-  a <- c(pred[[1]][i], pred[[2]][i], pred[[3]][i])
-  cls2[i] <- ssc::getmode(a)
-}
+# Predict testing instances using the three classifiers
+pred <- mapply(
+  FUN = function(m, indexes){
+    D <- ditest[, indexes]
+    predict(m, D, type = "class")
+  },
+  m = md2$models,
+  indexes = md2$indexes,
+  SIMPLIFY = FALSE
+)
+# Combine the predictions
+cls2 <- triTrainingCombine(pred)
 caret::confusionMatrix(table(cls2, yitest))

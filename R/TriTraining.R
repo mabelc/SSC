@@ -384,6 +384,23 @@ predict.triTraining <- function(object, x, ...) {
   return(pred)
 }
 
+#' @title Combining the hypothesis
+#' @description This function combines the predictions obtained 
+#' by the set of classifiers.
+#' @param pred A list with the predictions of each classifiers
+#' @return A vector of classes
+#' @export
+triTrainingCombine <- function(pred){
+  mapply(
+    FUN = function(a, b, c){
+      getmode(c(a, b, c))
+    },
+    pred[[1]],
+    pred[[2]],
+    pred[[3]]
+  )
+}
+
 #' @title Measure the error of two base classifiers
 #' @param cj predicted classes using classifier j
 #' @param ck predicted classes using classifier k
