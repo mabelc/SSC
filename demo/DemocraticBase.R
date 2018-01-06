@@ -58,8 +58,8 @@ m1 <- democraticBase(y = ytrain,
                      predsB = list(knn.prob, svm.prob))
 ### Predict
 # predict labels using each classifier
-m1.pred1 <- predict(m1$models[[1]], xitest, type = "class")
-m1.pred2 <- predict(m1$models[[2]], xitest)
+m1.pred1 <- predict(m1$model[[1]], xitest, type = "class")
+m1.pred2 <- predict(m1$model[[2]], xitest)
 # combine predictions
 m1.pred <- list(m1.pred1, m1.pred2)
 cls1 <- democraticCombining(m1.pred, m1$W, m1$classes)
@@ -121,20 +121,20 @@ m2 <- democraticBase(y = ytrain,
 
 ### Predict
 # Compute distance matrix Ditest
-Ditest <- dist(x = xitest, y = xtrain[m2$included.insts,],
+Ditest <- dist(x = xitest, y = xtrain[m2$instances.index,],
                method = "euclidean", by_rows = TRUE)
 # predict using classifier 1
-m2.pred1 <- predict(m2$models[[1]], Ditest[, m2$indexes[[1]]])
+m2.pred1 <- predict(m2$model[[1]], Ditest[, m2$model.index[[1]]])
 
 # Compute kernel matrix Kitest
-sv.idxs <- m2$included.insts[
-  m2$indexes[[2]][
-    SVindex(m2$models[[2]])
+sv.idxs <- m2$instances.index[
+  m2$model.index[[2]][
+    SVindex(m2$model[[2]])
   ]
 ]
 Kitest <- kernelMatrix(rbfkernel, x = xitest, y = xtrain[sv.idxs, ])
 # predict using classifier 2
-m2.pred2 <- predict(m2$models[[2]], Kitest)
+m2.pred2 <- predict(m2$model[[2]], Kitest)
 
 # Combine predictions
 m2.pred <- list(m2.pred1, m2.pred2)

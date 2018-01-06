@@ -8,14 +8,14 @@ snnrce(x, y, dist = "Euclidean", x.dist = FALSE, alpha = 0.1)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in \code{x.dist} argument: 
+interpretations according to the value set in the \code{x.dist} argument: 
 a matrix distance between the training examples or a matrix with the 
 training instances where each row represents a single instance.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{dist}{A distance function available in \code{proxy} package to compute 
+\item{dist}{A distance function available in the \code{proxy} package to compute 
 the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
 
 \item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
@@ -27,15 +27,15 @@ Default is \code{FALSE}.}
 A list object of class "snnrce" containing:
 \describe{
   \item{model}{The final base classifier trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the training instances used to 
+  \item{instances.index}{The indexes of the training instances used to 
   train the \code{model}. These indexes include the initial labeled instances
   and the newly labeled instances.
   Those indexes are relative to \code{x} argument.}
   \item{classes}{The levels of \code{y} factor.}
-  \item{x.dist}{The value provided in \code{x.dist} argument.}
-  \item{dist}{The value provided in \code{dist} argument when x.dist is \code{FALSE}.}
+  \item{x.dist}{The value provided in the \code{x.dist} argument.}
+  \item{dist}{The value provided in the \code{dist} argument when x.dist is \code{FALSE}.}
   \item{xtrain}{A matrix with the subset of training instances referenced by the indexes 
-  \code{included.insts} when x.dist is \code{FALSE}.}
+  \code{instances.index} when x.dist is \code{FALSE}.}
 }
 }
 \description{
@@ -93,7 +93,7 @@ caret::confusionMatrix(table(pred1, yitest))
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 m2 <- snnrce(x = dtrain, y = ytrain, x.dist = TRUE)
-ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
 caret::confusionMatrix(table(pred2, yitest))

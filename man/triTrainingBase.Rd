@@ -22,11 +22,13 @@ indexes indicates the instances to predict.}
 \value{
 A list object of class "triTrainingBase" containing:
 \describe{
-  \item{model}{The final base classifier trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the training instances used to 
-  train the \code{model}. These indexes include the initial labeled instances
+  \item{model}{The final three base classifiers trained using the enlarged labeled set.}
+  \item{instances.index}{The indexes of the total of training instances used to 
+  train the three models. These indexes include the initial labeled instances
   and the newly labeled instances.
-  Those indexes are relative to \code{y} argument.}
+  These indexes are relative to the \code{y} argument.}
+  \item{model.index}{List of three vectors of indexes related to the training instances 
+  used per each classifier. These indexes are relative to \code{instances.index}.}
 }
 }
 \description{

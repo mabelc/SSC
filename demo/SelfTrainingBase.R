@@ -51,7 +51,7 @@ predB <- function(model, indexes)  {
 }
 
 md2 <- selfTrainingBase(y = ytrain, learnerB, predB)
-ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 cls2 <- predict(md2$model, ditest)
 caret::confusionMatrix(table(cls2, yitest))

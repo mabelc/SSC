@@ -36,10 +36,10 @@ Default is 0.7.}
 A list object of class "setredBase" containing:
 \describe{
   \item{model}{The final base classifier trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the training instances used to 
+  \item{instances.index}{The indexes of the training instances used to 
   train the \code{model}. These indexes include the initial labeled instances
   and the newly labeled instances.
-  Those indexes are relative to \code{y} argument.}
+  Those indexes are relative to the \code{y} argument.}
 }
 }
 \description{
@@ -116,7 +116,7 @@ predB <- function(model, indexes)  {
 }
 
 md2 <- setredBase(y = ytrain, D, learnerB, predB)
-ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 cls2 <- predict(md2$model, ditest)
 caret::confusionMatrix(table(cls2, yitest))

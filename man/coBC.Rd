@@ -9,7 +9,7 @@ coBC(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in \code{x.dist} argument: 
+interpretations according to the value set in the \code{x.dist} argument: 
 a matrix distance between the training examples or a matrix with the 
 training instances where each row represents a single instance.}
 
@@ -44,13 +44,13 @@ Default is 50.}
 \value{
 A list object of class "coBC" containing:
 \describe{
-  \item{models}{The final three base classifiers trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the total of training instances used to 
-  train the three \code{models}. These indexes include the initial labeled instances
+  \item{model}{The final three base classifiers trained using the enlarged labeled set.}
+  \item{instances.index}{The indexes of the total of training instances used to 
+  train the three models. These indexes include the initial labeled instances
   and the newly labeled instances.
   These indexes are relative to the \code{y} argument.}
-  \item{indexes}{List of three vectors of indexes related to the training instances 
-  used per each classifier. These indexes are relative to \code{included.insts}.}
+  \item{model.index}{List of three vectors of indexes related to the training instances 
+  used per each classifier. These indexes are relative to \code{instances.index}.}
   \item{classes}{The levels of \code{y} factor.}
   \item{pred}{The function provided in the \code{pred} argument.}
   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
@@ -60,7 +60,7 @@ A list object of class "coBC" containing:
 \description{
 Co-Training by Committee (CoBC) is a semi-supervised learning algorithm 
 with a co-training style. This algorithm trains \code{N} classifiers with the learning 
-scheme defined in \code{learner} argument using a reduced set of labeled examples. For 
+scheme defined in the \code{learner} argument using a reduced set of labeled examples. For 
 each iteration, an unlabeled 
 example is labeled for a classifier if the most confident classifications assigned by the 
 other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
@@ -70,7 +70,61 @@ candidates are selected randomly from a pool of size \code{u}.
 This method trains an ensemble of diverse classifiers. To promote the initial diversity 
 the classifiers are trained from the reduced set of labeled examples by Bagging.
 The stopping criterion is defined through the fulfillment of one of the following
-criteria: the algorithm reaches the number of iterations defined in \code{max.iter}
-parameter or the portion of unlabeled set, defined in \code{perc.full} parameter,
+criteria: the algorithm reaches the number of iterations defined in the \code{max.iter}
+parameter or the portion of unlabeled set, defined in the \code{perc.full} parameter,
 is moved to the enlarged labeled set of the classifiers.
+}
+\examples{
+library(ssc)
+
+## Load Wine data set
+data(wine)
+
+cls <- which(colnames(wine) == "Wine")
+x <- wine[, -cls] # instances without classes
+y <- wine[, cls] # the classes
+x <- scale(x) # scale the attributes
+
+## Prepare data
+set.seed(20)
+# Use 50\% of instances for training
+tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
+xtrain <- x[tra.idx,] # training instances
+ytrain <- y[tra.idx]  # classes of training instances
+# Use 70\% of train instances as unlabeled set
+tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
+ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
+
+# Use the other 50\% of instances for inductive testing
+tst.idx <- setdiff(1:length(y), tra.idx)
+xitest <- x[tst.idx,] # testing instances
+yitest <- y[tst.idx] # classes of testing instances
+
+## Example: Training from a set of instances with 1-NN as base classifier.
+set.seed(1)
+m1 <- coBC(x = xtrain, y = ytrain, 
+           learner = caret::knn3, 
+           learner.pars = list(k = 1),
+           pred = "predict")
+pred1 <- predict(m1, xitest)
+caret::confusionMatrix(table(pred1, yitest))
+
+## Example: Training from a distance matrix with 1-NN as base classifier.
+dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
+set.seed(1)
+m2 <- coBC(x = dtrain, y = ytrain, x.dist = TRUE,
+           learner = ssc::oneNN, 
+           pred = "predict",
+           pred.pars = list(type = "prob", initial.value = 0))
+ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+                      method = "euclidean", by_rows = TRUE)
+pred2 <- predict(m2, ditest)
+caret::confusionMatrix(table(pred2, yitest))
+
+}
+\references{
+Avrim Blum and Tom Mitchell.\cr
+\emph{Combining labeled and unlabeled data with co-training.}\cr
+In Eleventh Annual Conference on Computational Learning Theory, COLT’ 98, pages 92–100, New York, NY, USA, 1998. ACM.
+ISBN 1-58113-057-0. doi: 10.1145/279943.279962.
 }

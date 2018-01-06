@@ -230,9 +230,9 @@ democraticBase <- function(
   
   # Save result
   result <- list(
-    models = H,
-    indexes = indexes,
-    included.insts = included.insts,
+    model = H,
+    model.index = indexes,
+    instances.index = included.insts,
     W = W,
     classes = classes
   )
@@ -309,7 +309,7 @@ democratic <- function(
     # Call base method
     result <- democraticBase(y, d_learners_base, d_preds_base)
     # Extract model from list created in learnerB
-    result$models <- lapply(X = result$models, FUN = function(e) e$m)
+    result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case
     # Check x
@@ -401,8 +401,8 @@ predict.democratic <- function(object, x, ...){
           )
         ) 
       },
-      object$models[selected], 
-      object$indexes[selected], 
+      object$model[selected], 
+      object$model.index[selected], 
       object$preds[selected], 
       object$preds.pars[selected]
     )
@@ -417,7 +417,7 @@ predict.democratic <- function(object, x, ...){
           )
         ) 
       },
-      object$models[selected],
+      object$model[selected],
       object$preds[selected],
       object$preds.pars[selected]
     )

@@ -9,7 +9,7 @@ triTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in \code{x.dist} argument: 
+interpretations according to the value set in the \code{x.dist} argument:
 a matrix distance between the training examples or a matrix with the 
 training instances where each row represents a single instance.}
 
@@ -35,14 +35,17 @@ Default is \code{FALSE}.}
 \value{
 A list object of class "triTraining" containing:
 \describe{
-  \item{model}{The final base classifier trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the training instances used to 
-  train the \code{model}. These indexes include the initial labeled instances
+  \item{model}{The final three base classifiers trained using the enlarged labeled set.}
+  \item{instances.index}{The indexes of the total of training instances used to 
+  train the three models. These indexes include the initial labeled instances
   and the newly labeled instances.
-  Those indexes are relative to \code{x} argument.}
+  These indexes are relative to the \code{y} argument.}
+  \item{model.index}{List of three vectors of indexes related to the training instances 
+  used per each classifier. These indexes are relative to \code{instances.index}.}
   \item{classes}{The levels of \code{y} factor.}
-  \item{pred}{The function provided in \code{pred} argument.}
-  \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+  \item{pred}{The function provided in the \code{pred} argument.}
+  \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
+  \item{x.dist}{The value provided in the \code{x.dist} argument.}
 }
 }
 \description{
@@ -52,21 +55,16 @@ reduced set of labeled examples. For each iteration, an unlabeled example is lab
 for a classifier if the other two classifiers agree on the labeling proposed.
 }
 \details{
-SETRED initiates the self-labeling process by training a model from the original 
-labeled set. In each iteration, the \code{learner} function detects unlabeled 
-examples on wich it makes most confident prediction and labels those examples 
-according to the \code{pred} function. The identification of mislabeled examples is 
-performed using a neighborhood graph created from distance matrix \code{D}. 
-Most examples possess the same label in a neighborhood. So if an example locates 
-in a neighborhood with too many neighbors from different classes, this example should 
-be considered problematic. The value of the \code{theta} argument controls the confidence 
-of the candidates selected to enlarge the labeled set. The lower this value is, the more 
-restrictive it is the selection of the examples that are considered good.
-For more information about the self-labeled process and the remainders parameters, please 
-see \code{\link{selfTraining}}.
+Tri-training initiates the self-labeling process by training three models from the 
+original labeled set, using the \code{learner} function specified. 
+In each iteration, the algorithm detects unlabeled examples on which two classifiers 
+agree with the classification and includes these instances in the enlarged set of the 
+third classifier under certain conditions. The generation of the final hypothesis is 
+produced via the majority voting. The iteration process ends when no changes occurs in 
+any model during a complete iteration.
 }
 \references{
 ZhiHua Zhou and Ming Li.\cr
 \emph{Tri-training: exploiting unlabeled data using three classifiers.}\cr
-IEEE Transactions on Knowledge and Data Engineering, 17(11):1529–1541, Nov 2005. ISSN 1041-4347. doi: 10.1109/TKDE.2005. 186.
+IEEE Transactions on Knowledge and Data Engineering, 17(11):1529-1541, Nov 2005. ISSN 1041-4347. doi: 10.1109/TKDE.2005. 186.
 }

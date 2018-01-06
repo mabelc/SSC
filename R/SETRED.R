@@ -33,7 +33,7 @@
 #' @return A list object of class "setredBase" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
-#'   \item{included.insts}{The indexes of the training instances used to 
+#'   \item{instances.index}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   Those indexes are relative to the \code{y} argument.}
@@ -95,7 +95,7 @@
 #' }
 #' 
 #' md2 <- setredBase(y = ytrain, D, learnerB, predB)
-#' ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
+#' ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
 #'                       method = "euclidean", by_rows = TRUE)
 #' cls2 <- predict(md2$model, ditest)
 #' caret::confusionMatrix(table(cls2, yitest))
@@ -262,7 +262,7 @@ setredBase <- function(
   # Save result
   result <- list(
     model = model,
-    included.insts = labeled
+    instances.index = labeled
   )
   class(result) <- "setredBase"
   
@@ -320,7 +320,7 @@ setredBase <- function(
 #' @return A list object of class "setred" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
-#'   \item{included.insts}{The indexes of the training instances used to 
+#'   \item{instances.index}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{x} argument.}
@@ -377,7 +377,7 @@ setredBase <- function(
 #'             learner = ssc::oneNN, 
 #'             pred = "predict",
 #'             pred.pars = list(type = "prob", initial.value = 0))
-#' ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+#' ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
 #'                       method = "euclidean", by_rows = TRUE)
 #' pred2 <- predict(m2, ditest)
 #' caret::confusionMatrix(table(pred2, yitest))

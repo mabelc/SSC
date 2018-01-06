@@ -1,3 +1,4 @@
+
 #' @title Tri-training base method
 #' @description Tri-training is a semi-supervised learning algorithm with a co-training 
 #' style. This algorithm trains three classifiers with the same learning scheme from a 
@@ -20,11 +21,13 @@
 #' function is a wrapper of \code{triTrainingBase} function.
 #' @return A list object of class "triTrainingBase" containing:
 #' \describe{
-#'   \item{model}{The final base classifier trained using the enlarged labeled set.}
-#'   \item{included.insts}{The indexes of the training instances used to 
-#'   train the \code{model}. These indexes include the initial labeled instances
+#'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
+#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   train the three models. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
-#'   Those indexes are relative to the \code{y} argument.}
+#'   These indexes are relative to the \code{y} argument.}
+#'   \item{model.index}{List of three vectors of indexes related to the training instances 
+#'   used per each classifier. These indexes are relative to \code{instances.index}.}
 #' }
 #' @examples
 #' @export
@@ -102,14 +105,14 @@ triTrainingBase <- function(
       # measure error
       cj <- getClassIdx(
         checkProb(
-          prob = predB(models[[j]], labeled), 
+          prob = predB(models[[j]], labeled),
           ninstances = length(labeled), 
           classes
         )
       )
       ck <- getClassIdx(
         checkProb(
-          prob = predB(models[[k]], labeled), 
+          prob = predB(models[[k]], labeled),
           ninstances = length(labeled), 
           classes
         )
@@ -119,14 +122,14 @@ triTrainingBase <- function(
       if(e[i] < ePrima[i]){
         cj <- getClassIdx(
           checkProb(
-            prob = predB(models[[j]], unlabeled), 
+            prob = predB(models[[j]], unlabeled),
             ninstances = length(unlabeled), 
             classes
           )
         )
         ck <- getClassIdx(
           checkProb(
-            prob = predB(models[[j]], unlabeled), 
+            prob = predB(models[[j]], unlabeled),
             ninstances = length(unlabeled), 
             classes
           )
@@ -178,7 +181,7 @@ triTrainingBase <- function(
   ### Result ###
   
   # determine labeled instances
-  included.insts <- union(final.indexes[[1]], 
+  included.insts <- union(final.indexes[[1]],
                           union(final.indexes[[2]], 
                                 final.indexes[[3]]))
   # map indexes respect to m$included.insts
@@ -190,9 +193,9 @@ triTrainingBase <- function(
   
   # Save result
   result <- list(
-    models = models,
-    indexes = indexes,
-    included.insts = included.insts 
+    model = models,
+    model.index = indexes,
+    instances.index = included.insts
   )
   class(result) <- "triTrainingBase"
   
@@ -205,7 +208,7 @@ triTrainingBase <- function(
 #' reduced set of labeled examples. For each iteration, an unlabeled example is labeled 
 #' for a classifier if the other two classifiers agree on the labeling proposed.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in the \code{x.dist} argument: 
+#' interpretations according to the value set in the \code{x.dist} argument:
 #' a matrix distance between the training examples or a matrix with the 
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
@@ -222,36 +225,34 @@ triTrainingBase <- function(
 #' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
 #' Default is \code{FALSE}. 
 #' @details 
-#' SETRED initiates the self-labeling process by training a model from the original 
-#' labeled set. In each iteration, the \code{learner} function detects unlabeled 
-#' examples on which it makes most confident prediction and labels those examples 
-#' according to the \code{pred} function. The identification of mislabeled examples is 
-#' performed using a neighborhood graph created from distance matrix \code{D}. 
-#' Most examples possess the same label in a neighborhood. So if an example locates 
-#' in a neighborhood with too many neighbors from different classes, this example should 
-#' be considered problematic. The value of the \code{theta} argument controls the confidence 
-#' of the candidates selected to enlarge the labeled set. The lower this value is, the more 
-#' restrictive it is the selection of the examples that are considered good.
-#' For more information about the self-labeled process and the remainders parameters, please 
-#' see \code{\link{selfTraining}}.
+#' Tri-training initiates the self-labeling process by training three models from the 
+#' original labeled set, using the \code{learner} function specified. 
+#' In each iteration, the algorithm detects unlabeled examples on which two classifiers 
+#' agree with the classification and includes these instances in the enlarged set of the 
+#' third classifier under certain conditions. The generation of the final hypothesis is 
+#' produced via the majority voting. The iteration process ends when no changes occurs in 
+#' any model during a complete iteration.
 #'  
 #' @return A list object of class "triTraining" containing:
 #' \describe{
-#'   \item{model}{The final base classifier trained using the enlarged labeled set.}
-#'   \item{included.insts}{The indexes of the training instances used to 
-#'   train the \code{model}. These indexes include the initial labeled instances
+#'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
+#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   train the three models. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
-#'   Those indexes are relative to \code{x} argument.}
+#'   These indexes are relative to the \code{y} argument.}
+#'   \item{model.index}{List of three vectors of indexes related to the training instances 
+#'   used per each classifier. These indexes are relative to \code{instances.index}.}
 #'   \item{classes}{The levels of \code{y} factor.}
 #'   \item{pred}{The function provided in the \code{pred} argument.}
 #'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
+#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
 #' }
 #' @references
 #' ZhiHua Zhou and Ming Li.\cr
 #' \emph{Tri-training: exploiting unlabeled data using three classifiers.}\cr
-#' IEEE Transactions on Knowledge and Data Engineering, 17(11):1529–1541, Nov 2005. ISSN 1041-4347. doi: 10.1109/TKDE.2005. 186.
+#' IEEE Transactions on Knowledge and Data Engineering, 17(11):1529-1541, Nov 2005. ISSN 1041-4347. doi: 10.1109/TKDE.2005. 186.
 #' @examples
-#' @export 
+#' @export
 triTraining <- function(
   x, y,
   learner, learner.pars = list(),
@@ -291,9 +292,7 @@ triTraining <- function(
     }
     
     result <- triTrainingBase(y, learnerB1, predB1)
-    for(i in 1:3){
-      result$models[[i]] <- result$models[[i]]$m 
-    }
+    result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case
     # Check x
@@ -359,8 +358,8 @@ predict.triTraining <- function(object, x, ...) {
           )
         ) 
       },
-      object$models,
-      object$indexes
+      object$model,
+      object$model.index
     )
   }else{
     preds <- mapply(
@@ -373,7 +372,7 @@ predict.triTraining <- function(object, x, ...) {
           )
         ) 
       },
-      object$models
+      object$model
     )
   }
   

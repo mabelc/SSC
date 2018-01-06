@@ -9,7 +9,7 @@ setred(x, y, D, learner, learner.pars = list(), pred, pred.pars = list(),
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in \code{x.dist} argument: 
+interpretations according to the value set in the \code{x.dist} argument: 
 a matrix distance between the training examples or a matrix with the 
 training instances where each row represents a single instance.}
 
@@ -48,13 +48,13 @@ Default is 0.7.}
 A list object of class "setred" containing:
 \describe{
   \item{model}{The final base classifier trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the training instances used to 
+  \item{instances.index}{The indexes of the training instances used to 
   train the \code{model}. These indexes include the initial labeled instances
   and the newly labeled instances.
   Those indexes are relative to \code{x} argument.}
   \item{classes}{The levels of \code{y} factor.}
-  \item{pred}{The function provided in \code{pred} argument.}
-  \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+  \item{pred}{The function provided in the \code{pred} argument.}
+  \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
 }
 }
 \description{
@@ -70,7 +70,7 @@ by the neighborhood graph.
 \details{
 SETRED initiates the self-labeling process by training a model from the original 
 labeled set. In each iteration, the \code{learner} function detects unlabeled 
-examples on wich it makes most confident prediction and labels those examples 
+examples on which it makes most confident prediction and labels those examples 
 according to the \code{pred} function. The identification of mislabeled examples is 
 performed using a neighborhood graph created from distance matrix \code{D}. 
 Most examples possess the same label in a neighborhood. So if an example locates 
@@ -124,7 +124,7 @@ m2 <- setred(x = D, y = ytrain, D, x.dist = TRUE,
             learner = ssc::oneNN, 
             pred = "predict",
             pred.pars = list(type = "prob", initial.value = 0))
-ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
 caret::confusionMatrix(table(pred2, yitest))

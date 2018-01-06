@@ -35,7 +35,7 @@ md1 <- triTrainingBase(y = ytrain, learnerB, predB)
 
 # Predict testing instances using the three classifiers
 pred <- lapply(
-  X = md1$models, 
+  X = md1$model, 
   FUN = function(m) predict(m, xitest, type = "class")
 )
 # Combine the predictions
@@ -62,7 +62,7 @@ set.seed(1)
 md2 <- triTrainingBase(y = ytrain, learnerB, predB)
 
 # Predict
-ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 
 # Predict testing instances using the three classifiers
@@ -71,8 +71,8 @@ pred <- mapply(
     D <- ditest[, indexes]
     predict(m, D, type = "class")
   },
-  m = md2$models,
-  indexes = md2$indexes,
+  m = md2$model,
+  indexes = md2$model.index,
   SIMPLIFY = FALSE
 )
 # Combine the predictions

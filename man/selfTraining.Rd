@@ -9,7 +9,7 @@ selfTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in \code{x.dist} argument: 
+interpretations according to the value set in the \code{x.dist} argument: 
 a matrix distance between the training examples or a matrix with the 
 training instances where each row represents a single instance.}
 
@@ -47,13 +47,13 @@ this value (\code{thr.conf}) are added to the training set.}
 A list object of class "selfTraining" containing:
 \describe{
   \item{model}{The final base classifier trained using the enlarged labeled set.}
-  \item{included.insts}{The indexes of the training instances used to 
+  \item{instances.index}{The indexes of the training instances used to 
   train the \code{model}. These indexes include the initial labeled instances
   and the newly labeled instances.
   Those indexes are relative to \code{x} argument.}
   \item{classes}{The levels of \code{y} factor.}
-  \item{pred}{The function provided in \code{pred} argument.}
-  \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+  \item{pred}{The function provided in the \code{pred} argument.}
+  \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
 }
 }
 \description{
@@ -80,8 +80,8 @@ the probabilities per classes for each new instance. The value of the
 to enlarge the labeled set for the next iteration.
 
 The stopping criterion is defined through the fulfillment of one of the following
-criteria: the algorithm reaches the number of iterations defined in \code{max.iter}
-parameter or the portion of unlabeled set, defined in \code{perc.full} parameter,
+criteria: the algorithm reaches the number of iterations defined in the \code{max.iter}
+parameter or the portion of unlabeled set, defined in the \code{perc.full} parameter,
 is moved to the labeled set. In some cases, the process stopps and not instances 
 are added to the original labeled set. In this case, the user must to assign a more 
 flexible value to the \code{thr.conf} parameter.
@@ -125,7 +125,7 @@ m2 <- selfTraining(x = dtrain, y = ytrain, x.dist = TRUE,
                   learner = ssc::oneNN, 
                   pred = "predict",
                   pred.pars = list(type = "prob", initial.value = 0))
-ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
 caret::confusionMatrix(table(pred2, yitest))

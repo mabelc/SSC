@@ -35,8 +35,8 @@ md1 <- coBCBase(y = ytrain, learnerB1, predB1)
 # Predict probabilities per instances using each model
 h.prob <- list()
 ninstances <- nrow(xitest)
-for(i in 1:length(md1$models)){
-  m <- md1$models[[i]]
+for(i in 1:length(md1$model)){
+  m <- md1$model[[i]]
   prob <- predict(m, xitest)
   h.prob[[i]] <- checkProb(prob, ninstances, md1$classes)
 }
@@ -65,14 +65,14 @@ set.seed(1)
 md2 <- coBCBase(y = ytrain, learnerB2, predB2)
 
 # Predict probabilities per instances using each model
-ditest <- proxy::dist(x = xitest, y = xtrain[md2$included.insts,],
+ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 
 h.prob <- list()
 ninstances <- nrow(dtrain)
-for(i in 1:length(md2$models)){
-  m <- md2$models[[i]]
-  D <- ditest[, md2$indexes[[i]]]
+for(i in 1:length(md2$model)){
+  m <- md2$model[[i]]
+  D <- ditest[, md2$model.index[[i]]]
   prob <- predict(m, D, type = "prob",  initial.value = 0)
   h.prob[[i]] <- checkProb(prob, ninstances, md2$classes)
 }

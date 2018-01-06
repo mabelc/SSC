@@ -14,7 +14,7 @@
 #' @return A list object of class "snnrceBase" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
-#'   \item{included.insts}{The indexes of the training instances used to 
+#'   \item{instances.index}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   Those indexes are relative to the \code{y} argument.}
@@ -212,7 +212,7 @@ snnrceBase <- function(
   # Save result
   result <- list(
     model = oneNN(y = ynew[labeled]),
-    included.insts = labeled
+    instances.index = labeled
   )
   
   class(result) <- "snnrceBase"
@@ -264,7 +264,7 @@ predict.snnrceBase <- function(object, D, ...) {
 #' @return A list object of class "snnrce" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
-#'   \item{included.insts}{The indexes of the training instances used to 
+#'   \item{instances.index}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{x} argument.}
@@ -272,7 +272,7 @@ predict.snnrceBase <- function(object, D, ...) {
 #'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
 #'   \item{dist}{The value provided in the \code{dist} argument when x.dist is \code{FALSE}.}
 #'   \item{xtrain}{A matrix with the subset of training instances referenced by the indexes 
-#'   \code{included.insts} when x.dist is \code{FALSE}.}
+#'   \code{instances.index} when x.dist is \code{FALSE}.}
 #' }
 #' @references
 #' Yu Wang, Xiaoyan Xu, Haifeng Zhao, and Zhongsheng Hua.\cr
@@ -313,7 +313,7 @@ predict.snnrceBase <- function(object, D, ...) {
 #' ## Example: Training from a distance matrix with 1-NN as base classifier.
 #' dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 #' m2 <- snnrce(x = dtrain, y = ytrain, x.dist = TRUE)
-#' ditest <- proxy::dist(x = xitest, y = xtrain[m2$included.insts,],
+#' ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
 #'                       method = "euclidean", by_rows = TRUE)
 #' pred2 <- predict(m2, ditest)
 #' caret::confusionMatrix(table(pred2, yitest))
@@ -367,7 +367,7 @@ snnrce <- function(
       alpha
     )
     
-    result$xtrain <- x[result$included.insts, ]
+    result$xtrain <- x[result$instances.index, ]
     result$dist <- dist
   
   }
