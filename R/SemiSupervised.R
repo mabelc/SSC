@@ -48,15 +48,36 @@ predProb <- function(model, x, pred, pred.pars) {
 checkProb <- function(prob, ninstances, classes){
   # Check probabilities matrix
   if(!is.matrix(prob)){
-    stop(sprintf("prob is an object of class %s", class(prob), 
-                 ". Expected an object of class matrix."))
+    stop(
+      sprintf(
+        paste0(
+          "Predict function incorrect output.\n",
+          "'prob' is an object of class %s.\n",  
+          "Expected an object of class matrix."
+        ),
+        class(prob)
+      )
+    )
   }
   if(ninstances != nrow(prob)){
-    stop(sprintf("The rows number of prob is %s", nrow(prob), 
-                 ". Expected a number egual to ninstances (%i)", ninstances))
+    stop(
+      sprintf(
+        paste0(
+          "Predict function incorrect output.\n",
+          "The rows number of 'prob' is %s.\n",
+          "Expected a number egual to %i (value of 'ninstances')."
+        ), 
+        nrow(prob), 
+        ninstances)
+    )
   }
   if(length(classes) != length(intersect(classes, colnames(prob)))){
-    stop("The columns names of prob is a set not equal to classes set.")
+    stop(
+      paste0(
+        "Predict function incorrect output.\n",
+        "The columns names of 'prob' is a set not equal to 'classes' set."
+      )
+    )
   } else if(any(classes != colnames(prob))){
     # order columns by classes
     prob <- prob[, classes]

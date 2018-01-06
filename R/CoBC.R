@@ -96,7 +96,7 @@ coBCBase <- function(
         # Predict probabilities for unlabeled prime instances
         models <- H[committee]
         ninstances = length(pool)
-        prob <- H.prob(
+        prob <- coBCCombine(
           h.prob = lapply(
             X = 1:length(models), 
             FUN =  function(i)
@@ -112,7 +112,7 @@ coBCBase <- function(
         ## Verify with the initial training set
         # Predict probabilities
         ninstances = length(selected)
-        prob <- H.prob(
+        prob <- coBCCombine(
           h.prob = lapply(
             X = 1:N, 
             FUN =  function(i) 
@@ -290,7 +290,7 @@ predict.coBC <- function(object, x, ...){
   
   pred <- getClass(
     # Combine probability matrices
-    H.prob(h.prob, ninstances, object$classes)
+    coBCCombine(h.prob, ninstances, object$classes)
   )
   
   return(pred)
@@ -304,7 +304,7 @@ predict.coBC <- function(object, x, ...){
 #' @param classes The classes in the columns of each matrix in \code{h.prob}
 #' @return A probability matrix
 #' @export
-H.prob <- function(h.prob, ninstances, classes){
+coBCCombine <- function(h.prob, ninstances, classes){
   
   nclasses <- length(classes)
   

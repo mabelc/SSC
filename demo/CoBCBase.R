@@ -39,10 +39,10 @@ ninstances <- nrow(xitest)
 for(i in 1:length(md1$models)){
   m <- md1$models[[i]]
   prob <- predict(m, xitest)
-  h.prob[[i]] <- ssc::checkProb(prob, ninstances, md1$classes)
+  h.prob[[i]] <- checkProb(prob, ninstances, md1$classes)
 }
 # Combine probability matrices
-prob <- ssc::H.prob(h.prob, ninstances, md1$classes)
+prob <- coBCCombine(h.prob, ninstances, md1$classes)
 # Get class per instance
 cls1 <- md1$classes[apply(prob, 1, which.max)]
 caret::confusionMatrix(table(cls1, yitest))
@@ -76,10 +76,10 @@ for(i in 1:length(md2$models)){
   m <- md2$models[[i]]
   D <- ditest[, md2$indexes[[i]]]
   prob <- predict(m, D, type = "prob",  initial.value = 0)
-  h.prob[[i]] <- ssc::checkProb(prob, ninstances, md2$classes)
+  h.prob[[i]] <- checkProb(prob, ninstances, md2$classes)
 }
 # Combine probability matrices
-prob <- ssc::H.prob(h.prob, ninstances, md2$classes)
+prob <- coBCCombine(h.prob, ninstances, md2$classes)
 # Get class per instance
 cls2 <- md2$classes[apply(prob, 1, which.max)]
 caret::confusionMatrix(table(cls2, yitest))
