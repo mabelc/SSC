@@ -24,7 +24,7 @@
 #'   \item{included.insts}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
-#'   Those indexes are relative to \code{y} argument.}
+#'   Those indexes are relative to the \code{y} argument.}
 #' }
 #' @examples
 #' @export
@@ -205,7 +205,7 @@ triTrainingBase <- function(
 #' reduced set of labeled examples. For each iteration, an unlabeled example is labeled 
 #' for a classifier if the other two classifiers agree on the labeling proposed.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in \code{x.dist} argument: 
+#' interpretations according to the value set in the \code{x.dist} argument: 
 #' a matrix distance between the training examples or a matrix with the 
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
@@ -224,7 +224,7 @@ triTrainingBase <- function(
 #' @details 
 #' SETRED initiates the self-labeling process by training a model from the original 
 #' labeled set. In each iteration, the \code{learner} function detects unlabeled 
-#' examples on wich it makes most confident prediction and labels those examples 
+#' examples on which it makes most confident prediction and labels those examples 
 #' according to the \code{pred} function. The identification of mislabeled examples is 
 #' performed using a neighborhood graph created from distance matrix \code{D}. 
 #' Most examples possess the same label in a neighborhood. So if an example locates 
@@ -243,8 +243,8 @@ triTrainingBase <- function(
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{x} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
-#'   \item{pred}{The function provided in \code{pred} argument.}
-#'   \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+#'   \item{pred}{The function provided in the \code{pred} argument.}
+#'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
 #' }
 #' @references
 #' ZhiHua Zhou and Ming Li.\cr

@@ -17,7 +17,7 @@
 #'   \item{included.insts}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
-#'   Those indexes are relative to \code{y} argument.}
+#'   Those indexes are relative to the \code{y} argument.}
 #' }
 #' @noRd
 snnrceBase <- function(
@@ -240,12 +240,12 @@ predict.snnrceBase <- function(object, D, ...) {
 #' by the neighborhood graph. A statistical test using cut edge weight is used to modify 
 #' the labels of the missclassified examples.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in \code{x.dist} argument: 
+#' interpretations according to the value set in the \code{x.dist} argument: 
 #' a matrix distance between the training examples or a matrix with the 
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param dist A distance function available in \code{proxy} package to compute 
+#' @param dist A distance function available in the \code{proxy} package to compute 
 #' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
 #' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
 #' Default is \code{FALSE}.
@@ -269,8 +269,8 @@ predict.snnrceBase <- function(object, D, ...) {
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{x} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
-#'   \item{x.dist}{The value provided in \code{x.dist} argument.}
-#'   \item{dist}{The value provided in \code{dist} argument when x.dist is \code{FALSE}.}
+#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
+#'   \item{dist}{The value provided in the \code{dist} argument when x.dist is \code{FALSE}.}
 #'   \item{xtrain}{A matrix with the subset of training instances referenced by the indexes 
 #'   \code{included.insts} when x.dist is \code{FALSE}.}
 #' }

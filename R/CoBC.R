@@ -220,13 +220,13 @@ coBCBase <- function(
 #' @title CoBC method
 #' @description Co-Training by Committee (CoBC) is a semi-supervised learning algorithm 
 #' with a co-training style. This algorithm trains \code{N} classifiers with the learning 
-#' scheme defined in \code{learner} argument using a reduced set of labeled examples. For 
+#' scheme defined in the \code{learner} argument using a reduced set of labeled examples. For 
 #' each iteration, an unlabeled 
 #' example is labeled for a classifier if the most confident classifications assigned by the 
 #' other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
 #' candidates are selected randomly from a pool of size \code{u}.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in \code{x.dist} argument: 
+#' interpretations according to the value set in the \code{x.dist} argument: 
 #' a matrix distance between the training examples or a matrix with the 
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
@@ -252,8 +252,8 @@ coBCBase <- function(
 #' This method trains an ensemble of diverse classifiers. To promote the initial diversity 
 #' the classifiers are trained from the reduced set of labeled examples by Bagging.
 #' The stopping criterion is defined through the fulfillment of one of the following
-#' criteria: the algorithm reaches the number of iterations defined in \code{max.iter}
-#' parameter or the portion of unlabeled set, defined in \code{perc.full} parameter,
+#' criteria: the algorithm reaches the number of iterations defined in the \code{max.iter}
+#' parameter or the portion of unlabeled set, defined in the \code{perc.full} parameter,
 #' is moved to the enlarged labeled set of the classifiers.
 #' @return A list object of class "coBC" containing:
 #' \describe{

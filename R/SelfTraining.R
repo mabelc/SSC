@@ -35,7 +35,7 @@
 #'   \item{included.insts}{The indexes of the training instances used to 
 #'   train the \code{model}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
-#'   Those indexes are relative to \code{y} argument.}
+#'   Those indexes are relative to the \code{y} argument.}
 #' }
 #' @examples 
 #' library(ssc)
@@ -211,7 +211,7 @@ selfTrainingBase <- function(
 #' Self-training follows a wrapper methodology using one base supervised 
 #' classifier to establish the possible class of unlabeled instances. 
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in \code{x.dist} argument: 
+#' interpretations according to the value set in the \code{x.dist} argument: 
 #' a matrix distance between the training examples or a matrix with the 
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
@@ -251,8 +251,8 @@ selfTrainingBase <- function(
 #' to enlarge the labeled set for the next iteration.
 #' 
 #' The stopping criterion is defined through the fulfillment of one of the following
-#' criteria: the algorithm reaches the number of iterations defined in \code{max.iter}
-#' parameter or the portion of unlabeled set, defined in \code{perc.full} parameter,
+#' criteria: the algorithm reaches the number of iterations defined in the \code{max.iter}
+#' parameter or the portion of unlabeled set, defined in the \code{perc.full} parameter,
 #' is moved to the labeled set. In some cases, the process stopps and not instances 
 #' are added to the original labeled set. In this case, the user must to assign a more 
 #' flexible value to the \code{thr.conf} parameter.
@@ -265,8 +265,8 @@ selfTrainingBase <- function(
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{x} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
-#'   \item{pred}{The function provided in \code{pred} argument.}
-#'   \item{pred.pars}{The list provided in \code{pred.pars} argument.}
+#'   \item{pred}{The function provided in the \code{pred} argument.}
+#'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
 #' }
 #' @references
 #' David Yarowsky.\cr
