@@ -136,13 +136,12 @@ coBCBase <- function(
         # Obtain the committee for the classifier i
         committee <- setdiff(1:length(H), i)
         # Predict probabilities for unlabeled prime instances
-        models <- H[committee]
         ninstances = length(pool)
         prob <- coBCCombine(
           h.prob = lapply(
-            X = 1:length(models),
-            FUN =  function(i)
-              checkProb(prob = predB(models[[i]], pool), ninstances, classes)
+            X = H[committee],
+            FUN =  function(model)
+              checkProb(prob = predB(model, pool), ninstances, classes)
           ),
           ninstances,
           classes
@@ -156,9 +155,9 @@ coBCBase <- function(
         ninstances = length(selected)
         prob <- coBCCombine(
           h.prob = lapply(
-            X = 1:N, 
-            FUN =  function(i) 
-              checkProb(prob = predB(HO[[i]], selected), ninstances, classes)
+            X = HO, 
+            FUN =  function(model) 
+              checkProb(prob = predB(model, selected), ninstances, classes)
           ), 
           ninstances, 
           classes
@@ -194,23 +193,20 @@ coBCBase <- function(
   ### Result ###
   
   # determine labeled instances
-  included.insts <- c()
-  for(i in 1:N){
-    included.insts <- union(Lind[[i]], included.insts)
-  }
+  instances.index <- unique(unlist(Lind))
   # map indexes respect to m$included.insts
-  indexes <- vector(mode = "list", length = N)
-  for(i in 1:N){
-    indexes[[i]] <- vapply(Lind[[i]], FUN.VALUE = 1,
-                           FUN = function(e){ which(e == included.insts)})
-  }
+  model.index <- lapply(
+    X = Lind,
+    FUN = function(indexes)
+      unclass(factor(indexes, levels = instances.index))
+  )
   
   # Save result
   result <- list(
     model = H,
-    model.index = indexes,
+    model.index = model.index,
     classes = classes,
-    instances.index = included.insts
+    instances.index = instances.index
   )
   class(result) <- "coBCBase"
   

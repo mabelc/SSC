@@ -195,22 +195,16 @@ democraticBase <- function(
   } # End while
   
   ### Result ###
+  
   # determine labeled instances
-  included.insts <- c()
-  for(i in 1:nclassifiers){
-    included.insts <- union(included.insts, Lind[[i]])
-  }
+  instances.index <- unique(unlist(Lind))
   # map indexes respect to m$included.insts
-  indexes <- vector(mode = "list", length = nclassifiers)
-  for(i in 1:nclassifiers){
-    indexes[[i]] <- vapply(
-      Lind[[i]], 
-      FUN.VALUE = 1,
-      FUN = function(e){
-        which(e == included.insts)
-      }
-    )
-  }
+  model.index <- lapply(
+    X = Lind,
+    FUN = function(indexes)
+      unclass(factor(indexes, levels = instances.index))
+  )
+  
   # compute W
   W <- mapply(
     FUN = function(model, pred){
@@ -231,8 +225,8 @@ democraticBase <- function(
   # Save result
   result <- list(
     model = H,
-    model.index = indexes,
-    instances.index = included.insts,
+    model.index = model.index,
+    instances.index = instances.index,
     W = W,
     classes = classes
   )

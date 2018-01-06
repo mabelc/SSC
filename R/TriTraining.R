@@ -73,7 +73,6 @@ triTrainingBase <- function(
   for(i in 1:3){
     # Train classifier
     indexes <- labeled[Sind[[i]]] # vector of indexes
-    # trainModel(x[indexes, ], y[indexes], learner, learner.pars)
     models[[i]] <- learnerB(indexes, y[indexes])
     final.indexes[[i]] <- indexes
   }
@@ -181,21 +180,19 @@ triTrainingBase <- function(
   ### Result ###
   
   # determine labeled instances
-  included.insts <- union(final.indexes[[1]],
-                          union(final.indexes[[2]], 
-                                final.indexes[[3]]))
+  instances.index <- unique(unlist(final.indexes))
   # map indexes respect to m$included.insts
-  indexes <- vector(mode = "list", length = 3)
-  for(i in 1:3){
-    indexes[[i]] <- vapply(final.indexes[[i]], FUN.VALUE = 1,
-                           FUN = function(e){ which(e == included.insts)})
-  }
+  model.index <- lapply(
+    X = final.indexes,
+    FUN = function(indexes)
+      unclass(factor(indexes, levels = instances.index))
+  )
   
   # Save result
   result <- list(
     model = models,
-    model.index = indexes,
-    instances.index = included.insts
+    model.index = model.index,
+    instances.index = instances.index
   )
   class(result) <- "triTrainingBase"
   
