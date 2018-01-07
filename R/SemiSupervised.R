@@ -44,7 +44,7 @@ predProb <- function(model, x, pred, pred.pars) {
 #' @param ninstances expected number of rows in \code{prob}
 #' @param classes expected columns names in \code{prob}
 #' @return the matrix \code{prob} with it columns in the order given by \code{classes} 
-#' @export
+#' @noRd
 checkProb <- function(prob, ninstances, classes){
   # Check probabilities matrix
   if(!is.matrix(prob)){
@@ -94,6 +94,7 @@ checkProb <- function(prob, ninstances, classes){
 #' @title Get classes from a matrix of probabilities
 #' @param prob a probabilities matrix
 #' @return a factor with classes
+#' @noRd
 getClass <- function(prob){
   # Obtain classes from probabilities
   map <- apply(prob, MARGIN = 1, FUN = which.max)
@@ -108,6 +109,7 @@ getClass <- function(prob){
 #' return the classes indexes
 #' @param prob a probabilities matrix
 #' @return a vector of indexes corresponding to \code{classes}
+#' @noRd
 getClassIdx <- function(prob){
   # Obtain classes from probabilities
   map <- apply(prob, MARGIN = 1, FUN = which.max)
