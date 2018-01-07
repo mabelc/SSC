@@ -1,0 +1,11 @@
+CoBC               Demostrates how to use the coBC function
+CoBCBase           Demostrates how to use the coBCBase function
+Democratic         Demostrates how to use the democratic function
+DemocraticBase     Demostrates how to use the democraticBase function
+SelfTraining       Demostrates how to use the selfTraining function
+SelfTrainingBase   Demostrates how to use the selfTrainingBase function
+SETRED             Demostrates how to use the setred function
+SETREDBase         Demostrates how to use the setredBase function
+SNNRCE             Demostrates how to use the snnrce function
+TriTraining        Demostrates how to use the triTraining function
+TriTrainingBase    Demostrates how to use the triTrainingBase function
