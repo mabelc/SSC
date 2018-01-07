@@ -63,7 +63,7 @@ m1.pred2 <- predict(m1$model[[2]], xitest)
 # combine predictions
 m1.pred <- list(m1.pred1, m1.pred2)
 cls1 <- democraticCombining(m1.pred, m1$W, m1$classes)
-caret::confusionMatrix(table(cls1, yitest))
+table(cls1, yitest)
 
 ## Example B: 
 # Training from a distance matrix and a kernel matrix with 
@@ -139,6 +139,6 @@ m2.pred2 <- predict(m2$model[[2]], Kitest)
 # Combine predictions
 m2.pred <- list(m2.pred1, m2.pred2)
 cls2 <- democraticCombining(m2.pred, m2$W, m2$classes)
-caret::confusionMatrix(table(cls2, yitest))
+table(cls2, yitest)
 
 

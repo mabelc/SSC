@@ -30,7 +30,7 @@ m1 <- selfTraining(x = xtrain, y = ytrain,
                    learner.pars = list(k = 1),
                    pred = "predict")
 pred1 <- predict(m1, xitest)
-caret::confusionMatrix(table(pred1, yitest))
+table(pred1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
@@ -41,7 +41,7 @@ m2 <- selfTraining(x = dtrain, y = ytrain, x.dist = TRUE,
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
-caret::confusionMatrix(table(pred2, yitest))
+table(pred2, yitest)
 
 ## Example: Training from a set of instances with SVM as base classifier.
 learner <- e1071::svm
@@ -54,7 +54,7 @@ pred <- function(m, x){
 }
 m3 <- selfTraining(x = xtrain, y = ytrain, learner, learner.pars, pred)
 pred3 <- predict(m3, xitest)
-caret::confusionMatrix(table(pred3, yitest))
+table(pred3, yitest)
 
 ## Example: Training from a set of instances with Naive-Bayes as base classifier.
 m4 <- selfTraining(x = xtrain, y = ytrain, 
@@ -62,7 +62,7 @@ m4 <- selfTraining(x = xtrain, y = ytrain,
                    pred = "predict",
                    pred.pars = list(type = "raw"))
 pred4 <- predict(m4, xitest)
-caret::confusionMatrix(table(pred4, yitest))
+table(pred4, yitest)
 
 ## Example: Training from a set of instances with C5.0 as base classifier.
 m5 <- selfTraining(x = xtrain, y = ytrain, 
@@ -70,6 +70,6 @@ m5 <- selfTraining(x = xtrain, y = ytrain,
                    pred = "predict",
                    pred.pars = list(type = "prob"))
 pred5 <- predict(m5, xitest)
-caret::confusionMatrix(table(pred5, yitest))
+table(pred5, yitest)
 
 

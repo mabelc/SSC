@@ -41,7 +41,7 @@ h.prob <- lapply(
 prob <- coBCCombine(h.prob, ninstances = nrow(xitest), md1$classes)
 # Get class per instance
 cls1 <- md1$classes[apply(prob, 1, which.max)]
-caret::confusionMatrix(table(cls1, yitest))
+table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
@@ -76,5 +76,5 @@ for(i in 1:length(md2$model)){
 prob <- coBCCombine(h.prob, ninstances, md2$classes)
 # Get class per instance
 cls2 <- md2$classes[apply(prob, 1, which.max)]
-caret::confusionMatrix(table(cls2, yitest))
+table(cls2, yitest)
 

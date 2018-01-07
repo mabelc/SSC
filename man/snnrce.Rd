@@ -88,7 +88,7 @@ yitest <- y[tst.idx] # classes of testing instances
 ## Example: Training from a set of instances with 1-NN as base classifier.
 m1 <- snnrce(x = xtrain, y = ytrain,  dist = "Euclidean")
 pred1 <- predict(m1, xitest)
-caret::confusionMatrix(table(pred1, yitest))
+table(pred1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
@@ -96,7 +96,7 @@ m2 <- snnrce(x = dtrain, y = ytrain, x.dist = TRUE)
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
-caret::confusionMatrix(table(pred2, yitest))
+table(pred2, yitest)
 
 }
 \references{

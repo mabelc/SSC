@@ -40,7 +40,7 @@ pred <- lapply(
 )
 # Combine the predictions
 cls1 <- triTrainingCombine(pred)
-caret::confusionMatrix(table(cls1, yitest))
+table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
@@ -77,4 +77,4 @@ pred <- mapply(
 )
 # Combine the predictions
 cls2 <- triTrainingCombine(pred)
-caret::confusionMatrix(table(cls2, yitest))
+table(cls2, yitest)

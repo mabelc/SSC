@@ -55,5 +55,5 @@ m <- democratic(x = xtrain, y = ytrain,
                 preds.pars = list(knn.prob.pars, svm.prob.pars))
 # predict classes
 m.pred <- predict(m, xitest)
-caret::confusionMatrix(table(m.pred, yitest))
+table(m.pred, yitest)
 

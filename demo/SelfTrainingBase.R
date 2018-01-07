@@ -30,10 +30,9 @@ predB <- function(model, indexes)
   predict(model, xtrain[indexes, ]) 
 
 md1 <- selfTrainingBase(y = ytrain, learnerB, predB)
-md1$model
 
 cls1 <- predict(md1$model, xitest, type = "class")
-caret::confusionMatrix(table(cls1, yitest))
+table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
@@ -54,4 +53,4 @@ md2 <- selfTrainingBase(y = ytrain, learnerB, predB)
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 cls2 <- predict(md2$model, ditest)
-caret::confusionMatrix(table(cls2, yitest))
+table(cls2, yitest)
