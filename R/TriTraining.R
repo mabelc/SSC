@@ -374,7 +374,7 @@ predict.triTraining <- function(object, x, ...) {
   }
   
   # Get the mode of preds for every instance (by rows)
-  pred <- apply(X = preds, MARGIN = 1, FUN = statisticalMode)
+  pred <- apply(X = preds, MARGIN = 1, FUN = getmode)
   pred <- factor(object$classes[pred], object$classes)
   
   return(pred)
