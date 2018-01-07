@@ -103,8 +103,9 @@ yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN as base classifier.
 set.seed(1)
+library(caret)
 m1 <- coBC(x = xtrain, y = ytrain, 
-           learner = caret::knn3, 
+           learner = knn3,
            learner.pars = list(k = 1),
            pred = "predict")
 pred1 <- predict(m1, xitest)

@@ -137,7 +137,7 @@ coBCBase <- function(
         committee <- setdiff(1:length(H), i)
         # Predict probabilities for unlabeled prime instances
         ninstances = length(pool)
-        prob <- coBCCombine(
+        prob <- .coBCCombine(
           h.prob = lapply(
             X = H[committee],
             FUN =  function(model)
@@ -153,7 +153,7 @@ coBCBase <- function(
         ## Verify with the initial training set
         # Predict probabilities
         ninstances = length(selected)
-        prob <- coBCCombine(
+        prob <- .coBCCombine(
           h.prob = lapply(
             X = HO, 
             FUN =  function(model) 
@@ -393,7 +393,7 @@ predict.coBC <- function(object, x, ...){
   
   pred <- getClass(
     # Combine probability matrices
-    coBCCombine(h.prob, ninstances, object$classes)
+    .coBCCombine(h.prob, ninstances, object$classes)
   )
   
   return(pred)
@@ -403,12 +403,27 @@ predict.coBC <- function(object, x, ...){
 #' @description This function combines the probabilities predicted by the committee of 
 #' classifiers.
 #' @param h.prob A list of probability matrices.
-#' @param ninstances The number of rows of each matrix in \code{h.prob}.
 #' @param classes The classes in the same order that appear 
 #' in the columns of each matrix in \code{h.prob}.
 #' @return A probability matrix
 #' @export
-coBCCombine <- function(h.prob, ninstances, classes){
+coBCCombine <- function(h.prob, classes){
+  # Check the number of instances
+  ninstances <- unique(vapply(X = h.prob, FUN = nrow, FUN.VALUE = numeric(1)))
+  if(length(ninstances) != 1){
+    stop("The row number of matrixes in the 'pred' parameter are not all equals.") 
+  }
+  # Check prob matrixes
+  vapply(X = h.prob, FUN.VALUE = numeric(),
+         FUN = function(prob){
+           checkProb(prob, ninstances, classes)
+           numeric()
+         }
+  )
+  .coBCCombine(h.prob, ninstances, classes)
+}
+
+.coBCCombine <- function(h.prob, ninstances, classes){
   
   nclasses <- length(classes)
   

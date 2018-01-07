@@ -4,12 +4,10 @@
 \alias{coBCCombine}
 \title{Combining the hypothesis}
 \usage{
-coBCCombine(h.prob, ninstances, classes)
+coBCCombine(h.prob, classes)
 }
 \arguments{
 \item{h.prob}{A list of probability matrices.}
-
-\item{ninstances}{The number of rows of each matrix in \code{h.prob}.}
 
 \item{classes}{The classes in the same order that appear 
 in the columns of each matrix in \code{h.prob}.}
