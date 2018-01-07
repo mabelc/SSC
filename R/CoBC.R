@@ -163,7 +163,7 @@ coBCBase <- function(
           classes
         )
         # Compute classes
-        cls.idx <- sapply(X = 1:nrow(prob), FUN = function(i) which.max(prob[i, ]) )
+        cls.idx <- apply(prob, MARGIN = 1, FUN = which.max)
         # Compare 
         indCoinciden <- which(cls.idx == sel$class.idx)
         
