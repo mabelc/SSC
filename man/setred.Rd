@@ -128,7 +128,37 @@ ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
 caret::confusionMatrix(table(pred2, yitest))
- 
+
+## Example: Training from a set of instances with SVM as base classifier.
+learner <- e1071::svm
+learner.pars <- list(type = "C-classification", kernel="radial", 
+                     probability = TRUE, scale = TRUE)
+pred <- function(m, x){
+  r <- predict(m, x, probability = TRUE)
+  prob <- attr(r, "probabilities")
+  prob
+}
+m3 <- setred(x = xtrain, y = ytrain, D, learner, learner.pars, pred)
+pred3 <- predict(m3, xitest)
+caret::confusionMatrix(table(pred3, yitest))
+
+## Example: Training from a set of instances with Naive-Bayes as base classifier.
+m4 <- setred(x = xtrain, y = ytrain, D,
+             learner = function(x, y) e1071::naiveBayes(x, y), 
+             pred = "predict",
+             pred.pars = list(type = "raw"))
+pred4 <- predict(m4, xitest)
+caret::confusionMatrix(table(pred4, yitest))
+
+## Example: Training from a set of instances with C5.0 as base classifier.
+m5 <- setred(x = xtrain, y = ytrain, D,
+             learner = C50::C5.0, 
+             pred = "predict",
+             pred.pars = list(type = "prob"))
+pred5 <- predict(m5, xitest)
+caret::confusionMatrix(table(pred5, yitest))
+
+
 }
 \references{
 Ming Li and ZhiHua Zhou.\cr

@@ -60,7 +60,6 @@ please see \code{\link{setred}} function. Essentially, \code{setred}
 function is a wrapper of \code{setredBase} function.
 }
 \examples{
-
 library(ssc)
 
 ## Load Wine data set
@@ -96,7 +95,6 @@ predB <- function(model, indexes)
   predict(model, xtrain[indexes, ]) 
 
 md1 <- setredBase(y = ytrain, D, learnerB, predB)
-md1$model
 
 cls1 <- predict(md1$model, xitest, type = "class")
 caret::confusionMatrix(table(cls1, yitest))
@@ -120,5 +118,4 @@ ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 cls2 <- predict(md2$model, ditest)
 caret::confusionMatrix(table(cls2, yitest))
-
 }

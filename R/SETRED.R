@@ -38,68 +38,7 @@
 #'   and the newly labeled instances.
 #'   Those indexes are relative to the \code{y} argument.}
 #' }
-#' @examples
-#' 
-#' library(ssc)
-#' 
-#' ## Load Wine data set
-#' data(wine)
-#' 
-#' cls <- which(colnames(wine) == "Wine")
-#' x <- wine[, -cls] # instances without classes
-#' y <- wine[, cls] # the classes
-#' x <- scale(x) # scale the attributes
-#' 
-#' ## Prepare data
-#' set.seed(20)
-#' # Use 50% of instances for training
-#' tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
-#' xtrain <- x[tra.idx,] # training instances
-#' ytrain <- y[tra.idx]  # classes of training instances
-#' # Use 70% of train instances as unlabeled set
-#' tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
-#' ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
-#' 
-#' # Use the other 50% of instances for inductive testing
-#' tst.idx <- setdiff(1:length(y), tra.idx)
-#' xitest <- x[tst.idx,] # testing instances
-#' yitest <- y[tst.idx] # classes of testing instances
-#' 
-#' # Compute distances between training instances
-#' D <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
-#' 
-#' ## Example: Training from a set of instances with 1-NN (knn3) as base classifier.
-#' learnerB <- function(indexes, cls) 
-#'   caret::knn3(x = xtrain[indexes, ], y = cls, k = 1)
-#' predB <- function(model, indexes)  
-#'   predict(model, xtrain[indexes, ]) 
-#' 
-#' md1 <- setredBase(y = ytrain, D, learnerB, predB)
-#' md1$model
-#' 
-#' cls1 <- predict(md1$model, xitest, type = "class")
-#' caret::confusionMatrix(table(cls1, yitest))
-#' 
-#' ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier
-#' learnerB <- function(indexes, cls) {
-#'   m <- ssc::oneNN(y = cls)
-#'   attr(m, "tra.idxs") <- indexes
-#'   m
-#' }
-#' 
-#' predB <- function(model, indexes)  {
-#'   tra.idxs <- attr(model, "tra.idxs")
-#'   d <- D[indexes, tra.idxs]
-#'   prob <- predict(model, d, type = "prob",  initial.value = 0) 
-#'   prob
-#' }
-#' 
-#' md2 <- setredBase(y = ytrain, D, learnerB, predB)
-#' ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
-#'                       method = "euclidean", by_rows = TRUE)
-#' cls2 <- predict(md2$model, ditest)
-#' caret::confusionMatrix(table(cls2, yitest))
-#' 
+#' @example demo/SETREDBase.R
 #' @export
 setredBase <- function(
   y, D, learnerB, predB, 
@@ -334,54 +273,7 @@ setredBase <- function(
 #' In Advances in Knowledge Discovery and Data Mining, volume 3518 of Lecture Notes in
 #' Computer Science, pages 611–621. Springer Berlin Heidelberg, 2005.
 #' ISBN 978-3-540-26076-9. doi: 10.1007/11430919 71.
-#' @examples
-#' 
-#' library(ssc)
-#' 
-#' ## Load Wine data set
-#' data(wine)
-#' 
-#' cls <- which(colnames(wine) == "Wine")
-#' x <- wine[, -cls] # instances without classes
-#' y <- wine[, cls] # the classes
-#' x <- scale(x) # scale the attributes
-#' 
-#' ## Prepare data
-#' set.seed(20)
-#' # Use 50% of instances for training
-#' tra.idx <- sample(x = length(y), size = ceiling(length(y) * 0.5))
-#' xtrain <- x[tra.idx,] # training instances
-#' ytrain <- y[tra.idx]  # classes of training instances
-#' # Use 70% of train instances as unlabeled set
-#' tra.na.idx <- sample(x = length(tra.idx), size = ceiling(length(tra.idx) * 0.7))
-#' ytrain[tra.na.idx] <- NA # remove class information of unlabeled instances
-#' 
-#' # Use the other 50% of instances for inductive testing
-#' tst.idx <- setdiff(1:length(y), tra.idx)
-#' xitest <- x[tst.idx,] # testing instances
-#' yitest <- y[tst.idx] # classes of testing instances
-#' 
-#' # Compute distances between training instances
-#' D <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
-#' 
-#' ## Example: Training from a set of instances with 1-NN as base classifier.
-#' m1 <- setred(x = xtrain, y = ytrain, D, 
-#'             learner = caret::knn3, 
-#'             learner.pars = list(k = 1),
-#'             pred = "predict")
-#' pred1 <- predict(m1, xitest)
-#' caret::confusionMatrix(table(pred1, yitest))
-#' 
-#' ## Example: Training from a distance matrix with 1-NN as base classifier.
-#' m2 <- setred(x = D, y = ytrain, D, x.dist = TRUE,
-#'             learner = ssc::oneNN, 
-#'             pred = "predict",
-#'             pred.pars = list(type = "prob", initial.value = 0))
-#' ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
-#'                       method = "euclidean", by_rows = TRUE)
-#' pred2 <- predict(m2, ditest)
-#' caret::confusionMatrix(table(pred2, yitest))
-#'  
+#' @example demo/SETRED.R
 #' @export
 setred <- function(
   x, y, D,

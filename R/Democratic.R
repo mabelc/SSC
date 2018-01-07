@@ -1,4 +1,5 @@
 
+#' @example demo/DemocraticBase.R
 #' @export
 democraticBase <- function(
   y,
@@ -234,6 +235,7 @@ democraticBase <- function(
   return(result)
 }
 
+#' @example demo/Democratic.R
 #' @export
 democratic <- function(
   x, y,

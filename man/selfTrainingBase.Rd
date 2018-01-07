@@ -114,5 +114,4 @@ ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 cls2 <- predict(md2$model, ditest)
 caret::confusionMatrix(table(cls2, yitest))
-
 }

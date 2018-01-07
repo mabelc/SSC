@@ -88,6 +88,8 @@ flexible value to the \code{thr.conf} parameter.
 }
 \examples{
 
+library(ssc)
+
 ## Load Wine data set
 data(wine)
 
@@ -112,23 +114,53 @@ xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN as base classifier.
-m <- selfTraining(x = xtrain, y = ytrain, 
-                  learner = caret::knn3, 
-                  learner.pars = list(k = 1),
-                  pred = "predict")
-pred <- predict(m, xitest)
-caret::confusionMatrix(table(pred, yitest))
+m1 <- selfTraining(x = xtrain, y = ytrain, 
+                   learner = caret::knn3, 
+                   learner.pars = list(k = 1),
+                   pred = "predict")
+pred1 <- predict(m1, xitest)
+caret::confusionMatrix(table(pred1, yitest))
 
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
 m2 <- selfTraining(x = dtrain, y = ytrain, x.dist = TRUE,
-                  learner = ssc::oneNN, 
-                  pred = "predict",
-                  pred.pars = list(type = "prob", initial.value = 0))
+                   learner = ssc::oneNN, 
+                   pred = "predict",
+                   pred.pars = list(type = "prob", initial.value = 0))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
 caret::confusionMatrix(table(pred2, yitest))
+
+## Example: Training from a set of instances with SVM as base classifier.
+learner <- e1071::svm
+learner.pars <- list(type = "C-classification", kernel="radial", 
+                     probability = TRUE, scale = TRUE)
+pred <- function(m, x){
+  r <- predict(m, x, probability = TRUE)
+  prob <- attr(r, "probabilities")
+  prob
+}
+m3 <- selfTraining(x = xtrain, y = ytrain, learner, learner.pars, pred)
+pred3 <- predict(m3, xitest)
+caret::confusionMatrix(table(pred3, yitest))
+
+## Example: Training from a set of instances with Naive-Bayes as base classifier.
+m4 <- selfTraining(x = xtrain, y = ytrain, 
+                   learner = function(x, y) e1071::naiveBayes(x, y), 
+                   pred = "predict",
+                   pred.pars = list(type = "raw"))
+pred4 <- predict(m4, xitest)
+caret::confusionMatrix(table(pred4, yitest))
+
+## Example: Training from a set of instances with C5.0 as base classifier.
+m5 <- selfTraining(x = xtrain, y = ytrain, 
+                   learner = C50::C5.0, 
+                   pred = "predict",
+                   pred.pars = list(type = "prob"))
+pred5 <- predict(m5, xitest)
+caret::confusionMatrix(table(pred5, yitest))
+
 
 }
 \references{
