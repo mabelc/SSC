@@ -29,6 +29,9 @@ using the base classifiers trained with the \code{learner} function.}
 \item{pred.pars}{A list with additional parameters for the
 \code{pred} function if necessary.}
 
+\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
+Default is \code{FALSE}.}
+
 \item{N}{The number of classifiers used as committee members. All these classifiers 
 are trained using the \code{learnerB} function. Default is 3.}
 
@@ -103,9 +106,8 @@ yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN as base classifier.
 set.seed(1)
-library(caret)
 m1 <- coBC(x = xtrain, y = ytrain, 
-           learner = knn3,
+           learner = caret::knn3, 
            learner.pars = list(k = 1),
            pred = "predict")
 pred1 <- predict(m1, xitest)

@@ -236,6 +236,8 @@ coBCBase <- function(
 #' using the base classifiers trained with the \code{learner} function.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
+#' Default is \code{FALSE}. 
 #' @param N The number of classifiers used as committee members. All these classifiers 
 #' are trained using the \code{learnerB} function. Default is 3.
 #' @param perc.full A number between 0 and 1. If the percentage 
