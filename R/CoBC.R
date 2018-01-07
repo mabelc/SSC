@@ -460,14 +460,14 @@ coBCCombine <- function(h.prob, ninstances, classes){
   
   H.pro <- matrix(nrow = ninstances, ncol = nclasses)
   for(u in 1:ninstances){
-    den <- sum(vapply(X = h.prob, FUN = function(prob) sum(prob[u, ]), FUN.VALUE = 0.5))
+    den <- sum(vapply(X = h.prob, FUN = function(prob) sum(prob[u, ]), FUN.VALUE = numeric(1)))
     
     num <- vapply(
       X = 1:nclasses, 
       FUN = function(c){
-        sum(vapply(X = h.prob, FUN = function(prob) prob[u, c], FUN.VALUE = 0.5))
+        sum(vapply(X = h.prob, FUN = function(prob) prob[u, c], FUN.VALUE = numeric(1)))
       }, 
-      FUN.VALUE = 0.5
+      FUN.VALUE = numeric(1)
     )
     
     H.pro[u, ] <- num / den
