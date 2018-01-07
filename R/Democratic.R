@@ -180,7 +180,6 @@ democraticBase <- function(
         qp[i] <- sizeLLP * (1 - 2 * (e[i] + ep[i]) / sizeLLP) ^ 2		# if Li' added
         
         if (qp[i] > q[i]) {
-          #cat("Add", sizeLLP - sizeLi,"instances to",class(BaseL[[i]]),"\n")
           Lind[[i]] <- LindUnion[[i]]
           Lcls[[i]] <- LclsUnion[[i]]
           e[i] <- e[i] + ep[i]
