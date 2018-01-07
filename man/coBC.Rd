@@ -163,6 +163,6 @@ table(pred5, yitest)
 \references{
 Avrim Blum and Tom Mitchell.\cr
 \emph{Combining labeled and unlabeled data with co-training.}\cr
-In Eleventh Annual Conference on Computational Learning Theory, COLT’ 98, pages 92–100, New York, NY, USA, 1998. ACM.
+In Eleventh Annual Conference on Computational Learning Theory, COLT’ 98, pages 92-100, New York, NY, USA, 1998. ACM.
 ISBN 1-58113-057-0. doi: 10.1145/279943.279962.
 }

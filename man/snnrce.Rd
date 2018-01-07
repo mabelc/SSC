@@ -102,5 +102,5 @@ table(pred2, yitest)
 \references{
 Yu Wang, Xiaoyan Xu, Haifeng Zhao, and Zhongsheng Hua.\cr
 \emph{Semisupervised learning based on nearest neighbor rule and cut edges.}\cr
-Knowledge-Based Systems, 23(6):547–554, 2010. ISSN 0950-7051. doi: http://dx.doi.org/10.1016/j.knosys.2010.03.012.
+Knowledge-Based Systems, 23(6):547-554, 2010. ISSN 0950-7051. doi: http://dx.doi.org/10.1016/j.knosys.2010.03.012.
 }

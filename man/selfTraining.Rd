@@ -167,5 +167,5 @@ table(pred5, yitest)
 David Yarowsky.\cr
 \emph{Unsupervised word sense disambiguation rivaling supervised methods.}\cr
 In Proceedings of the 33rd annual meeting on Association for Computational Linguistics,
-pages 189–196. Association for Computational Linguistics, 1995.
+pages 189-196. Association for Computational Linguistics, 1995.
 }
