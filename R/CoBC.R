@@ -460,35 +460,20 @@ coBCCombine <- function(h.prob, ninstances, classes){
   
   H.pro <- matrix(nrow = ninstances, ncol = nclasses)
   for(u in 1:ninstances){
-    H.pro[u, ] <- vapply(
+    den <- sum(vapply(X = h.prob, FUN = function(prob) sum(prob[u, ]), FUN.VALUE = 0.5))
+    
+    num <- vapply(
       X = 1:nclasses, 
-      FUN = function(c) {
-        H.xu.wc(h.prob, u, c, nclasses) 
-      },
-      FUN.VALUE = 0
+      FUN = function(c){
+        sum(vapply(X = h.prob, FUN = function(prob) prob[u, c], FUN.VALUE = 0.5))
+      }, 
+      FUN.VALUE = 0.5
     )
+    
+    H.pro[u, ] <- num / den
   }
   
   colnames(H.pro) <- classes
   
   return(H.pro)
-}
-
-#' @title Compute the probability assigned by the committee H 
-#' that xu belongs to class c
-#' @param h.prob a list containing the probability matrix 
-#' of each base classifier
-#' @param u The unlabeled instance
-#' @param c The class
-#' @param nclasses The number of classes
-#' @return The probability
-#' @noRd
-H.xu.wc <- function(h.prob, u, c, nclasses){
-  N <- length(h.prob)
-  num <- sum(sapply(X = 1:N, FUN = function(i) h.prob[[i]][u, c] ))
-  den <- 0
-  for(j in 1:nclasses){
-    den <- den + sum(sapply(X = 1:N, FUN = function(i) h.prob[[i]][u, j] ))
-  }
-  return(num / den)
 }
