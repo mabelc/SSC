@@ -38,7 +38,7 @@ h.prob <- lapply(
   FUN = function(m) predict(m, xitest)
 )
 # Combine probability matrices
-prob <- coBCCombine(h.prob, ninstances, md1$classes)
+prob <- coBCCombine(h.prob, ninstances = nrow(xitest), md1$classes)
 # Get class per instance
 cls1 <- md1$classes[apply(prob, 1, which.max)]
 caret::confusionMatrix(table(cls1, yitest))
