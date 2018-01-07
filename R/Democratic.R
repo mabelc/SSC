@@ -443,13 +443,21 @@ predict.democratic <- function(object, x, ...){
 
 #' @export
 democraticCombining <- function(pred, W, classes){
+  # Check relation between pred and W
+  if(length(pred) != length(W)){
+    stop("The lengths of 'pred' and 'W' parameters are not equals.")
+  }
+  # Check the number of instances
+  ninstances <- unique(vapply(X = pred, FUN = length, FUN.VALUE = numeric(1)))
+  if(length(ninstances) != 1){
+    stop("The length of objects in the 'pred' parameter are not all equals.") 
+  }
   
-  map <- vector(mode = "numeric", length = nrow(x))
-  
-  ninstances <- length(pred[[1]])
-  nclassifiers <- length(W)
+  nclassifiers <- length(pred)
+  nclasses <- length(classes)
+  map <- vector(mode = "numeric", length = ninstances)
   for (i in 1:ninstances) {#for each example x in U
-    pertenece <- wz <- rep(0, length(classes))
+    pertenece <- wz <- rep(0, nclasses)
     
     for (j in 1:nclassifiers) {#para cada clasificador
       z <- which(pred[[j]][i] == classes)
