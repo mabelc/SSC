@@ -81,7 +81,7 @@ democraticBase <- function(
       H, predsB
     )
     
-    cls <- vote(predU, nclasses) # etiquetas votadas
+    cls <- vote(predU) # etiquetas votadas
     
     # End Internal classify
     
@@ -480,21 +480,14 @@ confidenceInterval <- function(pred, conf.cls) {
 
 
 #' @title Calcula la etiqueta de cada instancia por mayoria
-#' @param pred Matrix con la prediccion de cada clasificador para cada instancia
-#' @param ncls cantidad de clases
+#' @param pred Matrix con la prediccion de cada 
+#' clasificador para cada instancia
 #' @return A list of possibles labels for each instance
 #' @noRd
-vote <- function(pred, ncls){
-  lab <- list() # etiquetas
-  
-  for (i in 1:nrow(pred)) { # para cada instancia
-    perClass <- rep(0, ncls)
-    for (j in 1:ncol(pred)) # para cada clasificador
-      perClass[pred[i,j]] <- perClass[pred[i,j]] + 1
-    
-    l <- which.max(perClass)
-    lab[[i]] <- which(perClass == perClass[l])
+vote <- function(pred){
+  FUN = function(p){
+    as.numeric(names(which.max(summary(factor(p)))))
   }
-  
-  lab
+  lab <- apply(X = pred, MARGIN = 1, FUN)
+  return(lab)
 }
