@@ -224,10 +224,10 @@ democraticBase <- function(
   
   # Save result
   result <- list(
+    W = W,
     model = H,
     model.index = model.index,
     instances.index = instances.index,
-    W = W,
     classes = classes
   )
   class(result) <- "democraticBase"

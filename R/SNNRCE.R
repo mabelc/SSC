@@ -328,9 +328,8 @@ snnrce <- function(
       alpha
     )
     
-    result$xtrain <- x[result$instances.index, ]
     result$dist <- dist
-  
+    result$xtrain <- x[result$instances.index, ]
   }
   result$classes = levels(y)
   result$x.dist = x.dist
