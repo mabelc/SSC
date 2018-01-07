@@ -387,6 +387,12 @@ predict.triTraining <- function(object, x, ...) {
 #' @return A vector of classes
 #' @export
 triTrainingCombine <- function(pred){
+  # Check the number of instances
+  ninstances <- unique(vapply(X = pred, FUN = length, FUN.VALUE = numeric(1)))
+  if(length(ninstances) != 1){
+    stop("The length of objects in the 'pred' parameter are not all equals.") 
+  }
+  
   mapply(
     FUN = function(a, b, c){
       getmode(c(a, b, c))
