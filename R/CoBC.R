@@ -31,11 +31,11 @@
 #' function is a wrapper of \code{coBCBase} function.
 #' @return A list object of class "coBCBase" containing:
 #' \describe{
-#'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
-#'   \item{model.index}{List of three vectors of indexes related to the training instances 
+#'   \item{model}{The final \code{N} base classifiers trained using the enlarged labeled set.}
+#'   \item{model.index}{List of \code{N} vectors of indexes related to the training instances 
 #'   used per each classifier. These indexes are relative to \code{instances.index}.}
 #'   \item{instances.index}{The indexes of the total of training instances used to 
-#'   train the three models. These indexes include the initial labeled instances
+#'   train the \code{N} models. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   These indexes are relative to the \code{y} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
@@ -255,11 +255,11 @@ coBCBase <- function(
 #' is moved to the enlarged labeled set of the classifiers.
 #' @return A list object of class "coBC" containing:
 #' \describe{
-#'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
-#'   \item{model.index}{List of three vectors of indexes related to the training instances 
+#'   \item{model}{The final \code{N} base classifiers trained using the enlarged labeled set.}
+#'   \item{model.index}{List of \code{N} vectors of indexes related to the training instances 
 #'   used per each classifier. These indexes are relative to \code{instances.index}.}
 #'   \item{instances.index}{The indexes of the total of training instances used to 
-#'   train the three models. These indexes include the initial labeled instances
+#'   train the \code{N} models. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   These indexes are relative to the \code{y} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
