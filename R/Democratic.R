@@ -1,4 +1,42 @@
 
+#' @title Democratic base method
+#' @description Democratic is a semi-supervised learning algorithm with a co-training 
+#' style. This algorithm trains N classifiers with different learning schemes defined in 
+#' list \code{learnersB}. During the iterative process, the multiple classifiers with 
+#' different inductive biases label data for each other.
+#' @param y A vector with the labels of training instances. In this vector the 
+#' unlabeled instances are specified with the value \code{NA}.
+#' @param learnersB A list of functions for training N different supervised base classifiers.
+#' Each function needs two parameters, indexes and cls, where indexes indicates
+#' the instances to use and cls specifies the classes of those instances.
+#' @param predsB A list of functions for predicting the probabilities per classes.
+#' Each function must be two parameters, model and indexes, where the model
+#' is a classifier trained with \code{learnerB} function and
+#' indexes indicates the instances to predict.
+#' @details 
+#' democraticBase can be helpful in those cases where the method selected as 
+#' base classifier needs a \code{learner} and \code{pred} functions with other
+#' specifications. For more information about the general democratic method,
+#' please see \code{\link{democratic}} function. Essentially, \code{democratic}
+#' function is a wrapper of \code{democraticBase} function.
+#' @return A list object of class "democraticBase" containing:
+#' \describe{
+#'   \item{model}{A list with the final N base classifiers trained using the 
+#'   enlarged labeled set.}
+#'   \item{model.index}{List of N vectors of indexes related to the training instances 
+#'   used per each classifier. These indexes are relative to \code{instances.index}.}  
+#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   train the N \code{models}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   These indexes are relative to the \code{y} argument.}
+#'   \item{W}{A vector with the confidence-weighted vote assigned to each classifier.}
+#'   \item{classes}{The levels of \code{y} factor.}
+#' }
+#' @references
+#' Yan Zhou and Sally Goldman.\cr
+#' \emph{Democratic co-learning.}\cr
+#' In IEEE 16th International Conference on Tools with Artificial Intelligence (ICTAI),
+#' pages 594-602. IEEE, Nov 2004. doi: 10.1109/ICTAI.2004.48.
 #' @example demo/DemocraticBase.R
 #' @export
 democraticBase <- function(
@@ -235,6 +273,53 @@ democraticBase <- function(
   return(result)
 }
 
+#' @title Democratic method
+#' @description Democratic Co-Learning is a semi-supervised learning algorithm with a 
+#' co-training style. This algorithm trains N classifiers with different learning schemes 
+#' defined in list \code{learnersB}. During the iterative process, the multiple classifiers 
+#' with different inductive biases label data for each other.
+#' @param x A object that can be coerced as matrix. This object has two possible 
+#' interpretations according to the value set in \code{x.dist} argument: 
+#' a matrix distance between the training examples or a matrix with the 
+#' training instances where each row represents a single instance.
+#' @param y A vector with the labels of the training instances. In this vector 
+#' the unlabeled instances are specified with the value \code{NA}.
+#' @param learners A list of functions or strings naming the functions for 
+#' training the different supervised base classifiers.
+#' @param learners.pars A list with the set of additional parameters for each
+#' learner functions if necessary.
+#' @param preds A list of functions or strings naming the functions for
+#' predicting the probabilities per classes,
+#' using the base classifiers trained with the functions defined in \code{learners}.
+#' @param preds.pars A list with the set of additional parameters for each
+#' function in \code{preds} if necessary.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
+#' Default is \code{FALSE}.
+#' @details
+#' This method trains an ensemble of diverse classifiers. To promote the initial diversity 
+#' the classifiers must represent different learning schemes.
+#' When x.dist is \code{TRUE} all \code{learners} defined must be able to learn a classifier 
+#' from the distance matrix in \code{x}.
+#' The iteration process of the algorithm ends when no changes occurs in 
+#' any model during a complete iteration.
+#' The generation of the final hypothesis is 
+#' produced via a weigthed majority voting.
+#' @return A list object of class "democratic" containing:
+#' \describe{
+#'   \item{W}{A vector with the confidence-weighted vote assigned to each classifier.}
+#'   \item{model}{A list with the final N base classifiers trained using the 
+#'   enlarged labeled set.}
+#'   \item{model.index}{List of N vectors of indexes related to the training instances 
+#'   used per each classifier. These indexes are relative to \code{instances.index}.}  
+#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   train the N \code{models}. These indexes include the initial labeled instances
+#'   and the newly labeled instances.
+#'   These indexes are relative to the \code{y} argument.}
+#'   \item{classes}{The levels of \code{y} factor.}
+#'   \item{preds}{The functions provided in the \code{preds} argument.}
+#'   \item{preds.pars}{The set of lists provided in the \code{preds.pars} argument.}
+#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
+#' }
 #' @example demo/Democratic.R
 #' @export
 democratic <- function(
@@ -347,7 +432,6 @@ democratic <- function(
   }
   
   ### Result ###
-  result$classes = levels(y)
   result$preds = preds
   result$preds.pars = preds.pars
   result$x.dist = x.dist
@@ -356,6 +440,16 @@ democratic <- function(
   return(result)
 }
 
+#' @title Predictions of the Democratic method
+#' @description Predicts the label of instances according to the \code{democratic} model.
+#' @details For additional help see \code{\link{democratic}} examples.
+#' @param object Democratic model built with the \code{\link{democratic}} function.
+#' @param x A object that can be coerced as matrix.
+#' Depending on how was the model built, \code{x} is interpreted as a matrix 
+#' with the distances between the unseen instances and the selected training instances, 
+#' or a matrix of instances.
+#' @param ... This parameter is included for compatibility reasons.
+#' @return Vector with the labels assigned.
 #' @export
 #' @importFrom stats predict
 predict.democratic <- function(object, x, ...){
@@ -441,6 +535,14 @@ predict.democratic <- function(object, x, ...){
   return(cls)
 }
 
+#' @title Combining the hypothesis of the classifiers
+#' @description This function combines the probabilities predicted by the set of 
+#' classifiers.
+#' @param pred A list with the prediction for each classifier.
+#' @param W A vector with the confidence-weighted vote assigned to each classifier 
+#' during the training process.
+#' @param classes the classes.
+#' @return The classification proposed.
 #' @export
 democraticCombining <- function(pred, W, classes){
   # Check relation between pred and W
