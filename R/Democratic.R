@@ -21,6 +21,7 @@
 #' function is a wrapper of \code{democraticBase} function.
 #' @return A list object of class "democraticBase" containing:
 #' \describe{
+#'   \item{W}{A vector with the confidence-weighted vote assigned to each classifier.}
 #'   \item{model}{A list with the final N base classifiers trained using the 
 #'   enlarged labeled set.}
 #'   \item{model.index}{List of N vectors of indexes related to the training instances 
@@ -29,7 +30,6 @@
 #'   train the N \code{models}. These indexes include the initial labeled instances
 #'   and the newly labeled instances.
 #'   These indexes are relative to the \code{y} argument.}
-#'   \item{W}{A vector with the confidence-weighted vote assigned to each classifier.}
 #'   \item{classes}{The levels of \code{y} factor.}
 #' }
 #' @references
