@@ -403,6 +403,13 @@ triTrainingCombine <- function(pred){
   )
 }
 
+#' @title Statistical mode
+#' @noRd
+getmode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
 #' @title Measure the error of two base classifiers
 #' @param cj predicted classes using classifier j
 #' @param ck predicted classes using classifier k
