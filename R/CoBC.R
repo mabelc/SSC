@@ -195,7 +195,7 @@ coBCBase <- function(
   # determine labeled instances
   instances.index <- unique(unlist(Lind))
   # map indexes respect to m$included.insts
-  model.index <- lapply(
+  model.index.map <- lapply(
     X = Lind,
     FUN = function(indexes)
       unclass(factor(indexes, levels = instances.index))
@@ -204,7 +204,8 @@ coBCBase <- function(
   # Save result
   result <- list(
     model = H,
-    model.index = model.index,
+    model.index = Lind,
+    model.index.map = model.index.map,
     instances.index = instances.index,
     classes = classes
   )
@@ -376,7 +377,7 @@ predict.coBC <- function(object, x, ...){
         )
       },
       object$model,
-      object$model.index,
+      object$model.index.map,
       SIMPLIFY = FALSE
     )
   }else{

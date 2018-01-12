@@ -69,7 +69,7 @@ h.prob <- list()
 ninstances <- nrow(dtrain)
 for(i in 1:length(md2$model)){
   m <- md2$model[[i]]
-  D <- ditest[, md2$model.index[[i]]]
+  D <- ditest[, md2$model.index.map[[i]]]
   h.prob[[i]] <- predict(m, D, type = "prob",  initial.value = 0)
 }
 # Combine probability matrices

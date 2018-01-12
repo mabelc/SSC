@@ -119,7 +119,7 @@ pred <- mapply(
     predict(m, D, type = "class")
   },
   m = md2$model,
-  indexes = md2$model.index,
+  indexes = md2$model.index.map,
   SIMPLIFY = FALSE
 )
 # Combine the predictions

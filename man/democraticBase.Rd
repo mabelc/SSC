@@ -171,17 +171,13 @@ m2 <- democraticBase(y = ytrain,
 
 ### Predict
 # Compute distance matrix Ditest
-Ditest <- dist(x = xitest, y = xtrain[m2$instances.index,],
+Ditest <- dist(x = xitest, y = xtrain[m2$model.index[[1]],],
                method = "euclidean", by_rows = TRUE)
 # predict using classifier 1
-m2.pred1 <- predict(m2$model[[1]], Ditest[, m2$model.index[[1]]])
+m2.pred1 <- predict(m2$model[[1]], Ditest)
 
 # Compute kernel matrix Kitest
-sv.idxs <- m2$instances.index[
-  m2$model.index[[2]][
-    SVindex(m2$model[[2]])
-  ]
-]
+sv.idxs <- m2$model.index[[2]][SVindex(m2$model[[2]])]
 Kitest <- kernelMatrix(rbfkernel, x = xitest, y = xtrain[sv.idxs, ])
 # predict using classifier 2
 m2.pred2 <- predict(m2$model[[2]], Kitest)

@@ -237,7 +237,7 @@ democraticBase <- function(
   # determine labeled instances
   instances.index <- unique(unlist(Lind))
   # map indexes respect to m$included.insts
-  model.index <- lapply(
+  model.index.map <- lapply(
     X = Lind,
     FUN = function(indexes)
       unclass(factor(indexes, levels = instances.index))
@@ -264,7 +264,8 @@ democraticBase <- function(
   result <- list(
     W = W,
     model = H,
-    model.index = model.index,
+    model.index = Lind,
+    model.index.map = model.index.map,
     instances.index = instances.index,
     classes = classes
   )
@@ -491,7 +492,7 @@ predict.democratic <- function(object, x, ...){
         ) 
       },
       object$model[selected], 
-      object$model.index[selected], 
+      object$model.index.map[selected], 
       object$preds[selected], 
       object$preds.pars[selected]
     )

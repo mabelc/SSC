@@ -69,12 +69,12 @@ triTrainingBase <- function(
   Sind <- resample(y[labeled], N = 3)
   
   models <- vector(mode = "list", length = 3)
-  final.indexes <- vector(mode = "list", length = 3)
+  model.index <- vector(mode = "list", length = 3)
   for(i in 1:3){
     # Train classifier
     indexes <- labeled[Sind[[i]]] # vector of indexes
     models[[i]] <- learnerB(indexes, y[indexes])
-    final.indexes[[i]] <- indexes
+    model.index[[i]] <- indexes
   }
   
   ePrima <- rep(x = 0.5, times = 3)
@@ -168,7 +168,7 @@ triTrainingBase <- function(
           indexes, 
           factor(classes[c(ylabeled.map, Lcls[[i]])], classes)
         )
-        final.indexes[[i]] <- indexes
+        model.index[[i]] <- indexes
         
         # update values for i
         ePrima[i] <- e[i]
@@ -180,10 +180,10 @@ triTrainingBase <- function(
   ### Result ###
   
   # determine labeled instances
-  instances.index <- unique(unlist(final.indexes))
+  instances.index <- unique(unlist(model.index))
   # map indexes respect to m$included.insts
-  model.index <- lapply(
-    X = final.indexes,
+  model.index.map <- lapply(
+    X = model.index,
     FUN = function(indexes)
       unclass(factor(indexes, levels = instances.index))
   )
@@ -192,6 +192,7 @@ triTrainingBase <- function(
   result <- list(
     model = models,
     model.index = model.index,
+    model.index.map = model.index.map,
     instances.index = instances.index
   )
   class(result) <- "triTrainingBase"
@@ -356,7 +357,7 @@ predict.triTraining <- function(object, x, ...) {
         ) 
       },
       object$model,
-      object$model.index
+      object$model.index.map
     )
   }else{
     preds <- mapply(
