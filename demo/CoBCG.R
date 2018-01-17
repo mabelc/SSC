@@ -24,13 +24,13 @@ xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN (knn3) as base classifier.
-learnerB1 <- function(indexes, cls) 
+gen.learner1 <- function(indexes, cls)
   caret::knn3(x = xtrain[indexes, ], y = cls, k = 1)
-predB1 <- function(model, indexes)  
+gen.pred1 <- function(model, indexes)
   predict(model, xtrain[indexes, ]) 
 
 set.seed(1)
-md1 <- coBCG(y = ytrain, learnerB1, predB1)
+md1 <- coBCG(y = ytrain, gen.learner1, gen.pred1)
 
 # Predict probabilities per instances using each model
 h.prob <- lapply(
@@ -45,13 +45,13 @@ table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
-learnerB2 <- function(indexes, cls) {
+gen.learner2 <- function(indexes, cls) {
   m <- ssc::oneNN(y = cls)
   attr(m, "tra.idxs") <- indexes
   m
 }
 
-predB2 <- function(model, indexes)  {
+gen.pred2 <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
   d <- dtrain[indexes, tra.idxs]
   prob <- predict(model, d, type = "prob",  initial.value = 0) 
@@ -59,7 +59,7 @@ predB2 <- function(model, indexes)  {
 }
 
 set.seed(1)
-md2 <- coBCG(y = ytrain, learnerB2, predB2)
+md2 <- coBCG(y = ytrain, gen.learner2, gen.pred2)
 
 # Predict probabilities per instances using each model
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],

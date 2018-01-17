@@ -16,7 +16,7 @@ the instances to use and cls specifies the classes of those instances.}
 
 \item{predsB}{A list of functions for predicting the probabilities per classes.
 Each function must be two parameters, model and indexes, where the model
-is a classifier trained with \code{learnerB} function and
+is a classifier trained with \code{gen.learner} function and
 indexes indicates the instances to predict.}
 }
 \value{

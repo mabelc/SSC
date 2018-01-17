@@ -8,12 +8,12 @@
 #' classifier to establish the possible class of unlabeled instances. 
 #' @param y A vector with the labels of training instances. In this vector the 
 #' unlabeled instances are specified with the value \code{NA}.
-#' @param learnerB A function for training a supervised base classifier.
+#' @param gen.learner A function for training a supervised base classifier.
 #' This function needs two parameters, indexes and cls, where indexes indicates
 #' the instances to use and cls specifies the classes of those instances.
-#' @param predB A function for predicting the probabilities per classes.
+#' @param gen.pred A function for predicting the probabilities per classes.
 #' This function must be two parameters, model and indexes, where the model
-#' is a classifier trained with \code{learnerB} function and
+#' is a classifier trained with \code{gen.learner} function and
 #' indexes indicates the instances to predict.
 #' @param max.iter Maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
@@ -40,7 +40,7 @@
 #' @example demo/SelfTrainingG.R
 #' @export
 selfTrainingG <- function(
-  y, learnerB, predB, 
+  y, gen.learner, gen.pred,
   max.iter = 50,
   perc.full = 0.7,
   thr.conf = 0.5
@@ -101,11 +101,11 @@ selfTrainingG <- function(
     
     # Train classifier
     #model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
-    model <- learnerB(labeled, ynew[labeled])
+    model <- gen.learner(labeled, ynew[labeled])
     
     # Predict probabilities per classes of unlabeled examples
     #prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
-    prob <- checkProb(prob = predB(model, unlabeled), ninstances = length(unlabeled), classes)
+    prob <- checkProb(prob = gen.pred(model, unlabeled), ninstances = length(unlabeled), classes)
     
     # Select the instances with better class probability
     pre.selection <- selectInstances(cantClass, prob)  
@@ -134,7 +134,7 @@ selfTrainingG <- function(
   
   # Train final model
   #model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
-  model <- learnerB(labeled, ynew[labeled])
+  model <- gen.learner(labeled, ynew[labeled])
   
   result <- list(
     model = model,
@@ -249,17 +249,17 @@ selfTraining <- function(
                    nrow(x), ncol(x), length(y), length(y)))
     }
     
-    learnerB1 <- function(training.ints, cls){
+    gen.learner1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
       return(r)
     }
-    predB1 <- function(r, testing.ints){
+    gen.pred1 <- function(r, testing.ints){
       prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
       return(prob)
     }
     
-    result <- selfTrainingG(y, learnerB1, predB1, max.iter, perc.full, thr.conf)
+    result <- selfTrainingG(y, gen.learner1, gen.pred1, max.iter, perc.full, thr.conf)
     result$model <- result$model$m
   }else{
     # Instance matrix case
@@ -272,16 +272,16 @@ selfTraining <- function(
       stop("The rows number of x must be equal to the length of y.")
     }
     
-    learnerB2 <- function(training.ints, cls){
+    gen.learner2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
     }
-    predB2 <- function(m, testing.ints){
+    gen.pred2 <- function(m, testing.ints){
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
     
-    result <- selfTrainingG(y, learnerB2, predB2, max.iter, perc.full, thr.conf)
+    result <- selfTrainingG(y, gen.learner2, gen.pred2, max.iter, perc.full, thr.conf)
   }
  
   ### Result ###

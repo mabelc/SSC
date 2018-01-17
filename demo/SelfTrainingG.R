@@ -24,32 +24,32 @@ xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN (knn3) as base classifier.
-learnerB <- function(indexes, cls) 
+gen.learner <- function(indexes, cls)
   caret::knn3(x = xtrain[indexes, ], y = cls, k = 1)
-predB <- function(model, indexes)  
+gen.pred <- function(model, indexes)
   predict(model, xtrain[indexes, ]) 
 
-md1 <- selfTrainingG(y = ytrain, learnerB, predB)
+md1 <- selfTrainingG(y = ytrain, gen.learner, gen.pred)
 
 cls1 <- predict(md1$model, xitest, type = "class")
 table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
-learnerB <- function(indexes, cls) {
+gen.learner <- function(indexes, cls) {
   m <- ssc::oneNN(y = cls)
   attr(m, "tra.idxs") <- indexes
   m
 }
 
-predB <- function(model, indexes)  {
+gen.pred <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
   d <- dtrain[indexes, tra.idxs]
   prob <- predict(model, d, type = "prob",  initial.value = 0) 
   prob
 }
 
-md2 <- selfTrainingG(y = ytrain, learnerB, predB)
+md2 <- selfTrainingG(y = ytrain, gen.learner, gen.pred)
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 cls2 <- predict(md2$model, ditest)

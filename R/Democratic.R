@@ -11,7 +11,7 @@
 #' the instances to use and cls specifies the classes of those instances.
 #' @param predsB A list of functions for predicting the probabilities per classes.
 #' Each function must be two parameters, model and indexes, where the model
-#' is a classifier trained with \code{learnerB} function and
+#' is a classifier trained with \code{gen.learner} function and
 #' indexes indicates the instances to predict.
 #' @details 
 #' democraticG can be helpful in those cases where the method selected as 
@@ -389,7 +389,7 @@ democratic <- function(
     )
     # Call base method
     result <- democraticG(y, d_learners_base, d_preds_base)
-    # Extract model from list created in learnerB
+    # Extract model from list created in gen.learner
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case

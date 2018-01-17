@@ -4,24 +4,24 @@
 \alias{coBCG}
 \title{CoBC generic method}
 \usage{
-coBCG(y, learnerB, predB, N = 3, perc.full = 0.7, u = 100,
+coBCG(y, gen.learner, gen.pred, N = 3, perc.full = 0.7, u = 100,
   max.iter = 50)
 }
 \arguments{
 \item{y}{A vector with the labels of training instances. In this vector the 
 unlabeled instances are specified with the value \code{NA}.}
 
-\item{learnerB}{A function for training \code{N} supervised base classifiers.
+\item{gen.learner}{A function for training \code{N} supervised base classifiers.
 This function needs two parameters, indexes and cls, where indexes indicates
 the instances to use and cls specifies the classes of those instances.}
 
-\item{predB}{A function for predicting the probabilities per classes.
+\item{gen.pred}{A function for predicting the probabilities per classes.
 This function must be two parameters, model and indexes, where the model
-is a classifier trained with \code{learnerB} function and
+is a classifier trained with \code{gen.learner} function and
 indexes indicates the instances to predict.}
 
 \item{N}{The number of classifiers used as committee members. All these classifiers 
-are trained using the \code{learnerB} function. Default is 3.}
+are trained using the \code{gen.learner} function. Default is 3.}
 
 \item{perc.full}{A number between 0 and 1. If the percentage 
 of new labeled examples reaches this value the self-labeling process is stopped.
@@ -48,7 +48,7 @@ A list object of class "coBCG" containing:
 \description{
 CoBC is a semi-supervised learning algorithm with a co-training 
 style. This algorithm trains \code{N} classifiers with the learning scheme defined in 
-\code{learnerB} using a reduced set of labeled examples. For each iteration, an unlabeled 
+\code{gen.learner} using a reduced set of labeled examples. For each iteration, an unlabeled
 example is labeled for a classifier if the most confident classifications assigned by the 
 other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
 candidates are selected randomly from a pool of size \code{u}.
@@ -87,13 +87,13 @@ xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN (knn3) as base classifier.
-learnerB1 <- function(indexes, cls) 
+gen.learner1 <- function(indexes, cls)
   caret::knn3(x = xtrain[indexes, ], y = cls, k = 1)
-predB1 <- function(model, indexes)  
+gen.pred1 <- function(model, indexes)
   predict(model, xtrain[indexes, ]) 
 
 set.seed(1)
-md1 <- coBCG(y = ytrain, learnerB1, predB1)
+md1 <- coBCG(y = ytrain, gen.learner1, gen.pred1)
 
 # Predict probabilities per instances using each model
 h.prob <- lapply(
@@ -108,13 +108,13 @@ table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
-learnerB2 <- function(indexes, cls) {
+gen.learner2 <- function(indexes, cls) {
   m <- ssc::oneNN(y = cls)
   attr(m, "tra.idxs") <- indexes
   m
 }
 
-predB2 <- function(model, indexes)  {
+gen.pred2 <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
   d <- dtrain[indexes, tra.idxs]
   prob <- predict(model, d, type = "prob",  initial.value = 0) 
@@ -122,7 +122,7 @@ predB2 <- function(model, indexes)  {
 }
 
 set.seed(1)
-md2 <- coBCG(y = ytrain, learnerB2, predB2)
+md2 <- coBCG(y = ytrain, gen.learner2, gen.pred2)
 
 # Predict probabilities per instances using each model
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],

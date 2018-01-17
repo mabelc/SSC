@@ -6,12 +6,12 @@
 #' for a classifier if the other two classifiers agree on the labeling proposed.
 #' @param y A vector with the labels of training instances. In this vector the 
 #' unlabeled instances are specified with the value \code{NA}.
-#' @param learnerB A function for training three supervised base classifiers.
+#' @param gen.learner A function for training three supervised base classifiers.
 #' This function needs two parameters, indexes and cls, where indexes indicates
 #' the instances to use and cls specifies the classes of those instances.
-#' @param predB A function for predicting the probabilities per classes.
+#' @param gen.pred A function for predicting the probabilities per classes.
 #' This function must be two parameters, model and indexes, where the model
-#' is a classifier trained with \code{learnerB} function and
+#' is a classifier trained with \code{gen.learner} function and
 #' indexes indicates the instances to predict.
 #' @details 
 #' TriTrainingG can be helpful in those cases where the method selected as 
@@ -32,7 +32,7 @@
 #' @example demo/TriTrainingG.R
 #' @export
 triTrainingG <- function(
-  y, learnerB, predB
+  y, gen.learner, gen.pred
 ){
   ### Check parameters ###
   # Check y 
@@ -73,7 +73,7 @@ triTrainingG <- function(
   for(i in 1:3){
     # Train classifier
     indexes <- labeled[Sind[[i]]] # vector of indexes
-    models[[i]] <- learnerB(indexes, y[indexes])
+    models[[i]] <- gen.learner(indexes, y[indexes])
     model.index[[i]] <- indexes
   }
   
@@ -104,14 +104,14 @@ triTrainingG <- function(
       # measure error
       cj <- getClassIdx(
         checkProb(
-          prob = predB(models[[j]], labeled),
+          prob = gen.pred(models[[j]], labeled),
           ninstances = length(labeled), 
           classes
         )
       )
       ck <- getClassIdx(
         checkProb(
-          prob = predB(models[[k]], labeled),
+          prob = gen.pred(models[[k]], labeled),
           ninstances = length(labeled), 
           classes
         )
@@ -121,14 +121,14 @@ triTrainingG <- function(
       if(e[i] < ePrima[i]){
         cj <- getClassIdx(
           checkProb(
-            prob = predB(models[[j]], unlabeled),
+            prob = gen.pred(models[[j]], unlabeled),
             ninstances = length(unlabeled), 
             classes
           )
         )
         ck <- getClassIdx(
           checkProb(
-            prob = predB(models[[j]], unlabeled),
+            prob = gen.pred(models[[j]], unlabeled),
             ninstances = length(unlabeled), 
             classes
           )
@@ -164,7 +164,7 @@ triTrainingG <- function(
       if (updateClassifier[i]){
         # Train classifier
         indexes <- c(labeled, Lind[[i]])
-        models[[i]] <- learnerB(
+        models[[i]] <- gen.learner(
           indexes, 
           factor(classes[c(ylabeled.map, Lcls[[i]])], classes)
         )
@@ -280,17 +280,17 @@ triTraining <- function(
                    nrow(x), ncol(x), length(y), length(y)))
     }
     
-    learnerB1 <- function(training.ints, cls){
+    gen.learner1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
       return(r)
     }
-    predB1 <- function(r, testing.ints){
+    gen.pred1 <- function(r, testing.ints){
       prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
       return(prob)
     }
     
-    result <- triTrainingG(y, learnerB1, predB1)
+    result <- triTrainingG(y, gen.learner1, gen.pred1)
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case
@@ -303,16 +303,16 @@ triTraining <- function(
       stop("The rows number of x must be equal to the length of y.")
     }
     
-    learnerB2 <- function(training.ints, cls){
+    gen.learner2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
     }
-    predB2 <- function(m, testing.ints){
+    gen.pred2 <- function(m, testing.ints){
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
     
-    result <- triTrainingG(y, learnerB2, predB2)
+    result <- triTrainingG(y, gen.learner2, gen.pred2)
   }
   
   ### Result ###

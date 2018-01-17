@@ -2,21 +2,21 @@
 #' @title CoBC generic method
 #' @description CoBC is a semi-supervised learning algorithm with a co-training 
 #' style. This algorithm trains \code{N} classifiers with the learning scheme defined in 
-#' \code{learnerB} using a reduced set of labeled examples. For each iteration, an unlabeled 
+#' \code{gen.learner} using a reduced set of labeled examples. For each iteration, an unlabeled
 #' example is labeled for a classifier if the most confident classifications assigned by the 
 #' other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
 #' candidates are selected randomly from a pool of size \code{u}.
 #' @param y A vector with the labels of training instances. In this vector the 
 #' unlabeled instances are specified with the value \code{NA}.
-#' @param learnerB A function for training \code{N} supervised base classifiers.
+#' @param gen.learner A function for training \code{N} supervised base classifiers.
 #' This function needs two parameters, indexes and cls, where indexes indicates
 #' the instances to use and cls specifies the classes of those instances.
-#' @param predB A function for predicting the probabilities per classes.
+#' @param gen.pred A function for predicting the probabilities per classes.
 #' This function must be two parameters, model and indexes, where the model
-#' is a classifier trained with \code{learnerB} function and
+#' is a classifier trained with \code{gen.learner} function and
 #' indexes indicates the instances to predict.
 #' @param N The number of classifiers used as committee members. All these classifiers 
-#' are trained using the \code{learnerB} function. Default is 3.
+#' are trained using the \code{gen.learner} function. Default is 3.
 #' @param perc.full A number between 0 and 1. If the percentage 
 #' of new labeled examples reaches this value the self-labeling process is stopped.
 #' Default is 0.7.
@@ -44,8 +44,8 @@
 #' @export
 coBCG <- function(
   y,
-  learnerB,
-  predB,
+  gen.learner,
+  gen.pred,
   N = 3,
   perc.full = 0.7,
   u = 100, 
@@ -114,7 +114,7 @@ coBCG <- function(
   for (i in 1:N) {
     # Train model
     indexes <- labeled[s[[i]]]
-    H[[i]] <- learnerB(indexes, y[indexes])
+    H[[i]] <- gen.learner(indexes, y[indexes])
     # Save instances info
     Lind[[i]] <- indexes
     Lcls[[i]] <- y.map[indexes]
@@ -141,7 +141,7 @@ coBCG <- function(
           h.prob = lapply(
             X = H[committee],
             FUN =  function(model)
-              checkProb(prob = predB(model, pool), ninstances, classes)
+              checkProb(prob = gen.pred(model, pool), ninstances, classes)
           ),
           ninstances,
           classes
@@ -157,7 +157,7 @@ coBCG <- function(
           h.prob = lapply(
             X = HO, 
             FUN =  function(model) 
-              checkProb(prob = predB(model, selected), ninstances, classes)
+              checkProb(prob = gen.pred(model, selected), ninstances, classes)
           ), 
           ninstances, 
           classes
@@ -184,7 +184,7 @@ coBCG <- function(
       # Train classifier
       ind <- Lind[[i]] # indexes of intances
       yi <- classes[Lcls[[i]]] # indexes of classes
-      H[[i]] <- learnerB(ind, factor(yi, classes))
+      H[[i]] <- gen.learner(ind, factor(yi, classes))
     }
     
     iter <- iter + 1
@@ -241,7 +241,7 @@ coBCG <- function(
 #' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
 #' Default is \code{FALSE}. 
 #' @param N The number of classifiers used as committee members. All these classifiers 
-#' are trained using the \code{learnerB} function. Default is 3.
+#' are trained using the \code{gen.learner} function. Default is 3.
 #' @param perc.full A number between 0 and 1. If the percentage 
 #' of new labeled examples reaches this value the self-labeling process is stopped.
 #' Default is 0.7.
@@ -309,17 +309,17 @@ coBC <- function(
                    nrow(x), ncol(x), length(y), length(y)))
     }
     
-    learnerB1 <- function(training.ints, cls){
+    gen.learner1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
       return(r)
     }
-    predB1 <- function(r, testing.ints){
+    gen.pred1 <- function(r, testing.ints){
       prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
       return(prob)
     }
     
-    result <- coBCG(y, learnerB1, predB1, N, perc.full, u, max.iter)
+    result <- coBCG(y, gen.learner1, gen.pred1, N, perc.full, u, max.iter)
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case
@@ -332,16 +332,16 @@ coBC <- function(
       stop("The rows number of x must be equal to the length of y.")
     }
     
-    learnerB2 <- function(training.ints, cls){
+    gen.learner2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
     }
-    predB2 <- function(m, testing.ints){
+    gen.pred2 <- function(m, testing.ints){
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
     
-    result <- coBCG(y, learnerB2, predB2, N, perc.full, u, max.iter)
+    result <- coBCG(y, gen.learner2, gen.pred2, N, perc.full, u, max.iter)
   }
   
   ### Result ###

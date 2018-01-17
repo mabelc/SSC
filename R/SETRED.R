@@ -11,12 +11,12 @@
 #' unlabeled instances are specified with the value \code{NA}.
 #' @param D A distance matrix between all the training instances. This matrix is used to 
 #' construct the neighborhood graph.
-#' @param learnerB A function for training a supervised base classifier.
+#' @param gen.learner A function for training a supervised base classifier.
 #' This function needs two parameters, indexes and cls, where indexes indicates
 #' the instances to use and cls specifies the classes of those instances.
-#' @param predB A function for predicting the probabilities per classes.
+#' @param gen.pred A function for predicting the probabilities per classes.
 #' This function must be two parameters, model and indexes, where the model
-#' is a classifier trained with \code{learnerB} function and
+#' is a classifier trained with \code{gen.learner} function and
 #' indexes indicates the instances to predict.
 #' @param theta Rejection threshold to test the critical region. Default is 0.1.
 #' @param max.iter Maximum number of iterations to execute the self-labeling process. 
@@ -41,7 +41,7 @@
 #' @example demo/SETREDG.R
 #' @export
 setredG <- function(
-  y, D, learnerB, predB, 
+  y, D, gen.learner, gen.pred,
   theta = 0.1,
   max.iter = 50,
   perc.full = 0.7
@@ -118,11 +118,11 @@ setredG <- function(
     
     # Train classifier
     #model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
-    model <- learnerB(labeled, ynew[labeled])
+    model <- gen.learner(labeled, ynew[labeled])
     
     # Predict probabilities per classes of unlabeled examples
     #prob <- predProb(model, x[unlabeled, ], pred, pred.pars, classes)
-    prob <- checkProb(prob = predB(model, unlabeled), ninstances = length(unlabeled), classes)
+    prob <- checkProb(prob = gen.pred(model, unlabeled), ninstances = length(unlabeled), classes)
     
     # Select the instances with better class probability 
     selection <- selectInstances(cantClass, prob)
@@ -196,7 +196,7 @@ setredG <- function(
   
   # Train final model
   #model <- trainModel(x[labeled, ], ynew[labeled], learner, learner.pars)
-  model <- learnerB(labeled, ynew[labeled])
+  model <- gen.learner(labeled, ynew[labeled])
   
   # Save result
   result <- list(
@@ -313,17 +313,17 @@ setred <- function(
                    nrow(x), ncol(x), length(y), length(y)))
     }
      
-    learnerB1 <- function(training.ints, cls){
+    gen.learner1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
       return(r)
     }
-    predB1 <- function(r, testing.ints){
+    gen.pred1 <- function(r, testing.ints){
       prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
       return(prob)
     }
     
-    result <- setredG(y, x, learnerB1, predB1, theta, max.iter, perc.full)
+    result <- setredG(y, x, gen.learner1, gen.pred1, theta, max.iter, perc.full)
     result$model <- result$model$m
   }else{
     # Instance matrix case
@@ -336,18 +336,18 @@ setred <- function(
       stop("The rows number of x must be equal to the length of y.")
     }
     
-    learnerB2 <- function(training.ints, cls){
+    gen.learner2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
     }
-    predB2 <- function(m, testing.ints){
+    gen.pred2 <- function(m, testing.ints){
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
     result <- setredG(
       y, 
       D = proxy::dist(x, method = dist, by_rows = TRUE, diag = TRUE, upper = TRUE),
-      learnerB2, predB2, 
+      gen.learner2, gen.pred2,
       theta, max.iter, perc.full
     )
   }
