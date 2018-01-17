@@ -1,4 +1,4 @@
-#' @title SETRED base method
+#' @title SETRED generic method
 #' @description SETRED is a variant of the self-training classification method 
 #' (\code{\link{selfTraining}}) with a different addition mechanism. 
 #' The SETRED classifier is initially trained with a 
@@ -25,12 +25,12 @@
 #' of new labeled examples reaches this value the self-training process is stopped.
 #' Default is 0.7.
 #' @details 
-#' SetredBase can be helpful in those cases where the method selected as 
+#' SetredG can be helpful in those cases where the method selected as 
 #' base classifier needs a \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general setred method,
 #' please see \code{\link{setred}} function. Essentially, \code{setred}
-#' function is a wrapper of \code{setredBase} function.
-#' @return A list object of class "setredBase" containing:
+#' function is a wrapper of \code{setredG} function.
+#' @return A list object of class "setredG" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
 #'   \item{instances.index}{The indexes of the training instances used to 
@@ -38,9 +38,9 @@
 #'   and the newly labeled instances.
 #'   Those indexes are relative to the \code{y} argument.}
 #' }
-#' @example demo/SETREDBase.R
+#' @example demo/SETREDG.R
 #' @export
-setredBase <- function(
+setredG <- function(
   y, D, learnerB, predB, 
   theta = 0.1,
   max.iter = 50,
@@ -203,7 +203,7 @@ setredBase <- function(
     model = model,
     instances.index = labeled
   )
-  class(result) <- "setredBase"
+  class(result) <- "setredG"
   
   result
 }
@@ -323,7 +323,7 @@ setred <- function(
       return(prob)
     }
     
-    result <- setredBase(y, x, learnerB1, predB1, theta, max.iter, perc.full)
+    result <- setredG(y, x, learnerB1, predB1, theta, max.iter, perc.full)
     result$model <- result$model$m
   }else{
     # Instance matrix case
@@ -344,7 +344,7 @@ setred <- function(
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
-    result <- setredBase(
+    result <- setredG(
       y, 
       D = proxy::dist(x, method = dist, by_rows = TRUE, diag = TRUE, upper = TRUE),
       learnerB2, predB2, 

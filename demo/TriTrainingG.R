@@ -23,21 +23,27 @@ tst.idx <- setdiff(1:length(y), tra.idx)
 xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
-# Compute distances between training instances
-D <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
-
 ## Example: Training from a set of instances with 1-NN (knn3) as base classifier.
 learnerB <- function(indexes, cls) 
   caret::knn3(x = xtrain[indexes, ], y = cls, k = 1)
 predB <- function(model, indexes)  
   predict(model, xtrain[indexes, ]) 
 
-md1 <- setredBase(y = ytrain, D, learnerB, predB)
+# Train
+set.seed(1)
+md1 <- triTrainingG(y = ytrain, learnerB, predB)
 
-cls1 <- predict(md1$model, xitest, type = "class")
+# Predict testing instances using the three classifiers
+pred <- lapply(
+  X = md1$model, 
+  FUN = function(m) predict(m, xitest, type = "class")
+)
+# Combine the predictions
+cls1 <- triTrainingCombine(pred)
 table(cls1, yitest)
 
-## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier
+## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
+dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
 learnerB <- function(indexes, cls) {
   m <- ssc::oneNN(y = cls)
   attr(m, "tra.idxs") <- indexes
@@ -46,13 +52,29 @@ learnerB <- function(indexes, cls) {
 
 predB <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
-  d <- D[indexes, tra.idxs]
+  d <- dtrain[indexes, tra.idxs]
   prob <- predict(model, d, type = "prob",  initial.value = 0) 
   prob
 }
 
-md2 <- setredBase(y = ytrain, D, learnerB, predB)
+# Train
+set.seed(1)
+md2 <- triTrainingG(y = ytrain, learnerB, predB)
+
+# Predict
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
-cls2 <- predict(md2$model, ditest)
+
+# Predict testing instances using the three classifiers
+pred <- mapply(
+  FUN = function(m, indexes){
+    D <- ditest[, indexes]
+    predict(m, D, type = "class")
+  },
+  m = md2$model,
+  indexes = md2$model.index.map,
+  SIMPLIFY = FALSE
+)
+# Combine the predictions
+cls2 <- triTrainingCombine(pred)
 table(cls2, yitest)

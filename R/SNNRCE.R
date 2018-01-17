@@ -1,4 +1,4 @@
-#' @title SNNRCE base method
+#' @title SNNRCE generic method
 #' @description SNNRCE is a variant of the self-training classification 
 #' method (\code{\link{selfTraining}}) with a different 
 #' addition mechanism and a fixed learning scheme (1-NN). SNNRCE uses an amending scheme 
@@ -11,7 +11,7 @@
 #' @param y A vector with the labels of training instances. In this vector the 
 #' unlabeled instances are specified with the value \code{NA}.
 #' @param alpha Rejection threshold to test the critical region. Default is 0.1.
-#' @return A list object of class "snnrceBase" containing:
+#' @return A list object of class "snnrceG" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
 #'   \item{instances.index}{The indexes of the training instances used to 
@@ -20,7 +20,7 @@
 #'   Those indexes are relative to the \code{y} argument.}
 #' }
 #' @noRd
-snnrceBase <- function(
+snnrceG <- function(
   D, y,
   alpha = 0.1
 ){
@@ -215,14 +215,14 @@ snnrceBase <- function(
     instances.index = labeled
   )
   
-  class(result) <- "snnrceBase"
+  class(result) <- "snnrceG"
   
   return(result)
 }
 
 #' @export
 #' @importFrom stats predict
-predict.snnrceBase <- function(object, D, ...) {
+predict.snnrceG <- function(object, D, ...) {
   if(class(D) == "dist"){
     D <- proxy::as.matrix(D)
   }
@@ -308,7 +308,7 @@ snnrce <- function(
                    nrow(x), ncol(x), length(y), length(y)))
     }
     
-    result <- snnrceBase(D = x, y, alpha)
+    result <- snnrceG(D = x, y, alpha)
     
   }else{
     # Instance matrix case
@@ -321,7 +321,7 @@ snnrce <- function(
       stop("The rows number of x must be equal to the length of y.")
     }
     
-    result <- snnrceBase(
+    result <- snnrceG(
       D = proxy::dist(x, method = dist, by_rows = TRUE,
                       diag = TRUE, upper = TRUE), 
       y, 

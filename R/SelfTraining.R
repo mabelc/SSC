@@ -1,5 +1,5 @@
 
-#' @title Self-training base method
+#' @title Self-training generic method
 #' @description Self-training is a simple and effective semi-supervised
 #' learning classification method. The self-training classifier is initially
 #' trained with a reduced set of labeled examples. Then it is iteratively retrained
@@ -24,12 +24,12 @@
 #' At each iteration, only the new label examples with a confidence greater than 
 #' this value (\code{thr.conf}) are added to training set.
 #' @details 
-#' SelfTrainingBase can be helpful in those cases where the method selected as 
+#' SelfTrainingG can be helpful in those cases where the method selected as 
 #' base classifier needs a \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general self-training method,
 #' please see \code{\link{selfTraining}} function. Essentially, \code{selfTraining}
-#' function is a wrapper of \code{selfTrainingBase} function.
-#' @return A list object of class "selfTrainingBase" containing:
+#' function is a wrapper of \code{selfTrainingG} function.
+#' @return A list object of class "selfTrainingG" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
 #'   \item{instances.index}{The indexes of the training instances used to 
@@ -37,9 +37,9 @@
 #'   and the newly labeled instances.
 #'   Those indexes are relative to the \code{y} argument.}
 #' }
-#' @example demo/SelfTrainingBase.R
+#' @example demo/SelfTrainingG.R
 #' @export
-selfTrainingBase <- function(
+selfTrainingG <- function(
   y, learnerB, predB, 
   max.iter = 50,
   perc.full = 0.7,
@@ -140,7 +140,7 @@ selfTrainingBase <- function(
     model = model,
     instances.index = labeled
   )
-  class(result) <- "selfTrainingBase"
+  class(result) <- "selfTrainingG"
   
   return(result)
 }
@@ -259,7 +259,7 @@ selfTraining <- function(
       return(prob)
     }
     
-    result <- selfTrainingBase(y, learnerB1, predB1, max.iter, perc.full, thr.conf)
+    result <- selfTrainingG(y, learnerB1, predB1, max.iter, perc.full, thr.conf)
     result$model <- result$model$m
   }else{
     # Instance matrix case
@@ -281,7 +281,7 @@ selfTraining <- function(
       return(prob)
     }
     
-    result <- selfTrainingBase(y, learnerB2, predB2, max.iter, perc.full, thr.conf)
+    result <- selfTrainingG(y, learnerB2, predB2, max.iter, perc.full, thr.conf)
   }
  
   ### Result ###

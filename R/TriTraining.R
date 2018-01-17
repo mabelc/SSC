@@ -1,5 +1,5 @@
 
-#' @title Tri-training base method
+#' @title Tri-training generic method
 #' @description Tri-training is a semi-supervised learning algorithm with a co-training 
 #' style. This algorithm trains three classifiers with the same learning scheme from a 
 #' reduced set of labeled examples. For each iteration, an unlabeled example is labeled 
@@ -14,12 +14,12 @@
 #' is a classifier trained with \code{learnerB} function and
 #' indexes indicates the instances to predict.
 #' @details 
-#' TriTrainingBase can be helpful in those cases where the method selected as 
+#' TriTrainingG can be helpful in those cases where the method selected as 
 #' base classifier needs a \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general triTraining method,
 #' please see \code{\link{triTraining}} function. Essentially, \code{triTraining}
-#' function is a wrapper of \code{triTrainingBase} function.
-#' @return A list object of class "triTrainingBase" containing:
+#' function is a wrapper of \code{triTrainingG} function.
+#' @return A list object of class "triTrainingG" containing:
 #' \describe{
 #'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
 #'   \item{model.index}{List of three vectors of indexes related to the training instances 
@@ -29,9 +29,9 @@
 #'   and the newly labeled instances.
 #'   These indexes are relative to the \code{y} argument.}
 #' }
-#' @example demo/TriTrainingBase.R
+#' @example demo/TriTrainingG.R
 #' @export
-triTrainingBase <- function(
+triTrainingG <- function(
   y, learnerB, predB
 ){
   ### Check parameters ###
@@ -195,7 +195,7 @@ triTrainingBase <- function(
     model.index.map = model.index.map,
     instances.index = instances.index
   )
-  class(result) <- "triTrainingBase"
+  class(result) <- "triTrainingG"
   
   return(result)
 }
@@ -290,7 +290,7 @@ triTraining <- function(
       return(prob)
     }
     
-    result <- triTrainingBase(y, learnerB1, predB1)
+    result <- triTrainingG(y, learnerB1, predB1)
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case
@@ -312,7 +312,7 @@ triTraining <- function(
       return(prob)
     }
     
-    result <- triTrainingBase(y, learnerB2, predB2)
+    result <- triTrainingG(y, learnerB2, predB2)
   }
   
   ### Result ###

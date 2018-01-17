@@ -1,5 +1,5 @@
 
-#' @title Democratic base method
+#' @title Democratic generic method
 #' @description Democratic is a semi-supervised learning algorithm with a co-training 
 #' style. This algorithm trains N classifiers with different learning schemes defined in 
 #' list \code{learnersB}. During the iterative process, the multiple classifiers with 
@@ -14,12 +14,12 @@
 #' is a classifier trained with \code{learnerB} function and
 #' indexes indicates the instances to predict.
 #' @details 
-#' democraticBase can be helpful in those cases where the method selected as 
+#' democraticG can be helpful in those cases where the method selected as 
 #' base classifier needs a \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general democratic method,
 #' please see \code{\link{democratic}} function. Essentially, \code{democratic}
-#' function is a wrapper of \code{democraticBase} function.
-#' @return A list object of class "democraticBase" containing:
+#' function is a wrapper of \code{democraticG} function.
+#' @return A list object of class "democraticG" containing:
 #' \describe{
 #'   \item{W}{A vector with the confidence-weighted vote assigned to each classifier.}
 #'   \item{model}{A list with the final N base classifiers trained using the 
@@ -37,9 +37,9 @@
 #' \emph{Democratic co-learning.}\cr
 #' In IEEE 16th International Conference on Tools with Artificial Intelligence (ICTAI),
 #' pages 594-602. IEEE, Nov 2004. doi: 10.1109/ICTAI.2004.48.
-#' @example demo/DemocraticBase.R
+#' @example demo/DemocraticG.R
 #' @export
-democraticBase <- function(
+democraticG <- function(
   y,
   learnersB,
   predsB
@@ -269,7 +269,7 @@ democraticBase <- function(
     instances.index = instances.index,
     classes = classes
   )
-  class(result) <- "democraticBase"
+  class(result) <- "democraticG"
   
   return(result)
 }
@@ -388,7 +388,7 @@ democratic <- function(
       SIMPLIFY = FALSE
     )
     # Call base method
-    result <- democraticBase(y, d_learners_base, d_preds_base)
+    result <- democraticG(y, d_learners_base, d_preds_base)
     # Extract model from list created in learnerB
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
@@ -429,7 +429,7 @@ democratic <- function(
       SIMPLIFY = FALSE
     )
     # Call base method
-    result <- democraticBase(y, m_learners_base, m_preds_base)
+    result <- democraticG(y, m_learners_base, m_preds_base)
   }
   
   ### Result ###

@@ -1,5 +1,5 @@
 
-#' @title CoBC base method
+#' @title CoBC generic method
 #' @description CoBC is a semi-supervised learning algorithm with a co-training 
 #' style. This algorithm trains \code{N} classifiers with the learning scheme defined in 
 #' \code{learnerB} using a reduced set of labeled examples. For each iteration, an unlabeled 
@@ -24,12 +24,12 @@
 #' @param max.iter Maximum number of iterations to execute in the self-labeling process. 
 #' Default is 50.
 #' @details 
-#' coBCBase can be helpful in those cases where the method selected as 
+#' coBCG can be helpful in those cases where the method selected as 
 #' base classifier needs a \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general coBC method,
 #' please see \code{\link{coBC}} function. Essentially, \code{coBC}
-#' function is a wrapper of \code{coBCBase} function.
-#' @return A list object of class "coBCBase" containing:
+#' function is a wrapper of \code{coBCG} function.
+#' @return A list object of class "coBCG" containing:
 #' \describe{
 #'   \item{model}{The final \code{N} base classifiers trained using the enlarged labeled set.}
 #'   \item{model.index}{List of \code{N} vectors of indexes related to the training instances 
@@ -40,9 +40,9 @@
 #'   These indexes are relative to the \code{y} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
 #' }
-#' @example demo/CoBCBase.R
+#' @example demo/CoBCG.R
 #' @export
-coBCBase <- function(
+coBCG <- function(
   y,
   learnerB,
   predB,
@@ -209,7 +209,7 @@ coBCBase <- function(
     instances.index = instances.index,
     classes = classes
   )
-  class(result) <- "coBCBase"
+  class(result) <- "coBCG"
   
   return(result)
 }
@@ -319,7 +319,7 @@ coBC <- function(
       return(prob)
     }
     
-    result <- coBCBase(y, learnerB1, predB1, N, perc.full, u, max.iter)
+    result <- coBCG(y, learnerB1, predB1, N, perc.full, u, max.iter)
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
   }else{
     # Instance matrix case
@@ -341,7 +341,7 @@ coBC <- function(
       return(prob)
     }
     
-    result <- coBCBase(y, learnerB2, predB2, N, perc.full, u, max.iter)
+    result <- coBCG(y, learnerB2, predB2, N, perc.full, u, max.iter)
   }
   
   ### Result ###
