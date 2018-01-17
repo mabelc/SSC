@@ -212,7 +212,8 @@ triTrainingBase <- function(
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
 #' @param learner either a function or a string naming the function for 
-#' training the supervised base classifiers.
+#' training a supervised base classifier, using a set of instances
+#' (or optionally a distance matrix) and it's corresponding classes.
 #' @param learner.pars A list with additional parameters for the
 #' \code{learner} function if necessary.
 #' @param pred either a function or a string naming the function for

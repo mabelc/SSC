@@ -286,7 +286,7 @@ democraticBase <- function(
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
 #' @param learners A list of functions or strings naming the functions for 
-#' training the different supervised base classifiers.
+#' training the different supervised base classifiers. 
 #' @param learners.pars A list with the set of additional parameters for each
 #' learner functions if necessary.
 #' @param preds A list of functions or strings naming the functions for

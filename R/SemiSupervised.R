@@ -4,7 +4,8 @@
 #' @param x matrix of training instances
 #' @param y factor of classes
 #' @param learner either a function or a string naming the function for 
-#' training a supervised base classifier
+#' training a supervised base classifier, using a set of instances
+#' (or optionally a distance matrix) and it's corresponding classes.
 #' @param learner.pars a list with parameters that are to be passed to the \code{learner}
 #' function.
 #' @return the trained model 

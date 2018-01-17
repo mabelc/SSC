@@ -22,7 +22,8 @@ in the \code{proxy} package to compute
 the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
 
 \item{learner}{either a function or a string naming the function for 
-training a supervised base classifier.}
+training a supervised base classifier, using a set of instances
+(or optionally a distance matrix) and it's corresponding classes.}
 
 \item{learner.pars}{A list with additional parameters for the
 \code{learner} function if necessary.}
