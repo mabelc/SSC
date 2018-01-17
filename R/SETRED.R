@@ -223,8 +223,9 @@ setredBase <- function(
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param D A distance matrix between all the training instances. This matrix is used to 
-#' construct the neighborhood graph.
+#' @param dist A distance function or the name of a distance available
+#' in the \code{proxy} package to compute 
+#' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier.
 #' @param learner.pars A list with additional parameters for the
@@ -247,7 +248,11 @@ setredBase <- function(
 #' labeled set. In each iteration, the \code{learner} function detects unlabeled 
 #' examples on which it makes most confident prediction and labels those examples 
 #' according to the \code{pred} function. The identification of mislabeled examples is 
-#' performed using a neighborhood graph created from distance matrix \code{D}. 
+#' performed using a neighborhood graph created from the distance matrix.
+#' When \code{x.dist} is \code{FALSE} this distance matrix is computed using 
+#' \code{dist} function. On the other hand, when \code{x.dist} is \code{TRUE}
+#' the matrix provide with \code{x} is used both to train a classifier and to create
+#' the neighborhood graph.
 #' Most examples possess the same label in a neighborhood. So if an example locates 
 #' in a neighborhood with too many neighbors from different classes, this example should 
 #' be considered problematic. The value of the \code{theta} argument controls the confidence 
@@ -276,7 +281,8 @@ setredBase <- function(
 #' @example demo/SETRED.R
 #' @export
 setred <- function(
-  x, y, D,
+  x, y, 
+  dist = "Euclidean",
   learner, learner.pars = list(),
   pred, pred.pars = list(),
   x.dist = FALSE,
@@ -316,7 +322,7 @@ setred <- function(
       return(prob)
     }
     
-    result <- setredBase(y, D, learnerB1, predB1, theta, max.iter, perc.full)
+    result <- setredBase(y, x, learnerB1, predB1, theta, max.iter, perc.full)
     result$model <- result$model$m
   }else{
     # Instance matrix case
@@ -337,7 +343,12 @@ setred <- function(
       prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
       return(prob)
     }
-    result <- setredBase(y, D, learnerB2, predB2, theta, max.iter, perc.full)
+    result <- setredBase(
+      y, 
+      D = proxy::dist(x, method = dist, by_rows = TRUE, diag = TRUE, upper = TRUE),
+      learnerB2, predB2, 
+      theta, max.iter, perc.full
+    )
   }
   
   ### Result ###

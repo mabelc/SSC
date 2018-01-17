@@ -4,8 +4,9 @@
 \alias{setred}
 \title{SETRED method}
 \usage{
-setred(x, y, D, learner, learner.pars = list(), pred, pred.pars = list(),
-  x.dist = FALSE, theta = 0.1, max.iter = 50, perc.full = 0.7)
+setred(x, y, dist = "Euclidean", learner, learner.pars = list(), pred,
+  pred.pars = list(), x.dist = FALSE, theta = 0.1, max.iter = 50,
+  perc.full = 0.7)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -16,8 +17,9 @@ training instances where each row represents a single instance.}
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{D}{A distance matrix between all the training instances. This matrix is used to 
-construct the neighborhood graph.}
+\item{dist}{A distance function or the name of a distance available
+in the \code{proxy} package to compute 
+the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
 
 \item{learner}{either a function or a string naming the function for 
 training a supervised base classifier.}
@@ -72,7 +74,11 @@ SETRED initiates the self-labeling process by training a model from the original
 labeled set. In each iteration, the \code{learner} function detects unlabeled 
 examples on which it makes most confident prediction and labels those examples 
 according to the \code{pred} function. The identification of mislabeled examples is 
-performed using a neighborhood graph created from distance matrix \code{D}. 
+performed using a neighborhood graph created from the distance matrix.
+When \code{x.dist} is \code{FALSE} this distance matrix is computed using 
+\code{dist} function. On the other hand, when \code{x.dist} is \code{TRUE}
+the matrix provide with \code{x} is used both to train a classifier and to create
+the neighborhood graph.
 Most examples possess the same label in a neighborhood. So if an example locates 
 in a neighborhood with too many neighbors from different classes, this example should 
 be considered problematic. The value of the \code{theta} argument controls the confidence 
@@ -108,11 +114,8 @@ tst.idx <- setdiff(1:length(y), tra.idx)
 xitest <- x[tst.idx,] # testing instances
 yitest <- y[tst.idx] # classes of testing instances
 
-# Compute distances between training instances
-D <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
-
 ## Example: Training from a set of instances with 1-NN as base classifier.
-m1 <- setred(x = xtrain, y = ytrain, D, 
+m1 <- setred(x = xtrain, y = ytrain, dist = "euclidean", 
             learner = caret::knn3, 
             learner.pars = list(k = 1),
             pred = "predict")
@@ -120,7 +123,11 @@ pred1 <- predict(m1, xitest)
 table(pred1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN as base classifier.
-m2 <- setred(x = D, y = ytrain, D, x.dist = TRUE,
+# Compute distances between training instances
+library(proxy)
+D <- dist(x = xtrain, method = "euclidean", by_rows = TRUE)
+
+m2 <- setred(x = D, y = ytrain, x.dist = TRUE,
             learner = ssc::oneNN, 
             pred = "predict",
             pred.pars = list(type = "prob", initial.value = 0))
@@ -138,12 +145,12 @@ pred <- function(m, x){
   prob <- attr(r, "probabilities")
   prob
 }
-m3 <- setred(x = xtrain, y = ytrain, D, learner, learner.pars, pred)
+m3 <- setred(x = xtrain, y = ytrain, dist = "euclidean", learner, learner.pars, pred)
 pred3 <- predict(m3, xitest)
 table(pred3, yitest)
 
 ## Example: Training from a set of instances with Naive-Bayes as base classifier.
-m4 <- setred(x = xtrain, y = ytrain, D,
+m4 <- setred(x = xtrain, y = ytrain, dist = "euclidean",
              learner = function(x, y) e1071::naiveBayes(x, y), 
              pred = "predict",
              pred.pars = list(type = "raw"))
@@ -151,7 +158,7 @@ pred4 <- predict(m4, xitest)
 table(pred4, yitest)
 
 ## Example: Training from a set of instances with C5.0 as base classifier.
-m5 <- setred(x = xtrain, y = ytrain, D,
+m5 <- setred(x = xtrain, y = ytrain, dist = "euclidean",
              learner = C50::C5.0, 
              pred = "predict",
              pred.pars = list(type = "prob"))
