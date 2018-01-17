@@ -545,7 +545,7 @@ predict.democratic <- function(object, x, ...){
 #' @param classes the classes.
 #' @return The classification proposed.
 #' @export
-democraticCombining <- function(pred, W, classes){
+democraticCombine <- function(pred, W, classes){
   # Check relation between pred and W
   if(length(pred) != length(W)){
     stop("The lengths of 'pred' and 'W' parameters are not equals.")
