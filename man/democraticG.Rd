@@ -90,12 +90,18 @@ knn.prob <- function(model, indexes) {
 
 ### Define svm base classifier using ksvm from kernlab package
 library(kernlab)
+library(proxy)
 # learner function
 svm <- function(indexes, cls) {
+  rbf <- function(x, y) {
+    sigma <- 0.048
+    d <- dist(x, y, method = "Euclidean", by_rows = FALSE)
+    exp(-sigma *  d * d)
+  }
+  class(rbf) <- "kernel"
   ksvm(x = xtrain[indexes, ], y = cls, scaled = FALSE,
        type = "C-svc",  C = 1,
-       kernel = "rbfdot", kpar = list(sigma = 0.048),
-       prob.model = TRUE)
+       kernel = rbf, prob.model = TRUE)
 }
 # function to predict probabilities
 svm.prob <- function(model, indexes) {
@@ -104,8 +110,8 @@ svm.prob <- function(model, indexes) {
 
 ### Train
 m1 <- democraticG(y = ytrain, 
-                     learnersB = list(knn, svm), 
-                     predsB = list(knn.prob, svm.prob))
+                  learnersB = list(knn, svm), 
+                  predsB = list(knn.prob, svm.prob))
 ### Predict
 # predict labels using each classifier
 m1.pred1 <- predict(m1$model[[1]], xitest, type = "class")
@@ -123,7 +129,6 @@ table(cls1, yitest)
 library(ssc)
 # Compute distance matrix D
 # D is used in knn2.prob
-library(proxy)
 D <- as.matrix(dist(x = xtrain, method = "euclidean", by_rows = TRUE))
 # learner function
 knn2 <- function(indexes, cls) {
@@ -143,8 +148,8 @@ library(kernlab)
 
 # Compute kernel matrix K
 # K is used in svm2 and svm2.prob functions
-rbfkernel = rbfdot(sigma = 0.048)
-K <- kernelMatrix(rbfkernel, x = xtrain)
+sigma <- 0.048
+K <- exp(- sigma * D * D)
 
 # learner function
 svm2 <- function(indexes, cls) {
@@ -166,8 +171,8 @@ svm2.prob <- function(model, indexes)  {
 
 ### Train
 m2 <- democraticG(y = ytrain, 
-                     learnersB = list(knn2, svm2), 
-                     predsB = list(knn2.prob, svm2.prob))
+                  learnersB = list(knn2, svm2), 
+                  predsB = list(knn2.prob, svm2.prob))
 
 ### Predict
 # Compute distance matrix Ditest
@@ -177,8 +182,11 @@ Ditest <- dist(x = xitest, y = xtrain[m2$model.index[[1]],],
 m2.pred1 <- predict(m2$model[[1]], Ditest)
 
 # Compute kernel matrix Kitest
-sv.idxs <- m2$model.index[[2]][SVindex(m2$model[[2]])]
-Kitest <- kernelMatrix(rbfkernel, x = xitest, y = xtrain[sv.idxs, ])
+sv.idxs <- SVindex(m2$model[[2]])
+sv.idxs <- m2$model.index.map[[2]][sv.idxs]
+Kitest <- Ditest[, sv.idxs]
+Kitest <- exp(- sigma * Kitest * Kitest)
+Kitest <- as.kernelMatrix(Kitest)
 # predict using classifier 2
 m2.pred2 <- predict(m2$model[[2]], Kitest)
 
