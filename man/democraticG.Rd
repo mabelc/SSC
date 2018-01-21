@@ -4,17 +4,17 @@
 \alias{democraticG}
 \title{Democratic generic method}
 \usage{
-democraticG(y, learnersB, predsB)
+democraticG(y, gen.learners, gen.preds)
 }
 \arguments{
 \item{y}{A vector with the labels of training instances. In this vector the 
 unlabeled instances are specified with the value \code{NA}.}
 
-\item{learnersB}{A list of functions for training N different supervised base classifiers.
+\item{gen.learners}{A list of functions for training N different supervised base classifiers.
 Each function needs two parameters, indexes and cls, where indexes indicates
 the instances to use and cls specifies the classes of those instances.}
 
-\item{predsB}{A list of functions for predicting the probabilities per classes.
+\item{gen.preds}{A list of functions for predicting the probabilities per classes.
 Each function must be two parameters, model and indexes, where the model
 is a classifier trained with \code{gen.learner} function and
 indexes indicates the instances to predict.}
@@ -37,7 +37,7 @@ A list object of class "democraticG" containing:
 \description{
 Democratic is a semi-supervised learning algorithm with a co-training 
 style. This algorithm trains N classifiers with different learning schemes defined in 
-list \code{learnersB}. During the iterative process, the multiple classifiers with 
+list \code{gen.learners}. During the iterative process, the multiple classifiers with
 different inductive biases label data for each other.
 }
 \details{
@@ -110,8 +110,8 @@ svm.prob <- function(model, indexes) {
 
 ### Train
 m1 <- democraticG(y = ytrain, 
-                  learnersB = list(knn, svm), 
-                  predsB = list(knn.prob, svm.prob))
+                  gen.learners = list(knn, svm),
+                  gen.preds = list(knn.prob, svm.prob))
 ### Predict
 # predict labels using each classifier
 m1.pred1 <- predict(m1$model[[1]], xitest, type = "class")
@@ -171,8 +171,8 @@ svm2.prob <- function(model, indexes)  {
 
 ### Train
 m2 <- democraticG(y = ytrain, 
-                  learnersB = list(knn2, svm2), 
-                  predsB = list(knn2.prob, svm2.prob))
+                  gen.learners = list(knn2, svm2),
+                  gen.preds = list(knn2.prob, svm2.prob))
 
 ### Predict
 # Compute distance matrix Ditest

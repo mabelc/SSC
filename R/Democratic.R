@@ -2,14 +2,14 @@
 #' @title Democratic generic method
 #' @description Democratic is a semi-supervised learning algorithm with a co-training 
 #' style. This algorithm trains N classifiers with different learning schemes defined in 
-#' list \code{learnersB}. During the iterative process, the multiple classifiers with 
+#' list \code{gen.learners}. During the iterative process, the multiple classifiers with
 #' different inductive biases label data for each other.
 #' @param y A vector with the labels of training instances. In this vector the 
 #' unlabeled instances are specified with the value \code{NA}.
-#' @param learnersB A list of functions for training N different supervised base classifiers.
+#' @param gen.learners A list of functions for training N different supervised base classifiers.
 #' Each function needs two parameters, indexes and cls, where indexes indicates
 #' the instances to use and cls specifies the classes of those instances.
-#' @param predsB A list of functions for predicting the probabilities per classes.
+#' @param gen.preds A list of functions for predicting the probabilities per classes.
 #' Each function must be two parameters, model and indexes, where the model
 #' is a classifier trained with \code{gen.learner} function and
 #' indexes indicates the instances to predict.
@@ -41,8 +41,8 @@
 #' @export
 democraticG <- function(
   y,
-  learnersB,
-  predsB
+  gen.learners,
+  gen.preds
 ) {
   ### Check parameters ###
   # Check y 
@@ -54,12 +54,12 @@ democraticG <- function(
     }
   }
   # Check lengths
-  if(length(learnersB) != length(predsB)){
-    stop("The length of learnersB is not equal to the length of predsB.")
+  if(length(gen.learners) != length(gen.preds)){
+    stop("The length of gen.learners is not equal to the length of gen.preds.")
   }
-  nclassifiers <- length(learnersB) 
+  nclassifiers <- length(gen.learners)
   if (nclassifiers <= 1) {
-    stop("learnersB must contain at least two base classifiers.") 
+    stop("gen.learners must contain at least two base classifiers.")
   }
   
   ### Init variables ###
@@ -91,7 +91,7 @@ democraticG <- function(
   Lcls <- vector(mode = "list", length = nclassifiers)
   e <- vector(mode = "numeric", length = nclassifiers)
   for (i in 1:nclassifiers) {
-    H[[i]] <- learnersB[[i]](labeled, y[labeled])
+    H[[i]] <- gen.learners[[i]](labeled, y[labeled])
     Lind[[i]] <- labeled
     Lcls[[i]] <- y.map[labeled]
     e[i] <- 0
@@ -117,7 +117,7 @@ democraticG <- function(
           )
         )
       },
-      H, predsB
+      H, gen.preds
     )
     
     cls <- vote(predU) # etiquetas votadas
@@ -138,7 +138,7 @@ democraticG <- function(
           y.map[labeled]
         )$W
       },
-      H, predsB
+      H, gen.preds
     )
     
     for (i in 1:nunlabeled) { #for each unlabeled example x in U
@@ -206,7 +206,7 @@ democraticG <- function(
           Lcls[[i]]
         )$L
       },
-      H, predsB
+      H, gen.preds
     )
     
     q <- ep <- qp <- NULL
@@ -225,7 +225,7 @@ democraticG <- function(
           changes <- TRUE
           # entrenar clasificador i
           yi <- classes[Lcls[[i]]]
-          H[[i]] <- learnersB[[i]](Lind[[i]], factor(yi, classes))
+          H[[i]] <- gen.learners[[i]](Lind[[i]], factor(yi, classes))
         }
       }
     } # end for each classifier
@@ -257,7 +257,7 @@ democraticG <- function(
         y.map[labeled]
       )$W
     },
-    H, predsB
+    H, gen.preds
   )
   
   # Save result
@@ -277,7 +277,7 @@ democraticG <- function(
 #' @title Democratic method
 #' @description Democratic Co-Learning is a semi-supervised learning algorithm with a 
 #' co-training style. This algorithm trains N classifiers with different learning schemes 
-#' defined in list \code{learnersB}. During the iterative process, the multiple classifiers 
+#' defined in list \code{gen.learners}. During the iterative process, the multiple classifiers
 #' with different inductive biases label data for each other.
 #' @param x A object that can be coerced as matrix. This object has two possible 
 #' interpretations according to the value set in \code{x.dist} argument: 

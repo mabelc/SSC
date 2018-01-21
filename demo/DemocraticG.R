@@ -60,8 +60,8 @@ svm.prob <- function(model, indexes) {
 
 ### Train
 m1 <- democraticG(y = ytrain, 
-                  learnersB = list(knn, svm), 
-                  predsB = list(knn.prob, svm.prob))
+                  gen.learners = list(knn, svm),
+                  gen.preds = list(knn.prob, svm.prob))
 ### Predict
 # predict labels using each classifier
 m1.pred1 <- predict(m1$model[[1]], xitest, type = "class")
@@ -121,8 +121,8 @@ svm2.prob <- function(model, indexes)  {
 
 ### Train
 m2 <- democraticG(y = ytrain, 
-                  learnersB = list(knn2, svm2), 
-                  predsB = list(knn2.prob, svm2.prob))
+                  gen.learners = list(knn2, svm2),
+                  gen.preds = list(knn2.prob, svm2.prob))
 
 ### Predict
 # Compute distance matrix Ditest

@@ -52,7 +52,7 @@ A list object of class "democratic" containing:
 \description{
 Democratic Co-Learning is a semi-supervised learning algorithm with a 
 co-training style. This algorithm trains N classifiers with different learning schemes 
-defined in list \code{learnersB}. During the iterative process, the multiple classifiers 
+defined in list \code{gen.learners}. During the iterative process, the multiple classifiers
 with different inductive biases label data for each other.
 }
 \details{
