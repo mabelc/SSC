@@ -245,10 +245,10 @@ predict.snnrceG <- function(object, D, ...) {
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param dist A distance function available in the \code{proxy} package to compute 
-#' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
 #' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
 #' Default is \code{FALSE}.
+#' @param dist A distance function available in the \code{proxy} package to compute 
+#' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
 #' @param alpha Rejection threshold to test the critical region. Default is 0.1.
 #' @details 
 #' SNNRCE initiates the self-labeling process by training a 1-NN from the original 
@@ -281,9 +281,8 @@ predict.snnrceG <- function(object, D, ...) {
 #' @example demo/SNNRCE.R
 #' @export
 snnrce <- function(
-  x, y,
+  x, y, x.dist = FALSE,
   dist = "Euclidean",
-  x.dist = FALSE,
   alpha = 0.1
 ){
   ### Check parameters ###

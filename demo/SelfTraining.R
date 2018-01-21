@@ -52,7 +52,10 @@ pred <- function(m, x){
   prob <- attr(r, "probabilities")
   prob
 }
-m3 <- selfTraining(x = xtrain, y = ytrain, learner, learner.pars, pred)
+m3 <- selfTraining(x = xtrain, y = ytrain, 
+                   learner = learner, 
+                   learner.pars = learner.pars, 
+                   pred = pred)
 pred3 <- predict(m3, xitest)
 table(pred3, yitest)
 

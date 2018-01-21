@@ -228,6 +228,8 @@ coBCG <- function(
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
+#' Default is \code{FALSE}. 
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier, using a set of instances
 #' (or optionally a distance matrix) and it's corresponding classes.
@@ -238,8 +240,6 @@ coBCG <- function(
 #' using the base classifiers trained with the \code{learner} function.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}. 
 #' @param N The number of classifiers used as committee members. All these classifiers 
 #' are trained using the \code{gen.learner} function. Default is 3.
 #' @param perc.full A number between 0 and 1. If the percentage 
@@ -277,10 +277,9 @@ coBCG <- function(
 #' @example demo/CoBC.R
 #' @export
 coBC <- function(
-  x, y,
+  x, y, x.dist = FALSE,
   learner, learner.pars = list(),
   pred, pred.pars = list(),
-  x.dist = FALSE,
   N = 3,
   perc.full = 0.7,
   u = 100, 

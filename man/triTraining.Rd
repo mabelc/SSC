@@ -4,8 +4,8 @@
 \alias{triTraining}
 \title{Tri-training method}
 \usage{
-triTraining(x, y, learner, learner.pars = list(), pred, pred.pars = list(),
-  x.dist = FALSE)
+triTraining(x, y, x.dist = FALSE, learner, learner.pars = list(), pred,
+  pred.pars = list())
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -15,6 +15,9 @@ training instances where each row represents a single instance.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
+
+\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
+Default is \code{FALSE}.}
 
 \item{learner}{either a function or a string naming the function for 
 training a supervised base classifier, using a set of instances
@@ -29,9 +32,6 @@ using the base classifiers trained with the \code{learner} function.}
 
 \item{pred.pars}{A list with additional parameters for the
 \code{pred} function if necessary.}
-
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
 }
 \value{
 A list object of class "triTraining" containing:
@@ -122,7 +122,10 @@ pred <- function(m, x){
   prob
 }
 set.seed(1)
-m3 <- triTraining(x = xtrain, y = ytrain, learner, learner.pars, pred)
+m3 <- triTraining(x = xtrain, y = ytrain, 
+                  learner = learner, 
+                  learner.pars = learner.pars, 
+                  pred = pred)
 pred3 <- predict(m3, xitest)
 table(pred3, yitest)
 

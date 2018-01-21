@@ -4,7 +4,7 @@
 \alias{democratic}
 \title{Democratic method}
 \usage{
-democratic(x, y, learners, learners.pars, preds, preds.pars, x.dist = FALSE)
+democratic(x, y, x.dist = FALSE, learners, learners.pars, preds, preds.pars)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -14,6 +14,9 @@ training instances where each row represents a single instance.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
+
+\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
+Default is \code{FALSE}.}
 
 \item{learners}{A list of functions or strings naming the functions for 
 training the different supervised base classifiers.}
@@ -27,9 +30,6 @@ using the base classifiers trained with the functions defined in \code{learners}
 
 \item{preds.pars}{A list with the set of additional parameters for each
 function in \code{preds} if necessary.}
-
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
 }
 \value{
 A list object of class "democratic" containing:

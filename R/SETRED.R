@@ -223,6 +223,8 @@ setredG <- function(
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
+#' Default is \code{FALSE}. 
 #' @param dist A distance function or the name of a distance available
 #' in the \code{proxy} package to compute 
 #' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
@@ -236,8 +238,6 @@ setredG <- function(
 #' using the base classifier trained with the \code{learner} function.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}. 
 #' @param theta Rejection threshold to test the critical region. Default is 0.1.
 #' @param max.iter maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
@@ -282,11 +282,10 @@ setredG <- function(
 #' @example demo/SETRED.R
 #' @export
 setred <- function(
-  x, y, 
+  x, y, x.dist = FALSE,
   dist = "Euclidean",
   learner, learner.pars = list(),
   pred, pred.pars = list(),
-  x.dist = FALSE,
   theta = 0.1,
   max.iter = 50,
   perc.full = 0.7

@@ -55,7 +55,10 @@ pred <- function(m, x){
   prob <- attr(r, "probabilities")
   prob
 }
-m3 <- setred(x = xtrain, y = ytrain, dist = "euclidean", learner, learner.pars, pred)
+m3 <- setred(x = xtrain, y = ytrain, dist = "euclidean", 
+             learner = learner, 
+             learner.pars = learner.pars, 
+             pred = pred)
 pred3 <- predict(m3, xitest)
 table(pred3, yitest)
 

@@ -4,7 +4,7 @@
 \alias{snnrce}
 \title{SNNRCE method}
 \usage{
-snnrce(x, y, dist = "Euclidean", x.dist = FALSE, alpha = 0.1)
+snnrce(x, y, x.dist = FALSE, dist = "Euclidean", alpha = 0.1)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -15,11 +15,11 @@ training instances where each row represents a single instance.}
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{dist}{A distance function available in the \code{proxy} package to compute 
-the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
-
 \item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
 Default is \code{FALSE}.}
+
+\item{dist}{A distance function available in the \code{proxy} package to compute 
+the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
 
 \item{alpha}{Rejection threshold to test the critical region. Default is 0.1.}
 }

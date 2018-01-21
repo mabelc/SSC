@@ -55,7 +55,10 @@ pred <- function(m, x){
   prob
 }
 set.seed(1)
-m3 <- triTraining(x = xtrain, y = ytrain, learner, learner.pars, pred)
+m3 <- triTraining(x = xtrain, y = ytrain, 
+                  learner = learner, 
+                  learner.pars = learner.pars, 
+                  pred = pred)
 pred3 <- predict(m3, xitest)
 table(pred3, yitest)
 

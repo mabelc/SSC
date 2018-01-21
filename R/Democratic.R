@@ -285,6 +285,8 @@ democraticG <- function(
 #' training instances where each row represents a single instance.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
+#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
+#' Default is \code{FALSE}.
 #' @param learners A list of functions or strings naming the functions for 
 #' training the different supervised base classifiers. 
 #' @param learners.pars A list with the set of additional parameters for each
@@ -294,8 +296,6 @@ democraticG <- function(
 #' using the base classifiers trained with the functions defined in \code{learners}.
 #' @param preds.pars A list with the set of additional parameters for each
 #' function in \code{preds} if necessary.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}.
 #' @details
 #' This method trains an ensemble of diverse classifiers. To promote the initial diversity 
 #' the classifiers must represent different learning schemes.
@@ -324,10 +324,9 @@ democraticG <- function(
 #' @example demo/Democratic.R
 #' @export
 democratic <- function(
-  x, y,
+  x, y, x.dist = FALSE,
   learners, learners.pars,
-  preds, preds.pars,
-  x.dist = FALSE
+  preds, preds.pars
 ) {
   ### Check parameters ###
   # Check x.dist
