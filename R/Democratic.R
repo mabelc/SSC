@@ -280,13 +280,13 @@ democraticG <- function(
 #' defined in list \code{gen.learners}. During the iterative process, the multiple classifiers
 #' with different inductive biases label data for each other.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in \code{x.dist} argument: 
-#' a matrix distance between the training examples or a matrix with the 
-#' training instances where each row represents a single instance.
+#' interpretations according to the value set in the \code{x.inst} argument:
+#' a matrix with the training instances where each row represents a single instance
+#' or a precomputed (distance or kernel) matrix between the training examples.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}.
+#' @param x.inst A boolean value that indicates if \code{x} is or not an instance matrix.
+#' Default is \code{TRUE}.
 #' @param learners A list of functions or strings naming the functions for 
 #' training the different supervised base classifiers. 
 #' @param learners.pars A list with the set of additional parameters for each
@@ -299,8 +299,8 @@ democraticG <- function(
 #' @details
 #' This method trains an ensemble of diverse classifiers. To promote the initial diversity 
 #' the classifiers must represent different learning schemes.
-#' When x.dist is \code{TRUE} all \code{learners} defined must be able to learn a classifier 
-#' from the distance matrix in \code{x}.
+#' When x.inst is \code{FALSE} all \code{learners} defined must be able to learn a classifier
+#' from the precomputed matrix in \code{x}.
 #' The iteration process of the algorithm ends when no changes occurs in 
 #' any model during a complete iteration.
 #' The generation of the final hypothesis is 
@@ -319,19 +319,19 @@ democraticG <- function(
 #'   \item{classes}{The levels of \code{y} factor.}
 #'   \item{preds}{The functions provided in the \code{preds} argument.}
 #'   \item{preds.pars}{The set of lists provided in the \code{preds.pars} argument.}
-#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
+#'   \item{x.inst}{The value provided in the \code{x.inst} argument.}
 #' }
 #' @example demo/Democratic.R
 #' @export
 democratic <- function(
-  x, y, x.dist = FALSE,
+  x, y, x.inst = TRUE,
   learners, learners.pars,
   preds, preds.pars
 ) {
   ### Check parameters ###
-  # Check x.dist
-  if(!is.logical(x.dist)){
-    stop("Parameter x.dist is not logical.")
+  # Check x.inst
+  if(!is.logical(x.inst)){
+    stop("Parameter x.inst is not logical.")
   }
   # Check learners
   if (length(learners)  <= 1) {
@@ -343,7 +343,46 @@ democratic <- function(
     stop("The lists: learners, learners.pars, preds and preds.pars must be of the same length.")
   }
   
-  if(x.dist){
+  if(x.inst){
+    # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+    
+    # Build learner base functions
+    m_learners_base <- mapply(
+      FUN = function(learner, learner.pars){
+        learner_base <- function(training.ints, cls){
+          m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
+          return(m)
+        }
+        return(learner_base)
+      }, 
+      learners,
+      learners.pars,
+      SIMPLIFY = FALSE
+    )
+    # Build pred base functions 
+    m_preds_base <- mapply(
+      FUN = function(pred, pred.pars){
+        pred_base <-  function(m, testing.ints){
+          prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
+          return(prob)
+        }
+        return(pred_base)
+      }, 
+      preds,
+      preds.pars,
+      SIMPLIFY = FALSE
+    )
+    # Call base method
+    result <- democraticG(y, m_learners_base, m_preds_base)
+  }else{
     # Distance matrix case
     # Check matrix distance in x
     if(class(x) == "dist"){
@@ -390,51 +429,12 @@ democratic <- function(
     result <- democraticG(y, d_learners_base, d_preds_base)
     # Extract model from list created in gen.learner
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
-  }else{
-    # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
-    # Build learner base functions
-    m_learners_base <- mapply(
-      FUN = function(learner, learner.pars){
-        learner_base <- function(training.ints, cls){
-          m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
-          return(m)
-        }
-        return(learner_base)
-      }, 
-      learners,
-      learners.pars,
-      SIMPLIFY = FALSE
-    )
-    # Build pred base functions 
-    m_preds_base <- mapply(
-      FUN = function(pred, pred.pars){
-        pred_base <-  function(m, testing.ints){
-          prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
-          return(prob)
-        }
-        return(pred_base)
-      }, 
-      preds,
-      preds.pars,
-      SIMPLIFY = FALSE
-    )
-    # Call base method
-    result <- democraticG(y, m_learners_base, m_preds_base)
   }
   
   ### Result ###
   result$preds = preds
   result$preds.pars = preds.pars
-  result$x.dist = x.dist
+  result$x.inst = x.inst
   class(result) <- "democratic"
   
   return(result)
@@ -479,7 +479,22 @@ predict.democratic <- function(object, x, ...){
   # The matrix have one column per selected classifier 
   # and one row per instance
   ninstances = nrow(x)
-  if(object$x.dist){
+  if(object$x.inst){
+    pred <- mapply(
+      FUN = function(model, pred, pred.pars){
+        getClassIdx(
+          checkProb(
+            predProb(model, x, pred, pred.pars), 
+            ninstances, 
+            object$classes 
+          )
+        ) 
+      },
+      object$model[selected],
+      object$preds[selected],
+      object$preds.pars[selected]
+    )
+  }else{
     pred <- mapply(
       FUN = function(model, indexes, pred, pred.pars){
         getClassIdx(
@@ -493,21 +508,6 @@ predict.democratic <- function(object, x, ...){
       object$model[selected], 
       object$model.index.map[selected], 
       object$preds[selected], 
-      object$preds.pars[selected]
-    )
-  }else{
-    pred <- mapply(
-      FUN = function(model, pred, pred.pars){
-        getClassIdx(
-          checkProb(
-            predProb(model, x, pred, pred.pars), 
-            ninstances, 
-            object$classes 
-          )
-        ) 
-      },
-      object$model[selected],
-      object$preds[selected],
       object$preds.pars[selected]
     )
   }

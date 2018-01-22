@@ -153,13 +153,13 @@ selfTrainingG <- function(
 #' Self-training follows a wrapper methodology using one base supervised 
 #' classifier to establish the possible class of unlabeled instances. 
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in the \code{x.dist} argument: 
-#' a matrix distance between the training examples or a matrix with the 
-#' training instances where each row represents a single instance.
+#' interpretations according to the value set in the \code{x.inst} argument:
+#' a matrix with the training instances where each row represents a single instance
+#' or a precomputed (distance or kernel) matrix between the training examples.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}. 
+#' @param x.inst A boolean value that indicates if \code{x} is or not an instance matrix.
+#' Default is \code{TRUE}. 
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier, using a set of instances
 #' (or optionally a distance matrix) and it's corresponding classes.
@@ -182,7 +182,7 @@ selfTrainingG <- function(
 #' For predicting the most accurate instances per iteration, \code{selfTraining}
 #' uses the predictions obtained with the learner specified. To train a model 
 #' using the \code{learner} function, it is required a set of instances 
-#' (or a distance matrix between the instances if \code{x.dist} parameter is \code{TRUE})
+#' (or a precomputed matrix between the instances if \code{x.inst} parameter is \code{FALSE})
 #' in conjunction with the corresponding classes. 
 #' Additionals parameters are provided to the \code{learner} function via the 
 #' \code{learner.pars} argument. The model obtained is a supervised classifier
@@ -219,7 +219,7 @@ selfTrainingG <- function(
 #' @example demo/SelfTraining.R
 #' @export
 selfTraining <- function(
-  x, y, x.dist = FALSE,
+  x, y, x.inst = TRUE,
   learner, learner.pars = list(),
   pred, pred.pars = list(),
   max.iter = 50,
@@ -227,12 +227,33 @@ selfTraining <- function(
   thr.conf = 0.5
 ){
   ### Check parameters ###
-  # Check x.dist
-  if(!is.logical(x.dist)){
-    stop("Parameter x.dist is not logical.")
+  # Check x.inst
+  if(!is.logical(x.inst)){
+    stop("Parameter x.inst is not logical.")
   }
   
-  if(x.dist){
+  if(x.inst){
+    # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+    
+    gen.learner2 <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
+      return(m)
+    }
+    gen.pred2 <- function(m, testing.ints){
+      prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
+      return(prob)
+    }
+    
+    result <- selfTrainingG(y, gen.learner2, gen.pred2, max.iter, perc.full, thr.conf)
+  }else{
     # Distance matrix case
     # Check matrix distance in x
     if(class(x) == "dist"){
@@ -260,27 +281,6 @@ selfTraining <- function(
     
     result <- selfTrainingG(y, gen.learner1, gen.pred1, max.iter, perc.full, thr.conf)
     result$model <- result$model$m
-  }else{
-    # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
-    gen.learner2 <- function(training.ints, cls){
-      m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
-      return(m)
-    }
-    gen.pred2 <- function(m, testing.ints){
-      prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
-      return(prob)
-    }
-    
-    result <- selfTrainingG(y, gen.learner2, gen.pred2, max.iter, perc.full, thr.conf)
   }
  
   ### Result ###

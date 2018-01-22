@@ -4,19 +4,19 @@
 \alias{democratic}
 \title{Democratic method}
 \usage{
-democratic(x, y, x.dist = FALSE, learners, learners.pars, preds, preds.pars)
+democratic(x, y, x.inst = TRUE, learners, learners.pars, preds, preds.pars)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in \code{x.dist} argument: 
-a matrix distance between the training examples or a matrix with the 
-training instances where each row represents a single instance.}
+interpretations according to the value set in the \code{x.inst} argument:
+a matrix with the training instances where each row represents a single instance
+or a precomputed (distance or kernel) matrix between the training examples.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
+\item{x.inst}{A boolean value that indicates if \code{x} is or not an instance matrix.
+Default is \code{TRUE}.}
 
 \item{learners}{A list of functions or strings naming the functions for 
 training the different supervised base classifiers.}
@@ -46,7 +46,7 @@ A list object of class "democratic" containing:
   \item{classes}{The levels of \code{y} factor.}
   \item{preds}{The functions provided in the \code{preds} argument.}
   \item{preds.pars}{The set of lists provided in the \code{preds.pars} argument.}
-  \item{x.dist}{The value provided in the \code{x.dist} argument.}
+  \item{x.inst}{The value provided in the \code{x.inst} argument.}
 }
 }
 \description{
@@ -58,8 +58,8 @@ with different inductive biases label data for each other.
 \details{
 This method trains an ensemble of diverse classifiers. To promote the initial diversity 
 the classifiers must represent different learning schemes.
-When x.dist is \code{TRUE} all \code{learners} defined must be able to learn a classifier 
-from the distance matrix in \code{x}.
+When x.inst is \code{FALSE} all \code{learners} defined must be able to learn a classifier
+from the precomputed matrix in \code{x}.
 The iteration process of the algorithm ends when no changes occurs in 
 any model during a complete iteration.
 The generation of the final hypothesis is 

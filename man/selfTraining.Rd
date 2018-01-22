@@ -4,20 +4,20 @@
 \alias{selfTraining}
 \title{Self-training method}
 \usage{
-selfTraining(x, y, x.dist = FALSE, learner, learner.pars = list(), pred,
+selfTraining(x, y, x.inst = TRUE, learner, learner.pars = list(), pred,
   pred.pars = list(), max.iter = 50, perc.full = 0.7, thr.conf = 0.5)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in the \code{x.dist} argument: 
-a matrix distance between the training examples or a matrix with the 
-training instances where each row represents a single instance.}
+interpretations according to the value set in the \code{x.inst} argument:
+a matrix with the training instances where each row represents a single instance
+or a precomputed (distance or kernel) matrix between the training examples.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
+\item{x.inst}{A boolean value that indicates if \code{x} is or not an instance matrix.
+Default is \code{TRUE}.}
 
 \item{learner}{either a function or a string naming the function for 
 training a supervised base classifier, using a set of instances
@@ -69,7 +69,7 @@ classifier to establish the possible class of unlabeled instances.
 For predicting the most accurate instances per iteration, \code{selfTraining}
 uses the predictions obtained with the learner specified. To train a model 
 using the \code{learner} function, it is required a set of instances 
-(or a distance matrix between the instances if \code{x.dist} parameter is \code{TRUE})
+(or a precomputed matrix between the instances if \code{x.inst} parameter is \code{FALSE})
 in conjunction with the corresponding classes. 
 Additionals parameters are provided to the \code{learner} function via the 
 \code{learner.pars} argument. The model obtained is a supervised classifier
@@ -124,7 +124,7 @@ table(pred1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE))
-m2 <- selfTraining(x = dtrain, y = ytrain, x.dist = TRUE,
+m2 <- selfTraining(x = dtrain, y = ytrain, x.inst = FALSE,
                    learner = ssc::oneNN, 
                    pred = "predict",
                    pred.pars = list(type = "prob", initial.value = 0))

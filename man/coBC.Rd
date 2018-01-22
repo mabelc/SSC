@@ -4,20 +4,20 @@
 \alias{coBC}
 \title{CoBC method}
 \usage{
-coBC(x, y, x.dist = FALSE, learner, learner.pars = list(), pred,
+coBC(x, y, x.inst = TRUE, learner, learner.pars = list(), pred,
   pred.pars = list(), N = 3, perc.full = 0.7, u = 100, max.iter = 50)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in the \code{x.dist} argument: 
-a matrix distance between the training examples or a matrix with the 
-training instances where each row represents a single instance.}
+interpretations according to the value set in the \code{x.inst} argument:
+a matrix with the training instances where each row represents a single instance
+or a precomputed (distance or kernel) matrix between the training examples.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
+\item{x.inst}{A boolean value that indicates if \code{x} is or not an instance matrix.
+Default is \code{TRUE}.}
 
 \item{learner}{either a function or a string naming the function for 
 training a supervised base classifier, using a set of instances
@@ -58,7 +58,7 @@ A list object of class "coBC" containing:
   \item{classes}{The levels of \code{y} factor.}
   \item{pred}{The function provided in the \code{pred} argument.}
   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
-  \item{x.dist}{The value provided in the \code{x.dist} argument.}
+  \item{x.inst}{The value provided in the \code{x.inst} argument.}
 }
 }
 \description{
@@ -117,7 +117,7 @@ table(pred1, yitest)
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 set.seed(1)
-m2 <- coBC(x = dtrain, y = ytrain, x.dist = TRUE,
+m2 <- coBC(x = dtrain, y = ytrain, x.inst = FALSE,
            learner = ssc::oneNN, 
            pred = "predict",
            pred.pars = list(type = "prob", initial.value = 0))

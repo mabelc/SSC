@@ -206,13 +206,13 @@ triTrainingG <- function(
 #' reduced set of labeled examples. For each iteration, an unlabeled example is labeled 
 #' for a classifier if the other two classifiers agree on the labeling proposed.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in the \code{x.dist} argument:
-#' a matrix distance between the training examples or a matrix with the 
-#' training instances where each row represents a single instance.
+#' interpretations according to the value set in the \code{x.inst} argument:
+#' a matrix with the training instances where each row represents a single instance
+#' or a precomputed (distance or kernel) matrix between the training examples.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}.
+#' @param x.inst A boolean value that indicates if \code{x} is or not an instance matrix.
+#' Default is \code{TRUE}.
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier, using a set of instances
 #' (or optionally a distance matrix) and it's corresponding classes.
@@ -244,7 +244,7 @@ triTrainingG <- function(
 #'   \item{classes}{The levels of \code{y} factor.}
 #'   \item{pred}{The function provided in the \code{pred} argument.}
 #'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
-#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
+#'   \item{x.inst}{The value provided in the \code{x.inst} argument.}
 #' }
 #' @references
 #' ZhiHua Zhou and Ming Li.\cr
@@ -253,17 +253,38 @@ triTrainingG <- function(
 #' @example demo/TriTraining.R
 #' @export
 triTraining <- function(
-  x, y, x.dist = FALSE,
+  x, y, x.inst = TRUE,
   learner, learner.pars = list(),
   pred, pred.pars = list()
 ) {
   ### Check parameters ###
-  # Check x.dist
-  if(!is.logical(x.dist)){
-    stop("Parameter x.dist is not logical.")
+  # Check x.inst
+  if(!is.logical(x.inst)){
+    stop("Parameter x.inst is not logical.")
   }
   
-  if(x.dist){
+  if(x.inst){
+    # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+    
+    gen.learner2 <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
+      return(m)
+    }
+    gen.pred2 <- function(m, testing.ints){
+      prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
+      return(prob)
+    }
+    
+    result <- triTrainingG(y, gen.learner2, gen.pred2)
+  }else{
     # Distance matrix case
     # Check matrix distance in x
     if(class(x) == "dist"){
@@ -291,34 +312,13 @@ triTraining <- function(
     
     result <- triTrainingG(y, gen.learner1, gen.pred1)
     result$model <- lapply(X = result$model, FUN = function(e) e$m)
-  }else{
-    # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
-    gen.learner2 <- function(training.ints, cls){
-      m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
-      return(m)
-    }
-    gen.pred2 <- function(m, testing.ints){
-      prob <- predProb(m, x[testing.ints, ], pred, pred.pars)
-      return(prob)
-    }
-    
-    result <- triTrainingG(y, gen.learner2, gen.pred2)
   }
   
   ### Result ###
   result$classes = levels(y)
   result$pred = pred
   result$pred.pars = pred.pars
-  result$x.dist = x.dist
+  result$x.inst = x.inst
   class(result) <- "triTraining"
   
   return(result)
@@ -345,7 +345,20 @@ predict.triTraining <- function(object, x, ...) {
   # The result is a matrix of indexes that indicates the classes
   # The matrix have one column per classifier and one row per instance
   ninstances = nrow(x)
-  if(object$x.dist){
+  if(object$x.inst){
+    preds <- mapply(
+      FUN = function(model){
+        getClassIdx(
+          checkProb(
+            predProb(model, x, object$pred, object$pred.pars), 
+            ninstances, 
+            object$classes
+          )
+        ) 
+      },
+      object$model
+    )
+  }else{
     preds <- mapply(
       FUN = function(model, indexes){
         getClassIdx(
@@ -358,19 +371,6 @@ predict.triTraining <- function(object, x, ...) {
       },
       object$model,
       object$model.index.map
-    )
-  }else{
-    preds <- mapply(
-      FUN = function(model){
-        getClassIdx(
-          checkProb(
-            predProb(model, x, object$pred, object$pred.pars), 
-            ninstances, 
-            object$classes
-          )
-        ) 
-      },
-      object$model
     )
   }
   

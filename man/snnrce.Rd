@@ -4,22 +4,22 @@
 \alias{snnrce}
 \title{SNNRCE method}
 \usage{
-snnrce(x, y, x.dist = FALSE, dist = "Euclidean", alpha = 0.1)
+snnrce(x, y, x.inst = TRUE, dist = "Euclidean", alpha = 0.1)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in the \code{x.dist} argument: 
-a matrix distance between the training examples or a matrix with the 
-training instances where each row represents a single instance.}
+interpretations according to the value set in the \code{x.inst} argument:
+a matrix with the training instances where each row represents a single instance
+or a precomputed distance matrix between the training examples.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
+\item{x.inst}{A boolean value that indicates if \code{x} is or not an instance matrix.
+Default is \code{TRUE}.}
 
 \item{dist}{A distance function available in the \code{proxy} package to compute 
-the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
+the distance matrix in the case that \code{x.inst} is \code{TRUE}.}
 
 \item{alpha}{Rejection threshold to test the critical region. Default is 0.1.}
 }
@@ -32,10 +32,10 @@ A list object of class "snnrce" containing:
   and the newly labeled instances.
   Those indexes are relative to \code{x} argument.}
   \item{classes}{The levels of \code{y} factor.}
-  \item{x.dist}{The value provided in the \code{x.dist} argument.}
-  \item{dist}{The value provided in the \code{dist} argument when x.dist is \code{FALSE}.}
+  \item{x.inst}{The value provided in the \code{x.inst} argument.}
+  \item{dist}{The value provided in the \code{dist} argument when x.inst is \code{TRUE}.}
   \item{xtrain}{A matrix with the subset of training instances referenced by the indexes 
-  \code{instances.index} when x.dist is \code{FALSE}.}
+  \code{instances.index} when x.inst is \code{TRUE}.}
 }
 }
 \description{
@@ -92,7 +92,7 @@ table(pred1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
-m2 <- snnrce(x = dtrain, y = ytrain, x.dist = TRUE)
+m2 <- snnrce(x = dtrain, y = ytrain, x.inst = FALSE)
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
