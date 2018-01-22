@@ -117,7 +117,7 @@ gen.learner2 <- function(indexes, cls) {
 gen.pred2 <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
   d <- dtrain[indexes, tra.idxs]
-  prob <- predict(model, d, type = "prob",  initial.value = 0) 
+  prob <- predict(model, d, type = "prob") 
   prob
 }
 
@@ -133,7 +133,7 @@ ninstances <- nrow(dtrain)
 for(i in 1:length(md2$model)){
   m <- md2$model[[i]]
   D <- ditest[, md2$model.index.map[[i]]]
-  h.prob[[i]] <- predict(m, D, type = "prob",  initial.value = 0)
+  h.prob[[i]] <- predict(m, D, type = "prob")
 }
 # Combine probability matrices
 prob <- coBCCombine(h.prob, md2$classes)

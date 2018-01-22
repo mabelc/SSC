@@ -40,7 +40,7 @@ D <- dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 m2 <- setred(x = D, y = ytrain, x.dist = TRUE,
             learner = ssc::oneNN, 
             pred = "predict",
-            pred.pars = list(type = "prob", initial.value = 0))
+            pred.pars = list(type = "prob"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)

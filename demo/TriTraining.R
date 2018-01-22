@@ -39,7 +39,7 @@ set.seed(1)
 m2 <- triTraining(x = dtrain, y = ytrain, x.dist = TRUE,
                   learner = ssc::oneNN, 
                   pred = "predict",
-                  pred.pars = list(type = "prob", initial.value = 0))
+                  pred.pars = list(type = "prob"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)

@@ -49,13 +49,13 @@ predClass.OneNN <- function(m, dists) {
 #'    the 1-nearest-neighbour is used to compute probabilities.
 #' }
 #' @param initial.value the probabilities for each class are initiaized with this value. 
-#' Default is \code{1/(ncol(dists))}.
+#' Default is 0.
 #' @return a matrix of probabilities, with a row per instance and a column per class.
 #' @details The returned matrix has \code{nrow(dists)} rows and a column for every
 #' class, where each cell represents the probability that the instance belongs to the
 #' class, according to 1NN.
 #' @noRd
-predProb.OneNN <- function(m, dists, distance.weighting = "none", initial.value = 1/ncol(dists)) {
+predProb.OneNN <- function(m, dists, distance.weighting = "none", initial.value = 0) {
   if(!is.matrix(dists)){
     stop("The'dists' argument is not a matrix.")
   }
