@@ -4,25 +4,25 @@
 \alias{setred}
 \title{SETRED method}
 \usage{
-setred(x, y, x.dist = FALSE, dist = "Euclidean", learner,
+setred(x, y, x.inst = TRUE, dist = "Euclidean", learner,
   learner.pars = list(), pred, pred.pars = list(), theta = 0.1,
   max.iter = 50, perc.full = 0.7)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
-interpretations according to the value set in the \code{x.dist} argument: 
-a matrix distance between the training examples or a matrix with the 
-training instances where each row represents a single instance.}
+interpretations according to the value set in the \code{x.inst} argument:
+a matrix with the training instances where each row represents a single instance
+or a precomputed (distance or kernel) matrix between the training examples.}
 
 \item{y}{A vector with the labels of the training instances. In this vector 
 the unlabeled instances are specified with the value \code{NA}.}
 
-\item{x.dist}{A boolean value that indicates if \code{x} is or not a distance matrix.
-Default is \code{FALSE}.}
+\item{x.inst}{A boolean value that indicates if \code{x} is or not an instance matrix.
+Default is \code{TRUE}.}
 
 \item{dist}{A distance function or the name of a distance available
 in the \code{proxy} package to compute 
-the distance matrix in the case that \code{x.dist} is \code{FALSE}.}
+the distance matrix in the case that \code{x.inst} is \code{TRUE}.}
 
 \item{learner}{either a function or a string naming the function for 
 training a supervised base classifier, using a set of instances
@@ -76,8 +76,8 @@ labeled set. In each iteration, the \code{learner} function detects unlabeled
 examples on which it makes most confident prediction and labels those examples 
 according to the \code{pred} function. The identification of mislabeled examples is 
 performed using a neighborhood graph created from the distance matrix.
-When \code{x.dist} is \code{FALSE} this distance matrix is computed using 
-\code{dist} function. On the other hand, when \code{x.dist} is \code{TRUE}
+When \code{x.inst} is \code{TRUE} this distance matrix is computed using
+\code{dist} function. On the other hand, when \code{x.inst} is \code{FALSE}
 the matrix provide with \code{x} is used both to train a classifier and to create
 the neighborhood graph.
 Most examples possess the same label in a neighborhood. So if an example locates 
@@ -128,7 +128,7 @@ table(pred1, yitest)
 library(proxy)
 D <- dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 
-m2 <- setred(x = D, y = ytrain, x.dist = TRUE,
+m2 <- setred(x = D, y = ytrain, x.inst = FALSE,
             learner = ssc::oneNN, 
             pred = "predict",
             pred.pars = list(type = "prob"))

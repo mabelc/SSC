@@ -218,16 +218,16 @@ setredG <- function(
 #' iteration, the mislabeled examples are identified using the local information provided 
 #' by the neighborhood graph.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in the \code{x.dist} argument: 
-#' a matrix distance between the training examples or a matrix with the 
-#' training instances where each row represents a single instance.
+#' interpretations according to the value set in the \code{x.inst} argument:
+#' a matrix with the training instances where each row represents a single instance
+#' or a precomputed (distance or kernel) matrix between the training examples.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}. 
+#' @param x.inst A boolean value that indicates if \code{x} is or not an instance matrix.
+#' Default is \code{TRUE}.
 #' @param dist A distance function or the name of a distance available
 #' in the \code{proxy} package to compute 
-#' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
+#' the distance matrix in the case that \code{x.inst} is \code{TRUE}.
 #' @param learner either a function or a string naming the function for 
 #' training a supervised base classifier, using a set of instances
 #' (or optionally a distance matrix) and it's corresponding classes.
@@ -250,8 +250,8 @@ setredG <- function(
 #' examples on which it makes most confident prediction and labels those examples 
 #' according to the \code{pred} function. The identification of mislabeled examples is 
 #' performed using a neighborhood graph created from the distance matrix.
-#' When \code{x.dist} is \code{FALSE} this distance matrix is computed using 
-#' \code{dist} function. On the other hand, when \code{x.dist} is \code{TRUE}
+#' When \code{x.inst} is \code{TRUE} this distance matrix is computed using
+#' \code{dist} function. On the other hand, when \code{x.inst} is \code{FALSE}
 #' the matrix provide with \code{x} is used both to train a classifier and to create
 #' the neighborhood graph.
 #' Most examples possess the same label in a neighborhood. So if an example locates 
@@ -282,7 +282,7 @@ setredG <- function(
 #' @example demo/SETRED.R
 #' @export
 setred <- function(
-  x, y, x.dist = FALSE,
+  x, y, x.inst = TRUE,
   dist = "Euclidean",
   learner, learner.pars = list(),
   pred, pred.pars = list(),
@@ -291,40 +291,12 @@ setred <- function(
   perc.full = 0.7
 ) {
   ### Check parameters ###
-  # Check x.dist
-  if(!is.logical(x.dist)){
-    stop("Parameter x.dist is not logical.")
+  # Check x.inst
+  if(!is.logical(x.inst)){
+    stop("Parameter x.inst is not logical.")
   }
   
-  if(x.dist){
-    # Distance matrix case
-    # Check matrix distance in x
-    if(class(x) == "dist"){
-      x <- proxy::as.matrix(x)
-    }
-    if(!is.matrix(x)){
-      stop("Parameter x is neither a matrix or a dist object.")
-    } else if(nrow(x) != ncol(x)){
-      stop("The distance matrix x is not a square matrix.")
-    } else if(nrow(x) != length(y)){
-      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
-                         "and it's expected %i x %i according to the size of y."), 
-                   nrow(x), ncol(x), length(y), length(y)))
-    }
-     
-    gen.learner1 <- function(training.ints, cls){
-      m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
-      r <- list(m = m, training.ints = training.ints)
-      return(r)
-    }
-    gen.pred1 <- function(r, testing.ints){
-      prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
-      return(prob)
-    }
-    
-    result <- setredG(y, x, gen.learner1, gen.pred1, theta, max.iter, perc.full)
-    result$model <- result$model$m
-  }else{
+  if(x.inst){
     # Instance matrix case
     # Check x
     if(!is.matrix(x) && !is.data.frame(x)){
@@ -349,6 +321,34 @@ setred <- function(
       gen.learner2, gen.pred2,
       theta, max.iter, perc.full
     )
+  }else{
+    # Distance matrix case
+    # Check matrix distance in x
+    if(class(x) == "dist"){
+      x <- proxy::as.matrix(x)
+    }
+    if(!is.matrix(x)){
+      stop("Parameter x is neither a matrix or a dist object.")
+    } else if(nrow(x) != ncol(x)){
+      stop("The distance matrix x is not a square matrix.")
+    } else if(nrow(x) != length(y)){
+      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
+                         "and it's expected %i x %i according to the size of y."), 
+                   nrow(x), ncol(x), length(y), length(y)))
+    }
+    
+    gen.learner1 <- function(training.ints, cls){
+      m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
+      r <- list(m = m, training.ints = training.ints)
+      return(r)
+    }
+    gen.pred1 <- function(r, testing.ints){
+      prob <- predProb(r$m, x[testing.ints, r$training.ints], pred, pred.pars)
+      return(prob)
+    }
+    
+    result <- setredG(y, x, gen.learner1, gen.pred1, theta, max.iter, perc.full)
+    result$model <- result$model$m
   }
   
   ### Result ###

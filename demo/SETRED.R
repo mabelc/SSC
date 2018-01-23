@@ -37,7 +37,7 @@ table(pred1, yitest)
 library(proxy)
 D <- dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 
-m2 <- setred(x = D, y = ytrain, x.dist = TRUE,
+m2 <- setred(x = D, y = ytrain, x.inst = FALSE,
             learner = ssc::oneNN, 
             pred = "predict",
             pred.pars = list(type = "prob"))

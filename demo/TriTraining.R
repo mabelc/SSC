@@ -36,7 +36,7 @@ table(pred1, yitest)
 ## Example: Training from a distance matrix with 1-NN as base classifier.
 dtrain <- proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 set.seed(1)
-m2 <- triTraining(x = dtrain, y = ytrain, x.dist = TRUE,
+m2 <- triTraining(x = dtrain, y = ytrain, x.inst = FALSE,
                   learner = ssc::oneNN, 
                   pred = "predict",
                   pred.pars = list(type = "prob"))

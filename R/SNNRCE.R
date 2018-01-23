@@ -240,15 +240,15 @@ predict.snnrceG <- function(object, D, ...) {
 #' by the neighborhood graph. A statistical test using cut edge weight is used to modify 
 #' the labels of the missclassified examples.
 #' @param x A object that can be coerced as matrix. This object has two possible 
-#' interpretations according to the value set in the \code{x.dist} argument: 
-#' a matrix distance between the training examples or a matrix with the 
-#' training instances where each row represents a single instance.
+#' interpretations according to the value set in the \code{x.inst} argument:
+#' a matrix with the training instances where each row represents a single instance
+#' or a precomputed distance matrix between the training examples.
 #' @param y A vector with the labels of the training instances. In this vector 
 #' the unlabeled instances are specified with the value \code{NA}.
-#' @param x.dist A boolean value that indicates if \code{x} is or not a distance matrix.
-#' Default is \code{FALSE}.
+#' @param x.inst A boolean value that indicates if \code{x} is or not an instance matrix.
+#' Default is \code{TRUE}.
 #' @param dist A distance function available in the \code{proxy} package to compute 
-#' the distance matrix in the case that \code{x.dist} is \code{FALSE}.
+#' the distance matrix in the case that \code{x.inst} is \code{TRUE}.
 #' @param alpha Rejection threshold to test the critical region. Default is 0.1.
 #' @details 
 #' SNNRCE initiates the self-labeling process by training a 1-NN from the original 
@@ -269,10 +269,10 @@ predict.snnrceG <- function(object, D, ...) {
 #'   and the newly labeled instances.
 #'   Those indexes are relative to \code{x} argument.}
 #'   \item{classes}{The levels of \code{y} factor.}
-#'   \item{x.dist}{The value provided in the \code{x.dist} argument.}
-#'   \item{dist}{The value provided in the \code{dist} argument when x.dist is \code{FALSE}.}
+#'   \item{x.inst}{The value provided in the \code{x.inst} argument.}
+#'   \item{dist}{The value provided in the \code{dist} argument when x.inst is \code{TRUE}.}
 #'   \item{xtrain}{A matrix with the subset of training instances referenced by the indexes 
-#'   \code{instances.index} when x.dist is \code{FALSE}.}
+#'   \code{instances.index} when x.inst is \code{TRUE}.}
 #' }
 #' @references
 #' Yu Wang, Xiaoyan Xu, Haifeng Zhao, and Zhongsheng Hua.\cr
@@ -281,17 +281,37 @@ predict.snnrceG <- function(object, D, ...) {
 #' @example demo/SNNRCE.R
 #' @export
 snnrce <- function(
-  x, y, x.dist = FALSE,
+  x, y, x.inst = TRUE,
   dist = "Euclidean",
   alpha = 0.1
 ){
   ### Check parameters ###
-  # Check x.dist
-  if(!is.logical(x.dist)){
-    stop("Parameter x.dist is not logical.")
+  # Check x.inst
+  if(!is.logical(x.inst)){
+    stop("Parameter x.inst is not logical.")
   }
   
-  if(x.dist){
+  if(x.inst){
+    # Instance matrix case
+    # Check x
+    if(!is.matrix(x) && !is.data.frame(x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+
+    result <- snnrceG(
+      D = proxy::dist(x, method = dist, by_rows = TRUE,
+                      diag = TRUE, upper = TRUE),
+      y,
+      alpha
+    )
+
+    result$dist <- dist
+    result$xtrain <- x[result$instances.index, ]
+  }else{
     # Distance matrix case
     # Check matrix distance in x
     if(class(x) == "dist"){
@@ -302,36 +322,15 @@ snnrce <- function(
     } else if(nrow(x) != ncol(x)){
       stop("The distance matrix x is not a square matrix.")
     } else if(nrow(x) != length(y)){
-      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
-                         "and it's expected %i x %i according to the size of y."), 
+      stop(sprintf(paste("The dimensions of the matrix x is %i x %i",
+                         "and it's expected %i x %i according to the size of y."),
                    nrow(x), ncol(x), length(y), length(y)))
     }
-    
+
     result <- snnrceG(D = x, y, alpha)
-    
-  }else{
-    # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
-    result <- snnrceG(
-      D = proxy::dist(x, method = dist, by_rows = TRUE,
-                      diag = TRUE, upper = TRUE), 
-      y, 
-      alpha
-    )
-    
-    result$dist <- dist
-    result$xtrain <- x[result$instances.index, ]
   }
   result$classes = levels(y)
-  result$x.dist = x.dist
+  result$x.inst = x.inst
   class(result) <- "snnrce"
   return(result)
 }
@@ -349,10 +348,10 @@ snnrce <- function(
 #' @export
 #' @importFrom stats predict
 predict.snnrce <- function(object, x, ...) {
-  if(object$x.dist == FALSE){
+  if(object$x.inst){
     D <- proxy::dist(x, y = object$xtrain, method = object$dist, 
                      diag = TRUE, upper = TRUE, by_rows = TRUE)
-    cls <- predict(object$model, D, type = "class")  
+    cls <- predict(object$model, D, type = "class")
   }else{
     cls <- predict(object$model, x, type = "class")
   }
