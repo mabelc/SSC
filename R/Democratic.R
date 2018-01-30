@@ -25,11 +25,12 @@
 #'   \item{model}{A list with the final N base classifiers trained using the 
 #'   enlarged labeled set.}
 #'   \item{model.index}{List of N vectors of indexes related to the training instances 
-#'   used per each classifier. These indexes are relative to \code{instances.index}.}  
-#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   used per each classifier. These indexes are relative to the \code{y} argument.}
+#'   \item{instances.index}{The indexes of all training instances used to
 #'   train the N \code{models}. These indexes include the initial labeled instances
-#'   and the newly labeled instances.
-#'   These indexes are relative to the \code{y} argument.}
+#'   and the newly labeled instances. These indexes are relative to the \code{y} argument.}
+#'   \item{model.index.map}{List of three vectors with the same information in \code{model.index}
+#'   but the indexes are relative to \code{instances.index} vector.}
 #'   \item{classes}{The levels of \code{y} factor.}
 #' }
 #' @references
@@ -311,11 +312,12 @@ democraticG <- function(
 #'   \item{model}{A list with the final N base classifiers trained using the 
 #'   enlarged labeled set.}
 #'   \item{model.index}{List of N vectors of indexes related to the training instances 
-#'   used per each classifier. These indexes are relative to \code{instances.index}.}  
-#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   used per each classifier. These indexes are relative to the \code{y} argument.}
+#'   \item{instances.index}{The indexes of all training instances used to
 #'   train the N \code{models}. These indexes include the initial labeled instances
-#'   and the newly labeled instances.
-#'   These indexes are relative to the \code{y} argument.}
+#'   and the newly labeled instances. These indexes are relative to the \code{y} argument.}
+#'   \item{model.index.map}{List of three vectors with the same information in \code{model.index}
+#'   but the indexes are relative to \code{instances.index} vector.}
 #'   \item{classes}{The levels of \code{y} factor.}
 #'   \item{preds}{The functions provided in the \code{preds} argument.}
 #'   \item{preds.pars}{The set of lists provided in the \code{preds.pars} argument.}

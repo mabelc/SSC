@@ -23,11 +23,12 @@
 #' \describe{
 #'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
 #'   \item{model.index}{List of three vectors of indexes related to the training instances 
-#'   used per each classifier. These indexes are relative to \code{instances.index}.}
-#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   used per each classifier. These indexes are relative to the \code{y} argument.}
+#'   \item{instances.index}{The indexes of all training instances used to
 #'   train the three models. These indexes include the initial labeled instances
-#'   and the newly labeled instances.
-#'   These indexes are relative to the \code{y} argument.}
+#'   and the newly labeled instances. These indexes are relative to the \code{y} argument.}
+#'   \item{model.index.map}{List of three vectors with the same information in \code{model.index}
+#'   but the indexes are relative to \code{instances.index} vector.}
 #' }
 #' @example demo/TriTrainingG.R
 #' @export
@@ -236,11 +237,12 @@ triTrainingG <- function(
 #' \describe{
 #'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
 #'   \item{model.index}{List of three vectors of indexes related to the training instances 
-#'   used per each classifier. These indexes are relative to \code{instances.index}.}
-#'   \item{instances.index}{The indexes of the total of training instances used to 
+#'   used per each classifier. These indexes are relative to the \code{y} argument.}
+#'   \item{instances.index}{The indexes of all training instances used to
 #'   train the three models. These indexes include the initial labeled instances
-#'   and the newly labeled instances.
-#'   These indexes are relative to the \code{y} argument.}
+#'   and the newly labeled instances. These indexes are relative to the \code{y} argument.}
+#'   \item{model.index.map}{List of three vectors with the same information in \code{model.index}
+#'   but the indexes are relative to \code{instances.index} vector.}
 #'   \item{classes}{The levels of \code{y} factor.}
 #'   \item{pred}{The function provided in the \code{pred} argument.}
 #'   \item{pred.pars}{The list provided in the \code{pred.pars} argument.}
