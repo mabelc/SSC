@@ -129,7 +129,7 @@ triTrainingG <- function(
         )
         ck <- getClassIdx(
           checkProb(
-            prob = gen.pred(models[[j]], unlabeled),
+            prob = gen.pred(models[[k]], unlabeled),
             ninstances = length(unlabeled), 
             classes
           )
