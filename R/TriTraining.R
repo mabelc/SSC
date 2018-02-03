@@ -429,9 +429,3 @@ measureError <- function(cj, ck, y){
   }
   error
 }
-
-#' @noRd
-subsample <- function(L, N){
-  s <- sample(x = 1:nrow(L), size = N)
-  L[s,]
-}
