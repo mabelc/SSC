@@ -43,9 +43,11 @@ predClass.OneNN <- function(m, dists) {
 #' Valid options are:
 #' \itemize{
 #'    \item \code{"none"}: distances are not used to compute probabilities.
-#'    \item \code{"reciprocal"}: the reciprocal for the distance (\emph{1/distance}) with the 1-nearest-neighbour is used 
+#'    \item \code{"reciprocal"}: the reciprocal for the distance 
+#'    (\emph{1/distance}) with the 1-nearest-neighbour is used 
 #'    to compute probabilities.
-#'    \item \code{"reciprocalexp"}: the reciprocal for the exponential function of the distance ((\emph{1/exp(distance)})) with
+#'    \item \code{"reciprocalexp"}: the reciprocal for the exponential 
+#'    function of the distance ((\emph{1/exp(distance)})) with
 #'    the 1-nearest-neighbour is used to compute probabilities.
 #' }
 #' @param initial.value the probabilities for each class are initiaized with this value. 
