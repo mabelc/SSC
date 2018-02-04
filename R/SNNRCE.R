@@ -128,7 +128,8 @@ snnrceG <- function(
   while (count < nmax) {
     # Predict prob using 1-NN
     model <- oneNN(y = ynew[labeled])
-    prob <- predict(model, D[unlabeled, labeled], type = "prob")
+    prob <- predict(model, D[unlabeled, labeled], type = "prob",
+                    distance.weighting = "reciprocalexp")
     
     # Select one instance per class
     selection <- selectInstances(rep(1, nclasses), prob)
