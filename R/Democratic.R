@@ -121,7 +121,7 @@ democraticG <- function(
       H, gen.preds
     )
     
-    cls <- vote(predU) # etiquetas votadas
+    cls <- vote(predU) # voted labels
     
     # End Internal classify
     
@@ -150,10 +150,10 @@ democraticG <- function(
         sumW[predU[i, j]] <- sumW[predU[i, j]] + W[j]
       
       # Calculate the maximum confidence with different label to predicted.
-      lab <- cls[[i]][which.max(sumW[cls[[i]]])] #se devuelve la etiqueta mas probable
-      tmp <- sumW[lab] # la confidencia total asociada a esa etiqueta
-      sumW[lab] <- -Inf #para no volverla a seleccionar
-      Max <- which.max(sumW)#la segunda clase con mayor confidencia
+      lab <- cls[[i]][which.max(sumW[cls[[i]]])] #returns the most probable label
+      tmp <- sumW[lab] # the total confidence associated with this label
+      sumW[lab] <- -Inf # don't select the same label 
+      Max <- which.max(sumW) # second class with major confidence
       sumW[lab] <- tmp
       
       if (sumW[lab] > sumW[Max]) {
@@ -168,7 +168,6 @@ democraticG <- function(
     
     
     # Estimate if adding Li' to Li improves the accuracy
-    # AQUI
     
     LindUnion <- vector(mode = "list", length = nclassifiers)
     LclsUnion <- vector(mode = "list", length = nclassifiers)
@@ -214,7 +213,7 @@ democraticG <- function(
     for (i in 1:nclassifiers) { # for each classifier
       sizeLi <- length(Lind[[i]])
       sizeLLP <- length(LindUnion[[i]])
-      if (sizeLLP > sizeLi) { #hay instancias nuevas eb LiPrima
+      if (sizeLLP > sizeLi) { # there are new instances in LindUnion
         q[i] <- sizeLi * (1 - 2 * ( e[i] / sizeLi)) ^ 2				# est. of error rate
         ep[i] <- (1 - mean(L[-i])) * length(LindPrima[[i]])			# est. of new error rate
         qp[i] <- sizeLLP * (1 - 2 * (e[i] + ep[i]) / sizeLLP) ^ 2		# if Li' added
@@ -224,7 +223,7 @@ democraticG <- function(
           Lcls[[i]] <- LclsUnion[[i]]
           e[i] <- e[i] + ep[i]
           changes <- TRUE
-          # entrenar clasificador i
+          # train i classifier
           yi <- classes[Lcls[[i]]]
           H[[i]] <- gen.learners[[i]](Lind[[i]], factor(yi, classes))
         }
@@ -237,7 +236,7 @@ democraticG <- function(
   
   # determine labeled instances
   instances.index <- unique(unlist(Lind))
-  # map indexes respect to m$included.insts
+  # map indexes respect to instances.index
   model.index.map <- lapply(
     X = Lind,
     FUN = function(indexes)
@@ -520,7 +519,7 @@ predict.democratic <- function(object, x, ...){
   for (i in 1:nrow(pred)) {#for each example x in U
     pertenece <- wz <- rep(0, length(object$classes))
 
-    for (j in 1:ncol(pred)) {#para cada clasificador
+    for (j in 1:ncol(pred)) {#for each classifier
       z = pred[i, j]
       # Allocate this classifier to group Gz
       pertenece[z] <- pertenece[z] + 1
@@ -563,7 +562,7 @@ democraticCombine <- function(pred, W, classes){
   for (i in 1:ninstances) {#for each example x in U
     pertenece <- wz <- rep(0, nclasses)
     
-    for (j in 1:nclassifiers) {#para cada clasificador
+    for (j in 1:nclassifiers) {#for each classifier
       z <- which(pred[[j]][i] == classes)
       if (W[j] > 0.5) {
         # Allocate this classifier to group Gz
@@ -593,10 +592,10 @@ confidenceInterval <- function(pred, conf.cls) {
 }
 
 
-#' @title Calcula la etiqueta de cada instancia por mayoria
-#' @param pred Matrix con la prediccion de cada 
-#' clasificador para cada instancia
-#' @return A list of possibles labels for each instance
+#' @title Compute the most common label for each instance
+#' @param pred a matrix with the prediction of each instance
+#' using each classifier
+#' @return The voted class for each instance
 #' @noRd
 vote <- function(pred){
   FUN = function(p){
