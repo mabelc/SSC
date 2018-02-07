@@ -185,8 +185,11 @@ triTrainingG <- function(
   # map indexes respect to m$included.insts
   model.index.map <- lapply(
     X = model.index,
-    FUN = function(indexes)
-      unclass(factor(indexes, levels = instances.index))
+    FUN = function(indexes){
+      r <- unclass(factor(indexes, levels = instances.index))
+      attr(r, "levels") <- NULL
+      return(r)
+    }
   )
   
   # Save result

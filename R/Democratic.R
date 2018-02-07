@@ -239,8 +239,11 @@ democraticG <- function(
   # map indexes respect to instances.index
   model.index.map <- lapply(
     X = Lind,
-    FUN = function(indexes)
-      unclass(factor(indexes, levels = instances.index))
+    FUN = function(indexes){
+      r <- unclass(factor(indexes, levels = instances.index))
+      attr(r, "levels") <- NULL
+      return(r)
+    }
   )
   
   # compute W
