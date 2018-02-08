@@ -89,7 +89,7 @@ knn2 <- function(indexes, cls) {
 # function to predict probabilities
 knn2.prob <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
-  predict(model, D[indexes, tra.idxs], type = "prob", distance.weighting = "none") 
+  predict(model, D[indexes, tra.idxs], distance.weighting = "none")
 }
 
 ### Define svm2 base classifier using ksvm from kernlab package
@@ -128,7 +128,7 @@ m2 <- democraticG(y = ytrain,
 Ditest <- dist(x = xitest, y = xtrain[m2$model.index[[1]],],
                method = "euclidean", by_rows = TRUE)
 # predict using classifier 1
-m2.pred1 <- predict(m2$model[[1]], Ditest)
+m2.pred1 <- predict(m2$model[[1]], Ditest, type = "class")
 
 # Compute kernel matrix Kitest
 sv.idxs <- SVindex(m2$model[[2]])

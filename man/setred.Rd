@@ -5,7 +5,7 @@
 \title{SETRED method}
 \usage{
 setred(x, y, x.inst = TRUE, dist = "Euclidean", learner,
-  learner.pars = list(), pred, pred.pars = list(), theta = 0.1,
+  learner.pars = NULL, pred = "predict", pred.pars = NULL, theta = 0.1,
   max.iter = 50, perc.full = 0.7)
 }
 \arguments{
@@ -29,14 +29,17 @@ training a supervised base classifier, using a set of instances
 (or optionally a distance matrix) and it's corresponding classes.}
 
 \item{learner.pars}{A list with additional parameters for the
-\code{learner} function if necessary.}
+\code{learner} function if necessary.
+Default is \code{NULL}.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,
-using the base classifier trained with the \code{learner} function.}
+using the base classifier trained with the \code{learner} function.
+Default is \code{"predict"}.}
 
 \item{pred.pars}{A list with additional parameters for the
-\code{pred} function if necessary.}
+\code{pred} function if necessary.
+Default is \code{NULL}.}
 
 \item{theta}{Rejection threshold to test the critical region. Default is 0.1.}
 
@@ -131,7 +134,7 @@ D <- dist(x = xtrain, method = "euclidean", by_rows = TRUE)
 m2 <- setred(x = D, y = ytrain, x.inst = FALSE,
             learner = ssc::oneNN, 
             pred = "predict",
-            pred.pars = list(type = "prob", distance.weighting = "none"))
+            pred.pars = list(distance.weighting = "none"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)

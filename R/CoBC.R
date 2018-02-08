@@ -180,7 +180,7 @@ coBCG <- function(
       }
     }# End for each classifier
     
-    # Train models with the new instances
+    # Train models with new instances
     for (i in 1:end){
       # Train classifier
       ind <- Lind[[i]] # indexes of intances
@@ -209,8 +209,8 @@ coBCG <- function(
   result <- list(
     model = H,
     model.index = Lind,
-    model.index.map = model.index.map,
     instances.index = instances.index,
+    model.index.map = model.index.map,
     classes = classes
   )
   class(result) <- "coBCG"
@@ -239,11 +239,14 @@ coBCG <- function(
 #' (or optionally a distance matrix) and it's corresponding classes.
 #' @param learner.pars A list with additional parameters for the
 #' \code{learner} function if necessary.
+#' Default is \code{NULL}.
 #' @param pred either a function or a string naming the function for
 #' predicting the probabilities per classes,
 #' using the base classifiers trained with the \code{learner} function.
+#' Default is \code{"predict"}.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
+#' Default is \code{NULL}.
 #' @param N The number of classifiers used as committee members. All these classifiers 
 #' are trained using the \code{gen.learner} function. Default is 3.
 #' @param perc.full A number between 0 and 1. If the percentage 
@@ -283,31 +286,23 @@ coBCG <- function(
 #' @export
 coBC <- function(
   x, y, x.inst = TRUE,
-  learner, learner.pars = list(),
-  pred, pred.pars = list(),
+  learner, learner.pars = NULL,
+  pred = "predict", pred.pars = NULL,
   N = 3,
   perc.full = 0.7,
   u = 100, 
   max.iter = 50
 ) {
-
   ### Check parameters ###
-  # Check x.inst
-  if(!is.logical(x.inst)){
-    stop("Parameter x.inst is not logical.")
-  }
+  x <- as.matrix(x)
+  y <- as.factor(y)
+  x.inst <- as.logical(x.inst)
+  checkTrainingData(x, y, x.inst)
+  learner.pars <- as.list2(learner.pars)
+  pred.pars <- as.list2(pred.pars)
   
   if(x.inst){
     # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
     gen.learner2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
@@ -320,20 +315,6 @@ coBC <- function(
     result <- coBCG(y, gen.learner2, gen.pred2, N, perc.full, u, max.iter)
   }else{
     # Distance matrix case
-    # Check matrix distance in x
-    if(class(x) == "dist"){
-      x <- proxy::as.matrix(x)
-    }
-    if(!is.matrix(x)){
-      stop("Parameter x is neither a matrix or a dist object.")
-    } else if(nrow(x) != ncol(x)){
-      stop("The distance matrix x is not a square matrix.")
-    } else if(nrow(x) != length(y)){
-      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
-                         "and it's expected %i x %i according to the size of y."), 
-                   nrow(x), ncol(x), length(y), length(y)))
-    }
-    
     gen.learner1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
@@ -370,6 +351,8 @@ coBC <- function(
 #' @export
 #' @importFrom stats predict
 predict.coBC <- function(object, x, ...){
+  x <- as.matrix2(x)
+  
   ninstances = nrow(x)
   # Predict probabilities per instances using each model
   if(object$x.inst){

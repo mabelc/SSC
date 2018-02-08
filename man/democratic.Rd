@@ -4,7 +4,8 @@
 \alias{democratic}
 \title{Democratic method}
 \usage{
-democratic(x, y, x.inst = TRUE, learners, learners.pars, preds, preds.pars)
+democratic(x, y, x.inst = TRUE, learners, learners.pars = NULL,
+  preds = rep("predict", length(learners)), preds.pars = NULL)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -22,14 +23,17 @@ Default is \code{TRUE}.}
 training the different supervised base classifiers.}
 
 \item{learners.pars}{A list with the set of additional parameters for each
-learner functions if necessary.}
+learner functions if necessary.
+Default is \code{NULL}.}
 
 \item{preds}{A list of functions or strings naming the functions for
 predicting the probabilities per classes,
-using the base classifiers trained with the functions defined in \code{learners}.}
+using the base classifiers trained with the functions defined in \code{learners}.
+Default is \code{"predict"} function for each learner in \code{learners}.}
 
 \item{preds.pars}{A list with the set of additional parameters for each
-function in \code{preds} if necessary.}
+function in \code{preds} if necessary.
+Default is \code{NULL}.}
 }
 \value{
 A list object of class "democratic" containing:

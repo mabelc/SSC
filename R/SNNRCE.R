@@ -287,51 +287,29 @@ snnrce <- function(
   alpha = 0.1
 ){
   ### Check parameters ###
-  # Check x.inst
-  if(!is.logical(x.inst)){
-    stop("Parameter x.inst is not logical.")
-  }
+  x <- as.matrix(x)
+  y <- as.factor(y)
+  x.inst <- as.logical(x.inst)
+  checkTrainingData(x, y, x.inst)
   
   if(x.inst){
     # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-
     result <- snnrceG(
       D = proxy::dist(x, method = dist, by_rows = TRUE,
                       diag = TRUE, upper = TRUE),
       y,
       alpha
     )
-
-    result$dist <- dist
-    result$xtrain <- x[result$instances.index, ]
   }else{
     # Distance matrix case
-    # Check matrix distance in x
-    if(class(x) == "dist"){
-      x <- proxy::as.matrix(x)
-    }
-    if(!is.matrix(x)){
-      stop("Parameter x is neither a matrix or a dist object.")
-    } else if(nrow(x) != ncol(x)){
-      stop("The distance matrix x is not a square matrix.")
-    } else if(nrow(x) != length(y)){
-      stop(sprintf(paste("The dimensions of the matrix x is %i x %i",
-                         "and it's expected %i x %i according to the size of y."),
-                   nrow(x), ncol(x), length(y), length(y)))
-    }
-
     result <- snnrceG(D = x, y, alpha)
   }
   result$classes = levels(y)
   result$x.inst = x.inst
+  if(x.inst){
+    result$dist <- dist
+    result$xtrain <- x[result$instances.index, ]
+  }
   class(result) <- "snnrce"
   return(result)
 }
@@ -349,6 +327,8 @@ snnrce <- function(
 #' @export
 #' @importFrom stats predict
 predict.snnrce <- function(object, x, ...) {
+  x <- as.matrix2(x)
+  
   if(object$x.inst){
     D <- proxy::dist(x, y = object$xtrain, method = object$dist, 
                      diag = TRUE, upper = TRUE, by_rows = TRUE)

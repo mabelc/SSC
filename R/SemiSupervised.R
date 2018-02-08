@@ -1,4 +1,40 @@
 
+checkTrainingData <- function(x, y, x.inst){
+  if(!is.logical(x.inst)){
+    stop("Parameter x.inst is not logical.")
+  }
+  
+  if(x.inst){
+    # Check relation between x and y
+    if(nrow(x) != length(y)){
+      stop("The rows number of x must be equal to the length of y.")
+    }
+  }else{
+    if(nrow(x) != ncol(x)){
+      stop("The distance matrix x is not a square matrix.")
+    } else if(nrow(x) != length(y)){
+      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
+                         "and it's expected %i x %i according to the size of y."), 
+                   nrow(x), ncol(x), length(y), length(y)))
+    }
+  }
+}
+
+as.matrix2 <- function(x){
+  if(is.matrix(x)){
+    return(x)
+  }else{
+    return(matrix(x, nrow = 1))
+  }
+}
+
+as.list2 <- function(x, len = 0){
+  if(is.null(x)){
+    return(vector("list", len))
+  }else{
+    return(x)
+  }
+}
 
 #' @title Train a model
 #' @param x matrix of training instances

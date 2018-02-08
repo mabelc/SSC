@@ -4,7 +4,7 @@
 \alias{predict.OneNN}
 \title{Model Predictions}
 \usage{
-\method{predict}{OneNN}(object, dists, type = "class", ...)
+\method{predict}{OneNN}(object, dists, type = "prob", ...)
 }
 \arguments{
 \item{object}{A model of class OneNN built with \code{\link{oneNN}}}

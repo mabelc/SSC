@@ -47,13 +47,8 @@ selfTrainingG <- function(
 ){
   ### Check parameters ###
   # Check y 
-  if(!is.factor(y) ){
-    if(!is.vector(y)){
-      stop("Parameter y is neither a vector nor a factor.")  
-    }else{
-      y = as.factor(y)
-    }
-  }
+  y = as.factor(y)
+
   # Check max.iter
   if(max.iter < 1){
     stop("Parameter max.iter is less than 1. Expected a value greater than and equal to 1.")
@@ -165,11 +160,14 @@ selfTrainingG <- function(
 #' (or optionally a distance matrix) and it's corresponding classes.
 #' @param learner.pars A list with additional parameters for the
 #' \code{learner} function if necessary.
+#' Default is \code{NULL}.
 #' @param pred either a function or a string naming the function for
 #' predicting the probabilities per classes,
 #' using the base classifier trained with the \code{learner} function.
+#' Default is \code{"predict"}.
 #' @param pred.pars A list with additional parameters for the
 #' \code{pred} function if necessary.
+#' Default is \code{NULL}.
 #' @param max.iter maximum number of iterations to execute the self-labeling process. 
 #' Default is 50.
 #' @param perc.full A number between 0 and 1. If the percentage 
@@ -220,29 +218,23 @@ selfTrainingG <- function(
 #' @export
 selfTraining <- function(
   x, y, x.inst = TRUE,
-  learner, learner.pars = list(),
-  pred, pred.pars = list(),
+  learner, learner.pars = NULL,
+  pred = "predict", pred.pars = NULL,
   max.iter = 50,
   perc.full = 0.7,
   thr.conf = 0.5
 ){
   ### Check parameters ###
-  # Check x.inst
-  if(!is.logical(x.inst)){
-    stop("Parameter x.inst is not logical.")
-  }
+  x <- as.matrix(x)
+  y <- as.factor(y)
+  x.inst <- as.logical(x.inst)
+  checkTrainingData(x, y, x.inst)
+  learner.pars <- as.list2(learner.pars)
+  pred.pars <- as.list2(pred.pars)
   
+  ### Call generic interface ### 
   if(x.inst){
     # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
     gen.learner2 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, ], cls, learner, learner.pars)
       return(m)
@@ -255,20 +247,6 @@ selfTraining <- function(
     result <- selfTrainingG(y, gen.learner2, gen.pred2, max.iter, perc.full, thr.conf)
   }else{
     # Distance matrix case
-    # Check matrix distance in x
-    if(class(x) == "dist"){
-      x <- proxy::as.matrix(x)
-    }
-    if(!is.matrix(x)){
-      stop("Parameter x is neither a matrix or a dist object.")
-    } else if(nrow(x) != ncol(x)){
-      stop("The distance matrix x is not a square matrix.")
-    } else if(nrow(x) != length(y)){
-      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
-                         "and it's expected %i x %i according to the size of y."), 
-                   nrow(x), ncol(x), length(y), length(y)))
-    }
-    
     gen.learner1 <- function(training.ints, cls){
       m <- trainModel(x[training.ints, training.ints], cls, learner, learner.pars)
       r <- list(m = m, training.ints = training.ints)
@@ -305,9 +283,7 @@ selfTraining <- function(
 #' @export
 #' @importFrom stats predict
 predict.selfTraining <- function(object, x, ...) {
-  if(class(x) == "dist"){
-    x <- proxy::as.matrix(x)
-  }
+  x <- as.matrix2(x)
   
   result <- getClass(
     checkProb(

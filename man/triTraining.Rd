@@ -4,8 +4,8 @@
 \alias{triTraining}
 \title{Tri-training method}
 \usage{
-triTraining(x, y, x.inst = TRUE, learner, learner.pars = list(), pred,
-  pred.pars = list())
+triTraining(x, y, x.inst = TRUE, learner, learner.pars = NULL,
+  pred = "predict", pred.pars = NULL)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -24,14 +24,17 @@ training a supervised base classifier, using a set of instances
 (or optionally a distance matrix) and it's corresponding classes.}
 
 \item{learner.pars}{A list with additional parameters for the
-\code{learner} function if necessary.}
+\code{learner} function if necessary.
+Default is \code{NULL}.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,
-using the base classifiers trained with the \code{learner} function.}
+using the base classifiers trained with the \code{learner} function.
+Default is \code{"predict"}.}
 
 \item{pred.pars}{A list with additional parameters for the
-\code{pred} function if necessary.}
+\code{pred} function if necessary.
+Default is \code{NULL}.}
 }
 \value{
 A list object of class "triTraining" containing:
@@ -107,7 +110,7 @@ set.seed(1)
 m2 <- triTraining(x = dtrain, y = ytrain, x.inst = FALSE,
                   learner = ssc::oneNN, 
                   pred = "predict",
-                  pred.pars = list(type = "prob", distance.weighting = "none"))
+                  pred.pars = list(distance.weighting = "none"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
@@ -134,7 +137,6 @@ table(pred3, yitest)
 set.seed(1)
 m4 <- triTraining(x = xtrain, y = ytrain, 
                   learner = function(x, y) e1071::naiveBayes(x, y), 
-                  pred = "predict",
                   pred.pars = list(type = "raw"))
 pred4 <- predict(m4, xitest)
 table(pred4, yitest)
@@ -143,7 +145,6 @@ table(pred4, yitest)
 set.seed(1)
 m5 <- triTraining(x = xtrain, y = ytrain, 
                   learner = C50::C5.0, 
-                  pred = "predict",
                   pred.pars = list(type = "prob"))
 pred5 <- predict(m5, xitest)
 table(pred5, yitest)

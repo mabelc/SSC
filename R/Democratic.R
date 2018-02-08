@@ -268,8 +268,8 @@ democraticG <- function(
     W = W,
     model = H,
     model.index = Lind,
-    model.index.map = model.index.map,
     instances.index = instances.index,
+    model.index.map = model.index.map,
     classes = classes
   )
   class(result) <- "democraticG"
@@ -294,11 +294,14 @@ democraticG <- function(
 #' training the different supervised base classifiers. 
 #' @param learners.pars A list with the set of additional parameters for each
 #' learner functions if necessary.
+#' Default is \code{NULL}.
 #' @param preds A list of functions or strings naming the functions for
 #' predicting the probabilities per classes,
 #' using the base classifiers trained with the functions defined in \code{learners}.
+#' Default is \code{"predict"} function for each learner in \code{learners}.
 #' @param preds.pars A list with the set of additional parameters for each
 #' function in \code{preds} if necessary.
+#' Default is \code{NULL}.
 #' @details
 #' This method trains an ensemble of diverse classifiers. To promote the initial diversity 
 #' the classifiers must represent different learning schemes.
@@ -329,18 +332,23 @@ democraticG <- function(
 #' @export
 democratic <- function(
   x, y, x.inst = TRUE,
-  learners, learners.pars,
-  preds, preds.pars
+  learners, learners.pars = NULL,
+  preds = rep("predict", length(learners)),
+  preds.pars = NULL
 ) {
   ### Check parameters ###
-  # Check x.inst
-  if(!is.logical(x.inst)){
-    stop("Parameter x.inst is not logical.")
-  }
+  x <- as.matrix(x)
+  y <- as.factor(y)
+  x.inst <- as.logical(x.inst)
+  checkTrainingData(x, y, x.inst)
+  learners.pars <- as.list2(learners.pars, length(learners))
+  preds.pars <- as.list2(preds.pars, length(preds))
+  
   # Check learners
   if (length(learners)  <= 1) {
     stop("Parameter learners must contain at least two base classifiers.") 
   }
+  
   if(!(length(learners) == length(learners.pars) &&
        length(preds) == length(preds.pars) &&
        length(learners) == length(preds))){
@@ -349,15 +357,6 @@ democratic <- function(
   
   if(x.inst){
     # Instance matrix case
-    # Check x
-    if(!is.matrix(x) && !is.data.frame(x)){
-      stop("Parameter x is neither a matrix or a data frame.")
-    }
-    # Check relation between x and y
-    if(nrow(x) != length(y)){
-      stop("The rows number of x must be equal to the length of y.")
-    }
-    
     # Build learner base functions
     m_learners_base <- mapply(
       FUN = function(learner, learner.pars){
@@ -388,20 +387,6 @@ democratic <- function(
     result <- democraticG(y, m_learners_base, m_preds_base)
   }else{
     # Distance matrix case
-    # Check matrix distance in x
-    if(class(x) == "dist"){
-      x <- proxy::as.matrix(x)
-    }
-    if(!is.matrix(x)){
-      stop("Parameter x is neither a matrix or a dist object.")
-    } else if(nrow(x) != ncol(x)){
-      stop("The distance matrix x is not a square matrix.")
-    } else if(nrow(x) != length(y)){
-      stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
-                         "and it's expected %i x %i according to the size of y."), 
-                   nrow(x), ncol(x), length(y), length(y)))
-    }
-    
     # Build learner base functions
     d_learners_base <- mapply(
       FUN = function(learner, learner.pars){
@@ -457,11 +442,7 @@ democratic <- function(
 #' @export
 #' @importFrom stats predict
 predict.democratic <- function(object, x, ...){
-  if(class(x) == "integer"){
-    x <- matrix(x, nrow = 1)
-  } else if(class(x) == "dist"){
-    x <- proxy::as.matrix(x)
-  }
+  x <- as.matrix2(x)
   
   # Select classifiers for prediction
   lower.limit <- 0.5
@@ -515,6 +496,7 @@ predict.democratic <- function(object, x, ...){
       object$preds.pars[selected]
     )
   }
+  pred <- as.matrix2(pred)
   
   # Combining predictions
   map <- vector(mode = "numeric", length = ninstances)

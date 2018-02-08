@@ -129,7 +129,7 @@ predProb.OneNN <- function(m, dists, distance.weighting = "reciprocalexp", initi
 #' according to 1NN.
 #' @export
 #' @importFrom stats predict
-predict.OneNN <- function(object, dists, type="class", ...){
+predict.OneNN <- function(object, dists, type="prob", ...){
   if(type == "class"){
     predClass.OneNN(object, dists)
   }else if(type == "prob"){

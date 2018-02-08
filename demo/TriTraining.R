@@ -39,7 +39,7 @@ set.seed(1)
 m2 <- triTraining(x = dtrain, y = ytrain, x.inst = FALSE,
                   learner = ssc::oneNN, 
                   pred = "predict",
-                  pred.pars = list(type = "prob", distance.weighting = "none"))
+                  pred.pars = list(distance.weighting = "none"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
@@ -66,7 +66,6 @@ table(pred3, yitest)
 set.seed(1)
 m4 <- triTraining(x = xtrain, y = ytrain, 
                   learner = function(x, y) e1071::naiveBayes(x, y), 
-                  pred = "predict",
                   pred.pars = list(type = "raw"))
 pred4 <- predict(m4, xitest)
 table(pred4, yitest)
@@ -75,7 +74,6 @@ table(pred4, yitest)
 set.seed(1)
 m5 <- triTraining(x = xtrain, y = ytrain, 
                   learner = C50::C5.0, 
-                  pred = "predict",
                   pred.pars = list(type = "prob"))
 pred5 <- predict(m5, xitest)
 table(pred5, yitest)

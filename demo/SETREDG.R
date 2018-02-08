@@ -47,12 +47,12 @@ gen.learner <- function(indexes, cls) {
 gen.pred <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
   d <- D[indexes, tra.idxs]
-  prob <- predict(model, d, type = "prob", distance.weighting = "none") 
+  prob <- predict(model, d, distance.weighting = "none")
   prob
 }
 
 md2 <- setredG(y = ytrain, D, gen.learner, gen.pred)
 ditest <- proxy::dist(x = xitest, y = xtrain[md2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
-cls2 <- predict(md2$model, ditest)
+cls2 <- predict(md2$model, ditest, type = "class")
 table(cls2, yitest)

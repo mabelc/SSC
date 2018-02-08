@@ -4,8 +4,9 @@
 \alias{selfTraining}
 \title{Self-training method}
 \usage{
-selfTraining(x, y, x.inst = TRUE, learner, learner.pars = list(), pred,
-  pred.pars = list(), max.iter = 50, perc.full = 0.7, thr.conf = 0.5)
+selfTraining(x, y, x.inst = TRUE, learner, learner.pars = NULL,
+  pred = "predict", pred.pars = NULL, max.iter = 50, perc.full = 0.7,
+  thr.conf = 0.5)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
@@ -24,14 +25,17 @@ training a supervised base classifier, using a set of instances
 (or optionally a distance matrix) and it's corresponding classes.}
 
 \item{learner.pars}{A list with additional parameters for the
-\code{learner} function if necessary.}
+\code{learner} function if necessary.
+Default is \code{NULL}.}
 
 \item{pred}{either a function or a string naming the function for
 predicting the probabilities per classes,
-using the base classifier trained with the \code{learner} function.}
+using the base classifier trained with the \code{learner} function.
+Default is \code{"predict"}.}
 
 \item{pred.pars}{A list with additional parameters for the
-\code{pred} function if necessary.}
+\code{pred} function if necessary.
+Default is \code{NULL}.}
 
 \item{max.iter}{maximum number of iterations to execute the self-labeling process. 
 Default is 50.}
@@ -127,7 +131,7 @@ dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE
 m2 <- selfTraining(x = dtrain, y = ytrain, x.inst = FALSE,
                    learner = ssc::oneNN, 
                    pred = "predict",
-                   pred.pars = list(type = "prob", distance.weighting = "none"))
+                   pred.pars = list(distance.weighting = "none"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
