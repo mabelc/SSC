@@ -89,7 +89,7 @@ knn2 <- function(indexes, cls) {
 # function to predict probabilities
 knn2.prob <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
-  predict(model, D[indexes, tra.idxs], type = "prob") 
+  predict(model, D[indexes, tra.idxs], type = "prob", distance.weighting = "none") 
 }
 
 ### Define svm2 base classifier using ksvm from kernlab package

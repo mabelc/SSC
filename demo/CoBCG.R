@@ -54,7 +54,7 @@ gen.learner2 <- function(indexes, cls) {
 gen.pred2 <- function(model, indexes)  {
   tra.idxs <- attr(model, "tra.idxs")
   d <- dtrain[indexes, tra.idxs]
-  prob <- predict(model, d, type = "prob") 
+  prob <- predict(model, d, type = "prob", distance.weighting = "none") 
   prob
 }
 

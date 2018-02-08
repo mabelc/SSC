@@ -57,7 +57,7 @@ predClass.OneNN <- function(m, dists) {
 #' class, where each cell represents the probability that the instance belongs to the
 #' class, according to 1NN.
 #' @noRd
-predProb.OneNN <- function(m, dists, distance.weighting = "none", initial.value = 0) {
+predProb.OneNN <- function(m, dists, distance.weighting = "reciprocalexp", initial.value = 0) {
   if(!is.matrix(dists)){
     stop("The'dists' argument is not a matrix.")
   }

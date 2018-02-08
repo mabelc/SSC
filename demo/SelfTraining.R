@@ -37,7 +37,7 @@ dtrain <- as.matrix(proxy::dist(x = xtrain, method = "euclidean", by_rows = TRUE
 m2 <- selfTraining(x = dtrain, y = ytrain, x.inst = FALSE,
                    learner = ssc::oneNN, 
                    pred = "predict",
-                   pred.pars = list(type = "prob"))
+                   pred.pars = list(type = "prob", distance.weighting = "none"))
 ditest <- proxy::dist(x = xitest, y = xtrain[m2$instances.index,],
                       method = "euclidean", by_rows = TRUE)
 pred2 <- predict(m2, ditest)
