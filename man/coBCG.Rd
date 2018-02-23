@@ -101,10 +101,8 @@ h.prob <- lapply(
   X = md1$model, 
   FUN = function(m) predict(m, xitest)
 )
-# Combine probability matrices
-prob <- coBCCombine(h.prob, md1$classes)
-# Get class per instance
-cls1 <- md1$classes[apply(prob, 1, which.max)]
+# Combine the predictions
+cls1 <- coBCCombine(h.prob, md1$classes)
 table(cls1, yitest)
 
 ## Example: Training from a distance matrix with 1-NN (oneNN) as base classifier.
@@ -136,10 +134,8 @@ for(i in 1:length(md2$model)){
   D <- ditest[, md2$model.index.map[[i]]]
   h.prob[[i]] <- predict(m, D)
 }
-# Combine probability matrices
-prob <- coBCCombine(h.prob, md2$classes)
-# Get class per instance
-cls2 <- md2$classes[apply(prob, 1, which.max)]
+# Combine the predictions
+cls2 <- coBCCombine(h.prob, md2$classes)
 table(cls2, yitest)
 
 }

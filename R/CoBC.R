@@ -412,7 +412,13 @@ coBCCombine <- function(h.prob, classes){
            numeric()
          }
   )
-  .coBCCombine(h.prob, ninstances, classes)
+  
+  pred <- getClass(
+    # Combine probability matrices
+    .coBCCombine(h.prob, ninstances, classes)
+  )
+  
+  return(pred)
 }
 
 .coBCCombine <- function(h.prob, ninstances, classes){
