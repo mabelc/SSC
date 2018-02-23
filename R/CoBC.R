@@ -295,6 +295,7 @@ coBC <- function(
 ) {
   ### Check parameters ###
   x <- as.matrix(x)
+  rownames(x) <- NULL
   y <- as.factor(y)
   x.inst <- as.logical(x.inst)
   checkTrainingData(x, y, x.inst)
