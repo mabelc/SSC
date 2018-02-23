@@ -379,14 +379,13 @@ triTrainingCombine <- function(pred){
   if(length(ninstances) != 1){
     stop("The length of objects in the 'pred' parameter are not all equals.") 
   }
-  
-  mapply(
-    FUN = function(a, b, c){
-      getmode(c(a, b, c))
-    },
-    pred[[1]],
-    pred[[2]],
-    pred[[3]]
+  as.factor(
+    mapply(
+      FUN = function(a, b, c){
+        getmode(c(a, b, c))
+      },
+      pred[[1]], pred[[2]], pred[[3]]
+    )
   )
 }
 
