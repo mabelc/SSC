@@ -10,7 +10,7 @@ test_that(
         0.3, 0.4, 0.3,
         0.2, 0.6, 0.2
       ),
-      nrow = ninstances
+      nrow = ninstances, byrow = TRUE
     )
     classes <- c("a", "b", "c")
     colnames(a) <- classes
@@ -43,7 +43,7 @@ test_that(
         0.3, 0.4, 0.3,
         0.2, 0.6, 0.2
       ),
-      nrow = ninstances
+      nrow = ninstances, byrow = TRUE
     )
     expect_error(checkProb(a, ninstances, classes))
     # 
@@ -59,9 +59,65 @@ test_that(
         0.1, 0.4, 0.3, 0.1,
         0.2, 0.5, 0.2, 0.1
       ),
-      nrow = ninstances
+      nrow = ninstances, byrow = TRUE
     )
     colnames(a) <- c("a", "b", "c", "d")
     expect_error(checkProb(a, ninstances, c("a", "b", "c")))
+  }
+)
+
+test_that(
+  desc = "getClass works as expected",
+  code = {
+    ninstances <- 3
+    a <- matrix(
+      c(
+        0.3, 0.4, 0.3,
+        0.2, 0.1, 0.7,
+        0.4, 0.4, 0.2
+      ),
+      nrow = ninstances, byrow = TRUE
+    )
+    classes <- c("a", "b", "c")
+    colnames(a) <- classes
+    
+    e <- as.factor(c("b", "c", "a"))
+    r <- getClass(a)
+    expect_identical(r, e)
+    
+    ninstances <- 1
+    b <- matrix(c(0.3, 0.4, 0.3), nrow = ninstances)
+    colnames(b) <- classes
+    e <- factor(c("b"), levels = classes)
+    r <- getClass(b)
+    expect_identical(r, e)
+  }
+)
+
+test_that(
+  desc = "getClassIdx works as expected",
+  code = {
+    ninstances <- 3
+    a <- matrix(
+      c(
+        0.3, 0.4, 0.3,
+        0.2, 0.1, 0.7,
+        0.4, 0.4, 0.2
+      ),
+      nrow = ninstances, byrow = TRUE
+    )
+    classes <- c("a", "b", "c")
+    colnames(a) <- classes
+    
+    e <- c(2, 3, 1)
+    r <- getClassIdx(a)
+    expect_equal(r, e)
+    
+    ninstances <- 1
+    b <- matrix(c(0.3, 0.4, 0.3), nrow = ninstances)
+    colnames(b) <- classes
+    e <- 2
+    r <- getClassIdx(b)
+    expect_equal(r, e)
   }
 )
