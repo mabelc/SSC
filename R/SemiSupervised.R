@@ -101,11 +101,23 @@ checkProb <- function(prob, ninstances, classes){
       sprintf(
         paste0(
           "Predict function incorrect output.\n",
-          "The rows number of 'prob' is %s.\n",
-          "Expected a number egual to %i (value of 'ninstances')."
+          "The row number of 'prob' is %s.\n",
+          "Expected a number equal to %i (value of 'ninstances')."
         ), 
         nrow(prob), 
         ninstances)
+    )
+  }
+  if(length(classes) != ncol(prob)){
+    stop(
+      sprintf(
+        paste0(
+          "Predict function incorrect output.\n",
+          "The column number of 'prob' is %s.\n",
+          "Expected a number equal to %i (length of 'classes')."
+        ), 
+        ncol(prob), 
+        length(classes))
     )
   }
   if(length(classes) != length(intersect(classes, colnames(prob)))){
@@ -115,14 +127,14 @@ checkProb <- function(prob, ninstances, classes){
         "The columns names of 'prob' is a set not equal to 'classes' set."
       )
     )
-  } else if(any(classes != colnames(prob))){
+  } else {
     # order columns by classes
     prob <- prob[, classes]
     if(!is.matrix(prob)){
       # when nrow of prob is 1
-      dim(prob) <- c(1, length(prob))
+      prob <- matrix(prob, nrow = 1)
+      colnames(prob) <- classes
     }
-    colnames(prob) <- classes 
   }
   
   return(prob)
