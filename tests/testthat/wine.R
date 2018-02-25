@@ -2,23 +2,16 @@
 wine <- do.call(
   args = list(),
   what = function(){
-    data(wine) # load the Wine dataset
+    # load the Wine dataset
+    data(wine) 
     
     cls <- which(colnames(wine) == "Wine")
     x <- wine[, -cls] # instances without classes
     y <- wine[, cls] # the classes
     x <- scale(x) # scale the attributes for distance calculations
-    set.seed(20)
     
-    # Use 50% of instances for training
-    a <- 1:length(y)
-    training <- sample(a, ceiling(length(a) * 0.5))
-    testing <- setdiff(a, training)
-    
-    # Use 70% of train instances as unlabeled set
-    b <- 1:length(training)
-    unlabeled <- sample(b, ceiling(length(b) * 0.7))
-    labeled <- setdiff(b, unlabeled)
+    # load partition
+    load("winep.RData")
     
     # Data for semi-supervised training
     xtrain <- x[training,]  # training instances
