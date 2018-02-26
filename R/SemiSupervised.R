@@ -1,21 +1,31 @@
 
-checkTrainingData <- function(x, y, x.inst){
-  if(!is.logical(x.inst)){
+checkTrainingData <- function(e){
+  e$y <- as.factor(e$y)
+  e$x.inst <- as.logical(e$x.inst)
+  if(!is.logical(e$x.inst)){
     stop("Parameter x.inst is not logical.")
   }
-  
-  if(x.inst){
+  if(e$x.inst){
+    # Check x
+    if(!is.matrix(e$x) && !is.data.frame(e$x)){
+      stop("Parameter x is neither a matrix or a data frame.")
+    }
     # Check relation between x and y
-    if(nrow(x) != length(y)){
+    if(nrow(e$x) != length(e$y)){
       stop("The rows number of x must be equal to the length of y.")
     }
   }else{
-    if(nrow(x) != ncol(x)){
+    # Check x
+    e$x <- as.matrix(e$x)
+    if(!is.matrix(e$x)){
+      stop("Parameter x is not a matrix.")
+    }
+    if(nrow(e$x) != ncol(e$x)){
       stop("The distance matrix x is not a square matrix.")
-    } else if(nrow(x) != length(y)){
+    } else if(nrow(e$x) != length(e$y)){
       stop(sprintf(paste("The dimensions of the matrix x is %i x %i", 
                          "and it's expected %i x %i according to the size of y."), 
-                   nrow(x), ncol(x), length(y), length(y)))
+                   nrow(e$x), ncol(e$x), length(e$y), length(e$y)))
     }
   }
 }

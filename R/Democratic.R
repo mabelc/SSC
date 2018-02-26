@@ -337,10 +337,7 @@ democratic <- function(
   preds.pars = NULL
 ) {
   ### Check parameters ###
-  x <- as.matrix(x)
-  y <- as.factor(y)
-  x.inst <- as.logical(x.inst)
-  checkTrainingData(x, y, x.inst)
+  checkTrainingData(environment())
   learners.pars <- as.list2(learners.pars, length(learners))
   preds.pars <- as.list2(preds.pars, length(preds))
   

@@ -266,11 +266,8 @@ triTraining <- function(
   pred = "predict", pred.pars = NULL
 ) {
   ### Check parameters ###
-  x <- as.matrix(x)
   rownames(x) <- NULL
-  y <- as.factor(y)
-  x.inst <- as.logical(x.inst)
-  checkTrainingData(x, y, x.inst)
+  checkTrainingData(environment())
   learner.pars <- as.list2(learner.pars)
   pred.pars <- as.list2(pred.pars)
   

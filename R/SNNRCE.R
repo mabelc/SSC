@@ -287,10 +287,7 @@ snnrce <- function(
   alpha = 0.1
 ){
   ### Check parameters ###
-  x <- as.matrix(x)
-  y <- as.factor(y)
-  x.inst <- as.logical(x.inst)
-  checkTrainingData(x, y, x.inst)
+  checkTrainingData(environment())
   
   if(x.inst){
     # Instance matrix case
