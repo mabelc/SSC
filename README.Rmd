@@ -1,26 +1,35 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-ssc
-===
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# ssc
 
 Provides a collection of self-labeled techniques for semi-supervised classification. In semi-supervised classification, both labeled and unlabeled data are used to train a classifier. This learning paradigm has obtained promising results, specifically in the presence of a reduced set of labeled examples. This package implements a collection of self-labeled techniques to construct a classification model. These techniques enlarges the original labeled set using the most confident predictions to classify unlabeled data. The techniques implemented can be applied to classification problems in several domains by the specification of a suitable supervised base classifier. At low ratios of labeled data, it can be shown to perform better than classical supervised classifiers.
 
-Installation
-------------
+## Installation
 
 You can install ssc from github with:
 
-``` r
+```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("mabelc/SSC")
 ```
 
-Example
--------
+## Example
 
 This is a basic example which shows you how to solve a common problem:
 
-``` r
+```{r example}
 library(ssc)
 
 ## Load Iris data set
@@ -47,28 +56,21 @@ yitest <- y[tst.idx] # classes of testing instances
 
 ## Example: Training from a set of instances with 1-NN as base classifier.
 library(caret)
-#> Loading required package: lattice
-#> Loading required package: ggplot2
 m <- selfTraining(x = xtrain, y = ytrain, learner = knn3, learner.pars = list(k = 1))
 pred <- predict(m, xitest)
 table(pred, yitest)
-#>             yitest
-#> pred         setosa versicolor virginica
-#>   setosa         24          0         0
-#>   versicolor      0         22         9
-#>   virginica       0          0        20
 ```
 
-Overview of the package
------------------------
+## Overview of the package
 
 The ssc package implements the following self-labeled techniques:
 
--   coBC
--   democratic
--   selfTraining
--   setred
--   snnrce
--   triTraining
+- coBC
+- democratic
+- selfTraining
+- setred
+- snnrce
+- triTraining
 
-selfTraining, setred and snnrce are single-classifier based. coBC, democratic and triTraining are multi-classifier based.
+selfTraining, setred and snnrce are single-classifier based. coBC, democratic and triTraining are multi-classifier based. 
+
