@@ -12,7 +12,7 @@
 \item{dists}{A matrix of distances between the instances to classify (by rows) and
 the instances used to train the model (by column)}
 
-\item{type}{It is a string that can take two values: \code{"class"} for computing the class of
+\item{type}{A string that can take two values: \code{"class"} for computing the class of
 the instances or \code{"prob"} for computing the probabilities of belonging to each class.}
 
 \item{...}{Currently not used.}

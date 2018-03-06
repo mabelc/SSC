@@ -12,11 +12,12 @@ NULL
 
 #' Wine recognition data
 #'
-#' These data are the results of a chemical analysis of wines grown in the same
+#' This dataset is the result of a chemical analysis of wine grown in the same
 #' region in Italy but derived from three different cultivars. The analysis determined
 #' the quantities of 13 constituents found in each of the three types of wines.
 #'
-#' The attributes are (dontated to UCI repository by Riccardo Leardi, riclea@@anchem.unige.it )
+#' The dataset is taken from the UCI data repository, to which it was donated 
+#' by Riccardo Leardi, University of Genova. The attributes are as follows:
 #' \itemize{
 #'   \item Alcohol
 #'   \item Malic acid

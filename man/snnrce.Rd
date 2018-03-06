@@ -49,7 +49,7 @@ the labels of the missclassified examples.
 }
 \details{
 SNNRCE initiates the self-labeling process by training a 1-NN from the original 
-labeled set. This method attempts to reduce the noise examples by labeling those instances 
+labeled set. This method attempts to reduce the noise in examples by labeling those instances 
 with no cut edges in the initial stages of self-labeling learning. 
 These highly confident examples are added into the training set. 
 The remaining examples follow the standard self-training process until a minimum number 

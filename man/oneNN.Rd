@@ -12,10 +12,10 @@ oneNN(x = NULL, y)
 \item{y}{a vector with the labels of training instances}
 }
 \value{
-A model wish the data needed to use 1-NN
+A model with the data needed to use 1-NN
 }
 \description{
-Build a model using the given data to be capable
-of predict the label or the probabilities of other instances,
+Build a model using the given data to be able
+to predict the label or the probabilities of other instances,
 according to 1-NN algorithm.
 }

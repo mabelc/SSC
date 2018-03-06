@@ -226,7 +226,7 @@ coBCG <- function(
 #' example is labeled for a classifier if the most confident classifications assigned by the 
 #' other \code{N-1} classifiers agree on the labeling proposed. The unlabeled examples 
 #' candidates are selected randomly from a pool of size \code{u}.
-#' @param x A object that can be coerced as matrix. This object has two possible 
+#' @param x An object that can be coerced to a matrix. This object has two possible 
 #' interpretations according to the value set in the \code{x.inst} argument:
 #' a matrix with the training instances where each row represents a single instance
 #' or a precomputed (distance or kernel) matrix between the training examples.
@@ -340,8 +340,8 @@ coBC <- function(
 #' @description Predicts the label of instances according to the \code{coBC} model.
 #' @details For additional help see \code{\link{coBC}} examples.
 #' @param object coBC model built with the \code{\link{coBC}} function.
-#' @param x A object that can be coerced as matrix.
-#' Depending on how was the model built, \code{x} is interpreted as a matrix 
+#' @param x An object that can be coerced to a matrix.
+#' Depending on how the model was built, \code{x} is interpreted as a matrix 
 #' with the distances between the unseen instances and the selected training instances, 
 #' or a matrix of instances.
 #' @param ... This parameter is included for compatibility reasons.

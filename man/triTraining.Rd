@@ -65,7 +65,7 @@ original labeled set, using the \code{learner} function specified.
 In each iteration, the algorithm detects unlabeled examples on which two classifiers 
 agree with the classification and includes these instances in the enlarged set of the 
 third classifier under certain conditions. The generation of the final hypothesis is 
-produced via the majority voting. The iteration process ends when no changes occurs in 
+produced via the majority voting. The iteration process ends when no changes occur in 
 any model during a complete iteration.
 }
 \examples{

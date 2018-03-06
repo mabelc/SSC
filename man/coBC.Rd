@@ -8,7 +8,7 @@ coBC(x, y, x.inst = TRUE, learner, learner.pars = NULL, pred = "predict",
   pred.pars = NULL, N = 3, perc.full = 0.7, u = 100, max.iter = 50)
 }
 \arguments{
-\item{x}{A object that can be coerced as matrix. This object has two possible 
+\item{x}{An object that can be coerced to a matrix. This object has two possible 
 interpretations according to the value set in the \code{x.inst} argument:
 a matrix with the training instances where each row represents a single instance
 or a precomputed (distance or kernel) matrix between the training examples.}

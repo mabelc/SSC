@@ -20,15 +20,15 @@
 #' @param perc.full A number between 0 and 1. If the percentage 
 #' of new labeled examples reaches this value the self-training process is stopped.
 #' Default is 0.7.
-#' @param thr.conf A number between 0 and 1 that indicates the theshold confidence.
-#' At each iteration, only the new label examples with a confidence greater than 
-#' this value (\code{thr.conf}) are added to training set.
+#' @param thr.conf A number between 0 and 1 that indicates the confidence theshold.
+#' At each iteration, only the newly labelled examples with a confidence greater than 
+#' this value (\code{thr.conf}) are added to the training set.
 #' @details 
 #' SelfTrainingG can be helpful in those cases where the method selected as 
-#' base classifier needs a \code{learner} and \code{pred} functions with other
+#' base classifier needs \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general self-training method,
-#' please see \code{\link{selfTraining}} function. Essentially, \code{selfTraining}
-#' function is a wrapper of \code{selfTrainingG} function.
+#' please see the \code{\link{selfTraining}} function. Essentially, the \code{selfTraining}
+#' function is a wrapper of the \code{selfTrainingG} function.
 #' @return A list object of class "selfTrainingG" containing:
 #' \describe{
 #'   \item{model}{The final base classifier trained using the enlarged labeled set.}
@@ -145,7 +145,7 @@ selfTrainingG <- function(
 #' learning classification method. The self-training classifier is initially
 #' trained with a reduced set of labeled examples. Then it is iteratively retrained
 #' with its own most confident predictions over the unlabeled examples. 
-#' Self-training follows a wrapper methodology using one base supervised 
+#' Self-training follows a wrapper methodology using a base supervised 
 #' classifier to establish the possible class of unlabeled instances. 
 #' @param x A object that can be coerced as matrix. This object has two possible 
 #' interpretations according to the value set in the \code{x.inst} argument:
@@ -173,8 +173,8 @@ selfTrainingG <- function(
 #' @param perc.full A number between 0 and 1. If the percentage 
 #' of new labeled examples reaches this value the self-training process is stopped.
 #' Default is 0.7.
-#' @param thr.conf A number between 0 and 1 that indicates the theshold confidence.
-#' At each iteration, only the new labeled examples with a confidence greater than 
+#' @param thr.conf A number between 0 and 1 that indicates the confidence threshold.
+#' At each iteration, only the newly labelled examples with a confidence greater than 
 #' this value (\code{thr.conf}) are added to the training set.
 #' @details 
 #' For predicting the most accurate instances per iteration, \code{selfTraining}
@@ -186,16 +186,16 @@ selfTrainingG <- function(
 #' \code{learner.pars} argument. The model obtained is a supervised classifier
 #' ready to predict new instances through the \code{pred} function. 
 #' Using a similar idea, the additional parameters to the \code{pred} function
-#' are provided using \code{pred.pars} argument. The \code{pred} function returns 
-#' the probabilities per classes for each new instance. The value of the 
+#' are provided using the \code{pred.pars} argument. The \code{pred} function returns 
+#' the probabilities per class for each new instance. The value of the 
 #' \code{thr.conf} argument controls the confidence of instances selected 
 #' to enlarge the labeled set for the next iteration.
 #' 
 #' The stopping criterion is defined through the fulfillment of one of the following
 #' criteria: the algorithm reaches the number of iterations defined in the \code{max.iter}
-#' parameter or the portion of unlabeled set, defined in the \code{perc.full} parameter,
-#' is moved to the labeled set. In some cases, the process stopps and not instances 
-#' are added to the original labeled set. In this case, the user must to assign a more 
+#' parameter or the portion of the unlabeled set, defined in the \code{perc.full} parameter,
+#' is moved to the labeled set. In some cases, the process stops and no instances 
+#' are added to the original labeled set. In this case, the user must assign a more 
 #' flexible value to the \code{thr.conf} parameter.
 #' 
 #' @return A list object of class "selfTraining" containing:

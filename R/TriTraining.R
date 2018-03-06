@@ -17,8 +17,8 @@
 #' TriTrainingG can be helpful in those cases where the method selected as 
 #' base classifier needs a \code{learner} and \code{pred} functions with other
 #' specifications. For more information about the general triTraining method,
-#' please see \code{\link{triTraining}} function. Essentially, \code{triTraining}
-#' function is a wrapper of \code{triTrainingG} function.
+#' please see the \code{\link{triTraining}} function. Essentially, the \code{triTraining}
+#' function is a wrapper of the \code{triTrainingG} function.
 #' @return A list object of class "triTrainingG" containing:
 #' \describe{
 #'   \item{model}{The final three base classifiers trained using the enlarged labeled set.}
@@ -236,7 +236,7 @@ triTrainingG <- function(
 #' In each iteration, the algorithm detects unlabeled examples on which two classifiers 
 #' agree with the classification and includes these instances in the enlarged set of the 
 #' third classifier under certain conditions. The generation of the final hypothesis is 
-#' produced via the majority voting. The iteration process ends when no changes occurs in 
+#' produced via the majority voting. The iteration process ends when no changes occur in 
 #' any model during a complete iteration.
 #'  
 #' @return A list object of class "triTraining" containing:

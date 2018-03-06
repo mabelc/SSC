@@ -42,8 +42,8 @@ for a classifier if the other two classifiers agree on the labeling proposed.
 TriTrainingG can be helpful in those cases where the method selected as 
 base classifier needs a \code{learner} and \code{pred} functions with other
 specifications. For more information about the general triTraining method,
-please see \code{\link{triTraining}} function. Essentially, \code{triTraining}
-function is a wrapper of \code{triTrainingG} function.
+please see the \code{\link{triTraining}} function. Essentially, the \code{triTraining}
+function is a wrapper of the \code{triTrainingG} function.
 }
 \examples{
 library(ssc)

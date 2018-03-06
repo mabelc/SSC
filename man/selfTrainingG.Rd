@@ -27,9 +27,9 @@ Default is 50.}
 of new labeled examples reaches this value the self-training process is stopped.
 Default is 0.7.}
 
-\item{thr.conf}{A number between 0 and 1 that indicates the theshold confidence.
-At each iteration, only the new label examples with a confidence greater than 
-this value (\code{thr.conf}) are added to training set.}
+\item{thr.conf}{A number between 0 and 1 that indicates the confidence theshold.
+At each iteration, only the newly labelled examples with a confidence greater than 
+this value (\code{thr.conf}) are added to the training set.}
 }
 \value{
 A list object of class "selfTrainingG" containing:
@@ -51,10 +51,10 @@ classifier to establish the possible class of unlabeled instances.
 }
 \details{
 SelfTrainingG can be helpful in those cases where the method selected as 
-base classifier needs a \code{learner} and \code{pred} functions with other
+base classifier needs \code{learner} and \code{pred} functions with other
 specifications. For more information about the general self-training method,
-please see \code{\link{selfTraining}} function. Essentially, \code{selfTraining}
-function is a wrapper of \code{selfTrainingG} function.
+please see the \code{\link{selfTraining}} function. Essentially, the \code{selfTraining}
+function is a wrapper of the \code{selfTrainingG} function.
 }
 \examples{
 library(ssc)

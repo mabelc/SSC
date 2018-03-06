@@ -1,11 +1,11 @@
 
 #' @title 1-NN supervised classifier builder
-#' @description Build a model using the given data to be capable
-#' of predict the label or the probabilities of other instances,
+#' @description Build a model using the given data to be able
+#' to predict the label or the probabilities of other instances,
 #' according to 1-NN algorithm.
 #' @param x This argument is not used, the reason why he gets is to fulfill an agreement
 #' @param y a vector with the labels of training instances
-#' @return A model wish the data needed to use 1-NN
+#' @return A model with the data needed to use 1-NN
 #' @export
 oneNN <- function(x=NULL, y) {
   if(! is.factor(y) ){
@@ -119,7 +119,7 @@ predProb.OneNN <- function(m, dists, distance.weighting = "reciprocalexp", initi
 #' @param object A model of class OneNN built with \code{\link{oneNN}}
 #' @param dists A matrix of distances between the instances to classify (by rows) and
 #' the instances used to train the model (by column)
-#' @param type It is a string that can take two values: \code{"class"} for computing the class of
+#' @param type A string that can take two values: \code{"class"} for computing the class of
 #' the instances or \code{"prob"} for computing the probabilities of belonging to each class.
 #' @param ... Currently not used.
 #' @return If \code{type} is equal to \code{"class"} a vector of length equal to the rows number

@@ -9,8 +9,8 @@
 \arguments{
 \item{object}{coBC model built with the \code{\link{coBC}} function.}
 
-\item{x}{A object that can be coerced as matrix.
-Depending on how was the model built, \code{x} is interpreted as a matrix 
+\item{x}{An object that can be coerced to a matrix.
+Depending on how the model was built, \code{x} is interpreted as a matrix 
 with the distances between the unseen instances and the selected training instances, 
 or a matrix of instances.}
 

@@ -210,9 +210,9 @@ setredG <- function(
 
 #' @title SETRED method
 #' @description SETRED (SElf-TRaining with EDiting) is a variant of the self-training 
-#' classification method (\code{\link{selfTraining}}) with a different addition mechanism. 
+#' classification method (as implemented in the function \code{\link{selfTraining}}) with a different addition mechanism. 
 #' The SETRED classifier is initially trained with a 
-#' reduced set of labeled examples. Then it is iteratively retrained with its own most 
+#' reduced set of labeled examples. Then, it is iteratively retrained with its own most 
 #' confident predictions over the unlabeled examples. SETRED uses an amending scheme 
 #' to avoid the introduction of noisy examples into the enlarged labeled set. For each 
 #' iteration, the mislabeled examples are identified using the local information provided 
@@ -250,19 +250,19 @@ setredG <- function(
 #' @details 
 #' SETRED initiates the self-labeling process by training a model from the original 
 #' labeled set. In each iteration, the \code{learner} function detects unlabeled 
-#' examples on which it makes most confident prediction and labels those examples 
+#' examples for which it makes the most confident prediction and labels those examples 
 #' according to the \code{pred} function. The identification of mislabeled examples is 
 #' performed using a neighborhood graph created from the distance matrix.
 #' When \code{x.inst} is \code{TRUE} this distance matrix is computed using
-#' \code{dist} function. On the other hand, when \code{x.inst} is \code{FALSE}
-#' the matrix provide with \code{x} is used both to train a classifier and to create
+#' the \code{dist} function. On the other hand, when \code{x.inst} is \code{FALSE}
+#' the matrix provided with \code{x} is used both to train a classifier and to create
 #' the neighborhood graph.
 #' Most examples possess the same label in a neighborhood. So if an example locates 
 #' in a neighborhood with too many neighbors from different classes, this example should 
 #' be considered problematic. The value of the \code{theta} argument controls the confidence 
 #' of the candidates selected to enlarge the labeled set. The lower this value is, the more 
-#' restrictive it is the selection of the examples that are considered good.
-#' For more information about the self-labeled process and the remainders parameters, please 
+#' restrictive is the selection of the examples that are considered good.
+#' For more information about the self-labeled process and the rest of the parameters, please 
 #' see \code{\link{selfTraining}}.
 #'  
 #' @return A list object of class "setred" containing:
