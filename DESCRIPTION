@@ -41,7 +41,6 @@ Suggests:
     C50,
     kernlab,
     testthat
-Maintainer: Christoph Bergmeir <c.bergmeir@decsai.ugr.es>
 License: GPL (>= 3)
 URL: https://github.com/mabelc/SSC
 BugReports: https://github.com/mabelc/SSC/issues
