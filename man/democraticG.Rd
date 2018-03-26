@@ -49,6 +49,10 @@ please see \code{\link{democratic}} function. Essentially, \code{democratic}
 function is a wrapper of \code{democraticG} function.
 }
 \examples{
+
+\dontrun{
+# this is a long running example
+
 library(ssc)
 
 ## Load Wine data set
@@ -169,32 +173,7 @@ svm2.prob <- function(model, indexes)  {
           type = "probabilities") 
 }
 
-### Train
-m2 <- democraticG(y = ytrain, 
-                  gen.learners = list(knn2, svm2),
-                  gen.preds = list(knn2.prob, svm2.prob))
-
-### Predict
-# Compute distance matrix Ditest
-Ditest <- dist(x = xitest, y = xtrain[m2$model.index[[1]],],
-               method = "euclidean", by_rows = TRUE)
-# predict using classifier 1
-m2.pred1 <- predict(m2$model[[1]], Ditest, type = "class")
-
-# Compute kernel matrix Kitest
-sv.idxs <- SVindex(m2$model[[2]])
-sv.idxs <- m2$model.index.map[[2]][sv.idxs]
-Kitest <- Ditest[, sv.idxs]
-Kitest <- exp(- sigma * Kitest * Kitest)
-Kitest <- as.kernelMatrix(Kitest)
-# predict using classifier 2
-m2.pred2 <- predict(m2$model[[2]], Kitest)
-
-# Combine predictions
-m2.pred <- list(m2.pred1, m2.pred2)
-cls2 <- democraticCombine(m2.pred, m2$W, m2$classes)
-table(cls2, yitest)
-
+}
 
 }
 \references{
