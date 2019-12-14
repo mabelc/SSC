@@ -34,7 +34,7 @@ snnrceG <- function(
     }
   }
   # Check distance matrix
-  if(class(D) == "dist"){
+  if(inherits(D, "dist")){
     D <- proxy::as.matrix(D)
   }
   if(!is.matrix(D)){

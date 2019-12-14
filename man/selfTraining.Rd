@@ -5,8 +5,8 @@
 \title{Self-training method}
 \usage{
 selfTraining(x, y, x.inst = TRUE, learner, learner.pars = NULL,
-  pred = "predict", pred.pars = NULL, max.iter = 50, perc.full = 0.7,
-  thr.conf = 0.5)
+  pred = "predict", pred.pars = NULL, max.iter = 50,
+  perc.full = 0.7, thr.conf = 0.5)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 
