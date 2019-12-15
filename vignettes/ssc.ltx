@@ -370,7 +370,7 @@ To perform the training phase using directly the instances in \texttt{xtrain} an
 Instead of using the instances in \texttt{xtrain} we can use a precomputed matrix in conjunction with a distance-based classifier. In this case, we use the distance matrix \texttt{dtrain} and the \texttt{oneNN} function available in the \CRANpkg{ssc} package as follows:
 
 \begin{Shaded}
-\begin{Highlighting}[]	
+\begin{Highlighting}[]
 \NormalTok{m.selft2 <-}\StringTok{ }\KeywordTok{selfTraining}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ dtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{x.inst =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{learner =}\NormalTok{ oneNN,}
                          \DataTypeTok{pred =} \StringTok{"predict"}\NormalTok{, }\DataTypeTok{pred.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"prob"}\NormalTok{))}
 \end{Highlighting}
