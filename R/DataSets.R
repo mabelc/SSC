@@ -7,7 +7,7 @@
 #' @name coffee
 #' @usage data(coffee)
 #' @format A data frame with 56 rows and 287 variables including the class.
-#' @source \url{www.cs.ucr.edu/~eamonn/time_series_data/}
+#' @source \url{https://www.cs.ucr.edu/%7Eeamonn/time_series_data_2018/}
 NULL
 
 #' Wine recognition data

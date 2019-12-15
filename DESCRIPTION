@@ -1,7 +1,7 @@
 Package: ssc
 Type: Package
 Title: Semi-Supervised Classification Methods
-Version: 2.0-1
+Version: 2.1-0
 Authors@R: c(person("Mabel", "González", role = "aut",
                     email = "mabelc@correo.ugr.es",
                     comment = c(ORCID = "0000-0003-0152-444X")),
@@ -41,6 +41,8 @@ Suggests:
     C50,
     kernlab,
     testthat,
+    timeDate,
+    stringi,
     R.rsp
 VignetteBuilder: R.rsp
 License: GPL (>= 3)
