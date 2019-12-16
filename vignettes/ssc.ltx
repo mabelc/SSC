@@ -1,0 +1,662 @@
+%\VignetteIndexEntry{ssc: An R Package for Semi-Supervised Classification}
+%\VignetteEngine{R.rsp::tex}
+
+\documentclass[a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{RJournal}
+\usepackage{amsmath,amssymb,array}
+\usepackage{booktabs}
+% added later
+\usepackage{graphicx, multirow}
+\usepackage[english]{babel}
+\usepackage{rotating}
+%% load any required packages here
+% Para mostrar el codigo de R
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\else % if luatex or xelatex
+\ifxetex
+\usepackage{mathspec}
+\else
+\usepackage{fontspec}
+\fi
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+	\usepackage{microtype}
+	\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+	pdftitle={Untitled},
+	pdfauthor={Mabel},
+	pdfborder={0 0 0},
+	breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+% Fin para mostrar codigo R
+
+\begin{document}
+
+%% do not edit, for illustration only
+\sectionhead{}
+\volume{XX}
+\volnumber{YY}
+\year{20ZZ}
+\month{AAAA}
+
+%% replace RJtemplate with your article
+\begin{article}
+\title{\pkg{ssc}: An R Package for Semi-Supervised Classification}
+\author{by Mabel González, Osmani Rosado, José D. Rodríguez, Christoph Bergmeir, Isaac Triguero and José M. Benítez}
+
+\maketitle
+
+\abstract{
+Semi-supervised classification has become a popular area of machine learning, where both labeled and unlabeled data are used to train a classifier. This learning paradigm has obtained promising results, specifically in the presence of a reduced set of labeled examples. We present the R package \CRANpkg{ssc} that implements a collection of self-labeled techniques to construct a classification model. This family of techniques enlarges the original labeled set using the most confident predictions to classify unlabeled data. The techniques implemented in the \CRANpkg{ssc} package can be applied to classification problems in several domains by the specification of a suitable learning scheme. At low ratios of labeled data, it can be shown to perform better than classical supervised classifiers.
+}
+
+\section{Introduction}
+
+Nowadays, the increasing amount of stored data from the most diverse domains makes data mining \citep{ian2011data} a powerful tool to discover underlying knowledge on such data. A popular area of data mining focuses on the prediction of the label or class of new examples from data that describe what happened in the past. In those applications, an additional effort is required to obtain the labeled examples needed during the training process. Often, obtaining the labels is an expensive and time consuming process that requires the attention of the experts from a particular domain. Semi-supervised learning \citep[SSL,][]{chapelle2006semi} can relieve this situation since it performs the training from a reduced number of labeled data in conjunction with abundant unlabeled data.
+
+Semi-supervised classification (SSC) is in the middle ground between supervised and unsupervised classification. Several approaches have been proposed that follow the semi-supervised classification paradigm. The principal approaches are: generative models \citep{fujino2008generative}, graph-based models \citep{blum2001learning}, and the semi-supervised support vector machines \citep{joachims1999transductive}. Every SSC approach makes its own assumptions \citep{zhu2009introduction} about the link between the distribution of unlabeled and labeled data.
+
+The taxonomy proposed in \citet{triguero2015selflabeled} describes another family of methods, denoted self-labeled techniques. The main target of this family is to enlarge the original labeled set using the most confident predictions to classify unlabeled data. In the specialized literature, there are reported several self-labeled methods \citep{li2005setred, Wang2010SNNRCE, zhou2005tritraining, zhou2004democratic}. Some of the most popular self-labeled techniques are self-training \citep{Yarowsky1995Unsupervised} and co-training \citep{blum1998cotraining}. In general, those methods do not make any special assumptions about the distribution of the input data, but they accept that their most confident predictions tend to be correct.
+
+This paper presents the \CRANpkg{ssc} R package which implements successful self-labeled methods selected from the experimental analysis presented in \citet{triguero2015selflabeled}. The methods start learning with a partially labeled dataset. A classification model is obtained as a result from the semi-supervised learning performed. The hypothesis learned by the model can be used to classify either the unlabeled instances provided during the training process or new instances. The R package implementing the self-labeled methods described in this paper is available from the Comprehensive R Archive Network (CRAN) at \url{http://CRAN.R-project.org/package=ssc}. Additionally, a web page with a usage tutorial and more usage examples is available at \url{http://sci2s.ugr.es/dicits/software/ssc}.
+ 
+\subsection{Semi-supervised Classification} \label{sec:ssc}
+
+The main idea of SSL is to learn from unlabeled as much as from labeled data to obtain more accurate models \citep{chapelle2006semi}.
+In SSL, data can be separated into two sets: $L = \{x_1,\ldots,x_l\}$ with its known labels $Y_l = \{y_1, \ldots, y_l\}$,  and $U = \{x_{l+1},\ldots,x_{l+u}\}$ for which labels are unknown.
+
+Depending on the main goal of these methods, SSL can be divided into \emph{semi-supervised classification} (SSC) and \emph{semi-supervised clustering}. The first focuses on improving the results obtained with supervised classification and the latter in finding better defined clusters \citep{zhu2009introduction}. This paper is focused on SSC.
+
+SSC can be categorized into two slightly different settings, denoted \emph{transductive} and \emph{inductive learning}. Transductive learning concerns the problem of predicting the labels of the unlabeled examples provided during the training phase.
+On the other hand, inductive learning considers the labeled and unlabeled data provided as the training examples, and its objective is to predict the label of unseen data \citep{chapelle2006semi}.
+
+\subsubsection{Self-labeled methods}
+\label{sec:Self}
+
+Self-labeled techniques \citep{triguero2015selflabeled} obtain an enlarged labeled set by the iterative classification of unlabeled examples under the assumption that their most accurate predictions tend to be correct. Self-labeled techniques are typically divided into \emph{self-training} and \emph{co-training} methods.
+
+Self-training is a simple and effective SSL methodology. During the self-training process the classifier is initially trained with a reduced set of labeled examples, aiming to classify unlabeled examples. Then, it is retrained with its own most confident predictions, enlarging its labeled training set. This process is repeated until a stopping criterion is reached. The major advantages of self-training are its simplicity and the fact that it is a wrapper method \citep{zhu2009introduction}.
+
+The standard co-training \citep{blum1998cotraining} methodology assumes that the feature space can be split into two different conditionally independent views and that each view is able to predict the classes on its own. It trains one classifier in each specific view, and then the classifiers teach each other the most confidently predicted examples from the unlabeled pool. The process continues until a predefined number of iterations is reached.
+
+The wrapper methodology used in both methods makes the selection of the learning scheme for the classifiers flexible. The only requirement is that the classifiers can assign a confidence score to their predictions, which could be used to select which unlabeled instances to turn into additional training data.
+
+The \pkg{ssc} package implements six self-labeled methods. Table \ref{tab:methods} describes these methods according to the properties given by \citet{triguero2015selflabeled}:
+
+\begin{description}
+	\item[Addition mechanism] Describes the way in which the enlarged labeled set ($EL$) is formed. In incremental scheme, the algorithm starts with $EL = L$ and adds, step by step, the most confident instances of $U$. Another scheme is amending, which differs from incremental in that it can iteratively add or remove any instance that meets a certain criterion; this mechanism has been designed to avoid the introduction of noisy instances into $EL$ at each iteration.
+	\item[Classifiers] This refers to whether it uses one or several classifiers during the enlarging phase of the labeled set. All of these methods follow a wrapper methodology using one or more classifiers to establish the possible class of unlabeled instances. In a single-classifier model, each unlabeled instance belongs to the most probable class assigned by the uniquely used classifier. Multi-classifier methods combine the learned hypotheses with several classifiers to predict the class of unlabeled instances.
+	\item[Learning] It specifies whether the models are constituted by the same (single) or different (multiple) learning algorithms. Multi-learning approaches are closely linked with multi-classifier models; a multi-learning method is itself a multi-classifier method in which the different classifiers come from different learning methods. On the other hand, a single-learning approach can be linked to both single and multi-classifiers.
+	\item[Teaching] In a mutual-teaching approach, the classifiers teach each other their most confident predicted examples. Each $C_i$ classifier has its own $EL_i$ which it uses for training at each stage. $EL_i$ is increased with the most confident labeled examples obtained as the hypotheses combination of the remaining classifiers. By contrast, the self-teaching property refers to those classifiers that maintain a single $EL$.
+	\item[Stopping criteria] This is related to the mechanism used to stop the self-labeling process. It is an important factor due to the fact that it influences the size of $EL$ and therefore the learned hypothesis. Some of the approaches for this are: (i) repeat the self-labeling process until a portion of $U$ has been exhausted, (ii) establish a limited number of iterations, and (iii) the learned hypothesis remains stable between two consecutive stages.
+\end{description}
+
+\begin{table}[htbp]
+	\centering
+	\scriptsize
+	\tabcolsep = 0.14cm
+		\begin{tabular}{l|cccccc}
+			\toprule
+			\multirow{2}{*}{Method} & \multirow{2}{*}{Reference} & Addition & \multirow{2}{*}{Classifiers} & Learning  & \multirow{2}{*}{Teaching} & Stopping  \\
+			& & mechanism &  & paradigm &  & criteria \\
+			\midrule
+			Self-training &\citep{Yarowsky1995Unsupervised} 	   & incremental & single & single & self  & i \\
+			SETRED &\citep{li2005setred} 						   & amending 	 & single & single & self  & i \\
+			SNNRCE &\citep{Wang2010SNNRCE} 					   & amending 	 & single & single & self  & i \\
+			Tri-training &\citep{zhou2005tritraining}		   	   & incremental & multi  & single & mutual & iii \\
+			Co-Bagging  &\citep{blum1998cotraining}			   & incremental & multi  & single & mutual & i \\
+			Democratic-Co &\citep{zhou2004democratic} 		   & incremental & multi  & multi  & mutual & iii \\
+			\bottomrule
+		\end{tabular}%	
+	\caption{Methods implemented in \CRANpkg{ssc}}
+	\label{tab:methods}
+\end{table}
+
+\FloatBarrier
+\subsection{Related packages}
+\label{sec:packages}
+
+There are some publicly available R packages that allow semi-supervised classification. Most of them follow the generative paradigm. For instance, the \CRANpkg{upclass} package \citep{russell2014upclass} uses labeled and unlabeled data to construct a model-based classification method using a Gaussian mixture model. The Expectation Maximization algorithm is also used to obtain maximum likelihood estimates of the model parameters and classifications for the unlabeled data. The \CRANpkg{bgmm} package \citep{biecek2012mixture} implements partially supervised mixture modeling methods. \CRANpkg{Rmixmod} \citep{lebret2015mixmod} is an exploratory data analysis tool for solving clustering and classification problems by fitting a mixture model to a given dataset. It can be used in semi-supervised situations where the dataset is partially labeled. The \CRANpkg{spa} package \citep{culp2011spa} provides support for semi-supervised classification using graph-based estimation and linear regression.
+
+To the best of our knowledge, there are no R packages that specialize in self-labeled methods. Recently, the \CRANpkg{RSSL} \citep{rssl2017} and \CRANpkg{SSL} \citep{SSL2016} packages were introduced but their implementations are mostly complementary to those offered in our package. Only the self-training standard model is implemented in these packages and in the \CRANpkg{DMwR} package \citep{torgo2010DataMiningR} that covers a collection of data mining functions. On the other hand, \CRANpkg{ssc} provides a far more extensive set of self-labeled methods, including various of the most successful approaches according to the extensive overview provided by \citet{triguero2015selflabeled}.
+
+\section{Package functionalities}
+
+In this section we describe the main features of the \CRANpkg{ssc} package. It is written in pure R and it provides implementations of the most relevant self-labeled models. Two basic functionalities have been implemented in the package: training a semi-supervised model from data and classification of instances using a trained model. Both functionalities are accessible through two different interfaces: specific and generic. The former is oriented to standard base classifiers and the latter is focused on base classifiers with more complex specifications. Figure~\ref{fig:architecture} shows the main functions involved in both interfaces.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.8]{arquitecturaPaper}
+	\caption{Main functionalities and their implementation in \CRANpkg{ssc}.}
+	\label{fig:architecture}
+\end{figure}
+
+The workflow followed to perform the classification task with the \CRANpkg{ssc} package is illustrated in Figure \ref{fig:classificationProcess}. In the training phase we use one of the available training functions in the \CRANpkg{ssc} package. The training function takes as arguments the training set and other specified parameters of the selected model. In the classification phase we use the \texttt{predict} function for the specific interface. This function follows the \textit{S3} class style and for that reason the classification process depends on the class of the trained model. In the case of the generic interface, the \texttt{predict} function used is the one that corresponds to the base model trained in the case of the single-classifier methods: \texttt{selfTraining} and \texttt{setred}. For the multi-classifier methods, we provide classification functions to combine the predicted values obtained from each individual base classifier.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[scale=0.80]{Classification-process}
+	\caption{Training of models and prediction.}
+	\label{fig:classificationProcess}
+\end{figure}
+
+\FloatBarrier
+\subsection{Training functions}
+\label{sec:PrincipalFunctions}
+
+For each semi-supervised method (described in Table~\ref{tab:methods}), a function for training which returns the selected model is implemented. For both interfaces, the arguments are shown in Table \ref{tab:functions}.
+
+\begin{table}[!hb]
+	\centering
+		\begin{tabular}{l|l|l}
+			\toprule
+			Methods & Specific training interface & Generic training interface \\			
+			\midrule
+\multirow{3}{*}{coBC} & \texttt{x, y, x.inst, \bf{learner},} & \texttt{y, \bf{gen.learner}, \bf{gen.pred},}\\
+						  &	\texttt{\bf{learner.pars}, \bf{pred}, \bf{pred.pars},} & \texttt{N, perc.full, u, max.iter}\\ 
+						  & \texttt{N, perc.full, u, max.iter} & \\	
+			\midrule		
+\multirow{2}{*}{democratic} &  \texttt{x, y, x.inst, \bf{learners},} & \texttt{y, \bf{gen.learners}, \bf{gen.preds}} \\
+			   & \texttt{\bf{learners.pars}, \bf{preds}, \bf{preds.pars}} & \\
+			\midrule
+\multirow{3}{*}{selfTraining}  & \texttt{x, y, x.inst, \bf{learner},}  & \texttt{y, \bf{gen.learner}, \bf{gen.pred},} \\
+						  & \texttt{\bf{learner.pars}, \bf{pred}, \bf{pred.pars},} & \texttt{perc.full, max.iter, thr.conf}\\
+						  & \texttt{perc.full, max.iter, thr.conf} & \\
+			\midrule
+\multirow{3}{*}{setred}   & \texttt{x, y, x.inst, dist, \bf{learner},} & \texttt{y, D, \bf{gen.learner}, \bf{gen.pred},} \\
+			              & \texttt{\bf{learner.pars}, \bf{pred}, \bf{pred.pars},} & \texttt{perc.full, max.iter, theta} \\
+			              & \texttt{perc.full, max.iter, theta} &  \\
+			\midrule
+			snnrce        & \texttt{x, y, x.inst, dist, \bf{alpha}} & \\
+			\midrule
+\multirow{2}{*}{triTraining}   & \texttt{x, y, x.inst, \bf{learner},}  & \texttt{y, \bf{gen.learner}, \bf{gen.pred},}  \\
+			              & \texttt{\bf{learner.pars}, \bf{pred}, \bf{pred.pars},} & \\
+			\bottomrule
+		\end{tabular}
+	\caption{Input arguments for the training functions in \CRANpkg{ssc}. The arguments defining the base classifiers are highlighted.}
+	\label{tab:functions}
+\end{table}
+
+The \texttt{x}, \texttt{y} and \texttt{x.inst} arguments are mandatory for all training functions in the specific interface. The \texttt{x} argument provides the training instances in a usual matrix form (each row represents an instance). If the base classifier supports the training instances in other formats like a distance or kernel matrix then it is necessary to put as FALSE the argument \texttt{x.inst}. In this case, the \texttt{x} argument must be a squared matrix of dimension $m$, where $m$ means the number of training instances. The other common argument \texttt{y} is a vector with the class information of the training instances. In this vector the unlabeled instances are specified with the value \texttt{NA}.
+
+All training functions use at least one base classifier, following the wrapper methodology used in the SSC framework. In the case of the single-classifier methods: \texttt{selfTraining}, \texttt{setred}, \texttt{triTraining}, and \texttt{coBC}, the base classifier can be set using the arguments:  \texttt{learner}, \texttt{learner.pars}, \texttt{pred} and \texttt{pred.pars}. The defined interface of the \texttt{learner} function is as follows:
+
+\begin{example}
+	base.class <- learner(x.train, y.train, learner.pars)
+\end{example}
+
+Here, \texttt{x.train} and \texttt{y.train} are the training set and \texttt{learner.pars} is a list of additional parameters that can be passed to the \texttt{learner} function. The returned value is a trained base classifier (the object class depends on the learner specified). The defined interface of the \texttt{pred} function is as follows:
+
+\begin{example}
+	y.test <- pred(base.class, x.test, pred.pars)
+\end{example}
+
+Here, \texttt{base.class} is the base classifier trained, \texttt{x.test} are the instances to predict and \texttt{pred.pars} is a list of additional parameters that can be passed to the \texttt{pred} function. The returned value is a matrix of class probabilities (one column for each class and one row for each instance in \texttt{x.test}).
+
+For the generic interface, the base classifier definition is much more flexible. In this case, the manipulation of the instances occurs entirely inside the functions \texttt{gen.learner} and \texttt{gen.pred}. Therefore, the semi-supervised method accesses the training instances through indexes (index $i$ refers to $i_{th}$ instance supplied during the training phase). The defined interfaces of the \texttt{gen.learner} and \texttt{gen.pred} functions are as follows:
+
+\begin{example}
+	base.class <- gen.learner(indexes.train, y.train)
+	y.test <- gen.pred(base.class, indexes.test)
+\end{example}
+
+The argument \texttt{y} is common for all methods in both interfaces and the rest of arguments specifies particular features of the self-labeled techniques. For this reason these arguments appear either in the specific or the generic interface, with the exception of the \texttt{setred} method where the \texttt{dist} argument of the specific interface appears as argument \texttt{D} in the generic interface. In this case, the function \texttt{dist} is needed to compute the distance between all training instances and \texttt{D} is directly a distance matrix previously computed by the user.
+
+On the other hand, the \texttt{snnrce} method uses a fixed base classifier (1NN) that cannot be modified. For that reason, we do not include a training function for this method in the generic interface. The function \texttt{democratic} has as arguments a list of learners and predict functions to specify the set of algorithms that will be used as base classifiers, following a multi-classifier approach.
+
+\FloatBarrier
+\subsection{Classification functions}
+\label{sec:ClassFunctions}
+
+From the training phase we obtain an object whose class depends on the trained model. This object keeps the information needed to perform both inductive and transductive classification. For the specific interface, the classification task is performed by the \texttt{predict} function. The main arguments of this function are described as follows:
+
+\begin{description}
+	\item[-] \texttt{object}: a semi-supervised model previously trained.
+	\item[-] \texttt{x}: a matrix with the description of the instances to be classified.
+\end{description}
+
+Following the \textit{S3} class style, the \texttt{object} argument determines the function used to classify.
+The \texttt{x} argument depends on the training phase. If the model was trained from a distance (kernel) matrix then the expected value of \texttt{x} is a distance (kernel) matrix between the instances to be classified and the training instances included in the model. Otherwise, the model was trained from a matrix of instances and therefore the expected value of \texttt{x} is the matrix of instances to be classified. The \texttt{predict} function returns a factor with the classes predicted by the model.
+
+In the case of the generic interface, the classification task is straightforward for the methods \texttt{selfTraining} and \texttt{setred}. To classify new instances, it is sufficient to use the \texttt{predict} function associated with the final base classifier obtained during the training phase. This base classifier is returned as the \texttt{model} attribute of the semi-supervised model trained.
+For the multi-classifiers methods, the \texttt{model} attribute contains a list of base classifiers instead of a single classifier. To classify new instances it is required to classify first those new instances with each base classifier, independently. Then, the final classification is obtained by combining the predictions of each classifier. For this task, we offer a dedicated combination function for each multi-classifier method:
+
+\begin{description}
+	\item[-] \texttt{coBCCombine}
+	\item[-] \texttt{democraticCombine}
+    \item[-] \texttt{triTrainingCombine}
+\end{description}
+
+\FloatBarrier
+\section{Examples of usage}
+\label{sec:examples}
+
+This section presents various examples that illustrate the main functionalities of the \texttt{ssc} package. We can install it from CRAN executing the following function in the R environment:
+
+\begin{Shaded}
+	\begin{Highlighting}[]
+\KeywordTok{install.packages}\NormalTok{(ssc)}
+	\end{Highlighting}
+\end{Shaded}		
+
+\subsection{Setting up the data}
+\label{sec:SettingUpTheData}
+
+Two example datasets have been included in the \texttt{ssc} package: wine \citep{Lichman2013} and coffee \citep{UCRArchive}. The first is the result of a chemical analysis of wines to determine the type of wine (three classes). The second dataset represents a binary classification problem that stems from the temporal domain. We illustrate the use of the functions in the \CRANpkg{ssc} package using the wine dataset. We can obtain a partition that simulates the semi-supervised context with the following code:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ssc)}
+\KeywordTok{data}\NormalTok{(wine) }\CommentTok{# load the Wine dataset}
+
+\NormalTok{cls <-}\StringTok{ }\KeywordTok{which}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(wine) }\OperatorTok{==}\StringTok{ "Wine"}\NormalTok{)}
+\NormalTok{x <-}\StringTok{ }\NormalTok{wine[, }\OperatorTok{-}\NormalTok{cls] }\CommentTok{# instances without classes}
+\NormalTok{y <-}\StringTok{ }\NormalTok{wine[, cls] }\CommentTok{# the classes}
+\NormalTok{x <-}\StringTok{ }\KeywordTok{scale}\NormalTok{(x) }\CommentTok{# scale the attributes for distance calculations}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{3}\NormalTok{)}
+
+\CommentTok{# Use 50% of instances for training}
+\NormalTok{tra.idx <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{length}\NormalTok{(y), }\DataTypeTok{size =} \KeywordTok{ceiling}\NormalTok{(}\KeywordTok{length}\NormalTok{(y) }\OperatorTok{*}\StringTok{ }\FloatTok{0.5}\NormalTok{))}
+\NormalTok{xtrain <-}\StringTok{ }\NormalTok{x[tra.idx,] }\CommentTok{# training instances}
+\NormalTok{ytrain <-}\StringTok{ }\NormalTok{y[tra.idx] }\CommentTok{# classes of training instances}
+
+\CommentTok{# Use 70% of train instances as unlabeled set}
+\NormalTok{tra.na.idx <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{length}\NormalTok{(tra.idx),}
+                     \DataTypeTok{size =} \KeywordTok{ceiling}\NormalTok{(}\KeywordTok{length}\NormalTok{(tra.idx) }\OperatorTok{*}\StringTok{ }\FloatTok{0.7}\NormalTok{))}
+\NormalTok{ytrain[tra.na.idx] <-}\StringTok{ }\OtherTok{NA} \CommentTok{# remove class of unlabeled instances}
+
+\CommentTok{# Use the other 50% of instances for inductive test}
+\NormalTok{tst.idx <-}\StringTok{ }\KeywordTok{setdiff}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(y), tra.idx)}
+\NormalTok{xitest <-}\StringTok{ }\NormalTok{x[tst.idx,] }\CommentTok{# test instances}
+\NormalTok{yitest <-}\StringTok{ }\NormalTok{y[tst.idx] }\CommentTok{# classes of instances in xitest}
+
+\CommentTok{# Use the unlabeled examples for transductive test}
+\NormalTok{xttest <-}\StringTok{ }\NormalTok{x[tra.idx[tra.na.idx],] }\CommentTok{# transductive test instances}
+\NormalTok{yttest <-}\StringTok{ }\NormalTok{y[tra.idx[tra.na.idx]] }\CommentTok{# classes of instances in xttest}
+\end{Highlighting}
+\end{Shaded}
+
+The training set \texttt{xtrain} includes 50\% of all instances and the test set (\texttt{xitest}) contains the rest.
+In the \texttt{xtrain} set only the 30\% of the instances are labeled. This information is included in the factor \texttt{ytrain} where the positions that have the value \texttt{NA} correspond to the unlabeled instances in \texttt{xtrain}. The labeled instances in \texttt{xtrain} are randomly selected with only one restriction: all classes must be represented by at least two instances.
+
+The variables \texttt{xitest} and \texttt{xttest} are two matrices of instances stored row-wise that are used to test the prediction capabilities of the model. Specifically, \texttt{xitest} and \texttt{xttest} are used to test inductive and transductive prediction, respectively. In addition, the variables \texttt{yitest} and \texttt{yttest} correspond to the class information of the instances in \texttt{xitest} and \texttt{xttest}, respectively.
+
+We compute the matrices required to use additional training options from a precomputed distance or kernel matrix, when the argument \texttt{x.inst = FALSE}. The following code computes the distance matrix using the Euclidean method implemented in the \texttt{proxy} package and the kernel matrix using the Gaussian radial basis function (RBF) with a fixed value of sigma.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# computing distance and kernel matrices}
+\NormalTok{dtrain <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(proxy}\OperatorTok{::}\KeywordTok{dist}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{method =} \StringTok{"euclidean"}\NormalTok{, }\DataTypeTok{by_rows =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{ditest <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(proxy}\OperatorTok{::}\KeywordTok{dist}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xitest, }\DataTypeTok{y =}\NormalTok{ xtrain, }\DataTypeTok{method =} \StringTok{"euclidean"}\NormalTok{,}
+                                \DataTypeTok{by_rows =} \OtherTok{TRUE}\NormalTok{))}
+\NormalTok{ktrain <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\StringTok{ }\FloatTok{0.048} \OperatorTok{*}\StringTok{ }\NormalTok{dtrain}\OperatorTok{^}\DecValTok{2}\NormalTok{))}
+\NormalTok{kitest <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\StringTok{ }\FloatTok{0.048} \OperatorTok{*}\StringTok{ }\NormalTok{ditest}\OperatorTok{^}\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+The matrices \texttt{dtrain} and \texttt{ktrain} are used in the training phase, and the matrices \texttt{ditest} and \texttt{kitest} are used in the inductive prediction phase. We highlight the order of the arguments \texttt{x} and \texttt{y} passed in the second call to the \texttt{dist} function. It is important to guarantee that \texttt{x} takes the test set and \texttt{y} takes the training set. The goal is to obtain a distance matrix with the following dimensions: the number of rows is equal to the size of the test set and the number of columns is equal to the size of the training set.
+
+\subsection{Training the model}
+\label{sec:TrainingTheModel}
+
+We illustrate different ways of training a semi-supervised model depending on the base classifier specified and the option used for the \texttt{x.inst} argument.
+We include some examples of the \texttt{selfTraining} function to show the available options.
+
+To perform the training phase using directly the instances in \texttt{xtrain} and the \texttt{knn3} function from the \CRANpkg{caret} package as base classifier, we call the function as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(caret)}
+\NormalTok{m.selft1 <-}\StringTok{ }\KeywordTok{selfTraining}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{learner =}\NormalTok{ knn3,}
+                         \DataTypeTok{learner.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{k =} \DecValTok{1}\NormalTok{), }\DataTypeTok{pred =} \StringTok{"predict"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Instead of using the instances in \texttt{xtrain} we can use a precomputed matrix in conjunction with a distance-based classifier. In this case, we use the distance matrix \texttt{dtrain} and the \texttt{oneNN} function available in the \CRANpkg{ssc} package as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m.selft2 <-}\StringTok{ }\KeywordTok{selfTraining}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ dtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{x.inst =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{learner =}\NormalTok{ oneNN,}
+                         \DataTypeTok{pred =} \StringTok{"predict"}\NormalTok{, }\DataTypeTok{pred.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"prob"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+The next example shows how to use the \texttt{selfTraining} function with a precomputed kernel matrix. In this case, the selected base classifier is a Support Vector Machines (SVM) implemented in the \texttt{ksvm} function from the \CRANpkg{kernlab} package. In the argument \texttt{learner.pars} we need to specify the values of the arguments \texttt{kernel} and \texttt{prob.model} that will be provided to each call of the \texttt{ksvm} function. Furthermore, we define a wrapper for the original \texttt{predict} function of the ``ksvm'' object. Thus, we guarantee the selection of the columns that correspond to the support vectors obtained by the model \texttt{m}. Additionally, we coerce the matrix object \texttt{k} to ``kernelMatrix'' class before using the \texttt{predict} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(kernlab)}
+\NormalTok{m.selft3 <-}\StringTok{ }\KeywordTok{selfTraining}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ ktrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{x.inst =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{learner =}\NormalTok{ ksvm, }
+                         \DataTypeTok{learner.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{kernel =} \StringTok{"matrix"}\NormalTok{, }\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{),}
+                         \DataTypeTok{pred =} \ControlFlowTok{function}\NormalTok{(m, k)}
+                           \KeywordTok{predict}\NormalTok{(m, }\KeywordTok{as.kernelMatrix}\NormalTok{(k[, }\KeywordTok{SVindex}\NormalTok{(m)]), }
+                                   \DataTypeTok{type =} \StringTok{"probabilities"}\NormalTok{)}
+\NormalTok{                         )}
+\end{Highlighting}
+\end{Shaded}
+
+The training process with other methods in the \CRANpkg{ssc} package is quite similar. In the next code snippet we train SETRED, SNNRCE, tri-training, and co-bagging models using the training instances in \texttt{xtrain}.
+For the \texttt{setred}, \texttt{triTraining}, and \texttt{CoBC} methods, we use the \texttt{ksvm} function as base classifier. The \texttt{snnrce} method has a fixed base classifier.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m.snnrce <-}\StringTok{ }\KeywordTok{snnrce}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{dist =} \StringTok{"Euclidean"}\NormalTok{)}
+
+\NormalTok{m.setred <-}\StringTok{ }\KeywordTok{setred}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{dist =} \StringTok{"Euclidean"}\NormalTok{, }\DataTypeTok{learner =}\NormalTok{ ksvm,}
+               \DataTypeTok{learner.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{), }\DataTypeTok{pred =}\NormalTok{ predict,}
+               \DataTypeTok{pred.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"probabilities"}\NormalTok{))}
+
+\NormalTok{m.trit <-}\StringTok{ }\KeywordTok{triTraining}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{learner =}\NormalTok{ ksvm,}
+               \DataTypeTok{learner.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{), }\DataTypeTok{pred =}\NormalTok{ predict,}
+               \DataTypeTok{pred.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"probabilities"}\NormalTok{))}
+
+\NormalTok{m.cobc <-}\StringTok{ }\KeywordTok{coBC}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{N =} \DecValTok{5}\NormalTok{, }\DataTypeTok{learner =}\NormalTok{ ksvm,}
+               \DataTypeTok{learner.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{), }\DataTypeTok{pred =}\NormalTok{ predict,}
+               \DataTypeTok{pred.pars =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"probabilities"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Training with Democratic-Co}
+
+In the \CRANpkg{ssc} package, only the \texttt{democratic} method requires the specification of more than one base classifier. For that reason, the arguments \texttt{learners} and \texttt{preds} must be a list of functions instead of a single value. \texttt{democratic} assumes that the classifiers provided are from different learning paradigms. We show an example using three different base classifiers: 1NN, SVM and decision trees (implemented in the \texttt{C5.0} function from the \CRANpkg{C50} package). To perform the training process with \texttt{democratic}, we use the following code:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(C50)}
+\NormalTok{m.demo <-}\StringTok{ }\KeywordTok{democratic}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xtrain, }\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{learners =} \KeywordTok{list}\NormalTok{(knn3, ksvm, C5.}\DecValTok{0}\NormalTok{),}
+                     \DataTypeTok{learners.pars =} \KeywordTok{list}\NormalTok{(}\KeywordTok{list}\NormalTok{(}\DataTypeTok{k=}\DecValTok{1}\NormalTok{), }\KeywordTok{list}\NormalTok{(}\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{), }\OtherTok{NULL}\NormalTok{),}
+                     \DataTypeTok{preds =} \KeywordTok{list}\NormalTok{(predict, predict, predict), }\DataTypeTok{preds.pars =}
+                       \KeywordTok{list}\NormalTok{(}\OtherTok{NULL}\NormalTok{, }\KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"probabilities"}\NormalTok{), }\KeywordTok{list}\NormalTok{(}\DataTypeTok{type =} \StringTok{"prob"}\NormalTok{))}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+In the next example, we show how to use the generic interface for the democratic-Co method. The target is to train from precomputed matrices two base classifiers: SVM and 1NN. The specific interface allows only a single precomputed matrix as argument. To obtain the functionality desired, we need to use the generic interface. At first, we define the learner and prediction functions for each base classifier according to the interfaces introduced in Section~\ref{sec:PrincipalFunctions}. The \texttt{tindexes} attribute incorporated in both trained models is used to specify the training instances included in the trained model. The last step is the call of the \texttt{democraticG} function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{l1nn <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(indexes, cls)\{}
+\NormalTok{  m <-}\StringTok{ }\KeywordTok{oneNN}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ cls)}
+  \KeywordTok{attr}\NormalTok{(m, }\StringTok{"tindexes"}\NormalTok{) <-}\StringTok{ }\NormalTok{indexes}
+\NormalTok{  m}
+\NormalTok{\}}
+\NormalTok{l1nn.prob <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(m, indexes)  \{}
+  \KeywordTok{predict}\NormalTok{(m, dtrain[indexes, }\KeywordTok{attr}\NormalTok{(m, }\StringTok{"tindexes"}\NormalTok{)], }\DataTypeTok{type =} \StringTok{"prob"}\NormalTok{) }
+\NormalTok{\}}
+
+\NormalTok{lsvm <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(indexes, cls)\{}
+\NormalTok{  m =}\StringTok{ }\KeywordTok{ksvm}\NormalTok{(ktrain[indexes, indexes], cls, }\DataTypeTok{kernel =} \StringTok{"matrix"}\NormalTok{, }\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{)}
+  \KeywordTok{attr}\NormalTok{(m, }\StringTok{"tindexes"}\NormalTok{) <-}\StringTok{ }\NormalTok{indexes[}\KeywordTok{SVindex}\NormalTok{(m)]}
+\NormalTok{  m}
+\NormalTok{\}}
+\NormalTok{lsvm.prob <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(m, indexes)  \{}
+\NormalTok{  k <-}\StringTok{ }\KeywordTok{as.kernelMatrix}\NormalTok{(ktrain[indexes, }\KeywordTok{attr}\NormalTok{(m, }\StringTok{"tindexes"}\NormalTok{)])}
+  \KeywordTok{predict}\NormalTok{(m, k, }\DataTypeTok{type =} \StringTok{"probabilities"}\NormalTok{) }
+\NormalTok{\}}
+  
+\NormalTok{m.demoG <-}\StringTok{ }\KeywordTok{democraticG}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ ytrain, }\DataTypeTok{gen.learners =} \KeywordTok{list}\NormalTok{(l1nn, lsvm), }
+                       \DataTypeTok{gen.preds =} \KeywordTok{list}\NormalTok{(l1nn.prob, lsvm.prob))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Classifying seen and unseen instances}
+\label{sec:ClassifyingSeenAndUnseenInstances}
+
+In the following we explain how to classify new instances. We illustrate this with various examples. The models used in the following examples were trained previously in Section~\ref{sec:TrainingTheModel}.
+
+In the first example we use the model \texttt{m.selft1} to perform inductive classification. Because this model was trained using an instance matrix, we need the instance matrix \texttt{xitest} to classify new instances. We predict the classes of the test instances with the following code:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p.selft1 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.selft1, xitest)}
+\end{Highlighting}
+\end{Shaded}
+
+Now, we use the models \texttt{m.selft2} and \texttt{m.selft3} that were trained using precomputed distance and kernel matrices, respectively. Therefore, we provide the precomputed test matrices (\texttt{ditest} and \texttt{kitest}) to perform inductive classification. The classification obtained is stored in the vector \texttt{p.selft1}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p.selft2 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.selft2, ditest[, m.selft2}\OperatorTok{\$}\NormalTok{instances.index])}
+\NormalTok{p.selft3 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.selft3, }\KeywordTok{as.kernelMatrix}\NormalTok{(kitest[, m.selft3}\OperatorTok{\$}\NormalTok{instances.index]))}
+\end{Highlighting}
+\end{Shaded}
+
+The internal attribute \texttt{instances.index} in the objects \texttt{m.selft2} and \texttt{m.selft3} stores the indexes of the training instances used in the built model. During the training phase, the learning function selects the instances that will be included in the returned model. According to this, for each precomputed matrix we select the sub matrix corresponding to the unseen test instances and the selected training instances.
+
+On the other hand, we illustrate with the \texttt{m.selft3} model how to perform transductive classification. Here, to predict the classes of the unlabeled training instances (referenced by the  \texttt{tra.na.idx} variable) we pass directly the matrix \texttt{ktrain}, used during the training phase:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p.selft3transd <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.selft3, }\KeywordTok{as.kernelMatrix}\NormalTok{(ktrain[tra.na.idx,}
+\NormalTok{                                                          m.selft3}\OperatorTok{\$}\NormalTok{instances.index]))}
+\end{Highlighting}
+\end{Shaded}
+
+For the rest of the single classifier models, we perform inductive classification of the test instances provided in the matrix \texttt{xitest}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p.snnrce <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.snnrce, xitest)}
+\NormalTok{p.setred <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.setred, xitest)}
+\NormalTok{p.trit <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.trit, xitest)}
+\NormalTok{p.cobc <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.cobc, xitest)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Classifying with Democratic-Co}
+
+For the specific interface, the classification task using the \texttt{democratic} function is similar to the previous examples. We predict the classes of the test instances as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p.demo <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.demo, xitest)}
+\end{Highlighting}
+\end{Shaded}
+
+However, this task using the generic interface requires a previous step, consisting in the prediction of the test instances by each base classifier contained in the ensemble. Subsequently, we use the \texttt{democraticCombine} function to create the final hypotheses.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m1.pred1 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.demoG}\OperatorTok{$}\NormalTok{model[[}\DecValTok{1}\NormalTok{]], ditest[, m.demoG}\OperatorTok{$}\NormalTok{model.index[[}\DecValTok{1}\NormalTok{]]], }
+                    \DataTypeTok{type =}\StringTok{"class"}\NormalTok{)}
+\NormalTok{m1.pred2 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(m.demoG}\OperatorTok{$}\NormalTok{model[[}\DecValTok{2}\NormalTok{]],}
+                    \KeywordTok{as.kernelMatrix}\NormalTok{(kitest[, m.demoG}\OperatorTok{$}\NormalTok{model.index[[}\DecValTok{2}\NormalTok{]]]))}
+
+\NormalTok{p.demoG <-}\StringTok{ }\KeywordTok{democraticCombine}\NormalTok{(}\DataTypeTok{pred =} \KeywordTok{list}\NormalTok{(m1.pred1, m1.pred2), m.demoG}\OperatorTok{$}\NormalTok{W,}
+\NormalTok{                             m.demoG}\OperatorTok{$}\NormalTok{classes)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Comparison between the models trained}
+\label{sec:comparison}
+
+In this example we perform a comparison between a selection of the trained models to determine the most competitive one for the wine classification problem.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p <-}\StringTok{ }\KeywordTok{list}\NormalTok{(p.selft3, p.snnrce, p.setred, p.trit, p.cobc, p.demo)}
+\NormalTok{acc <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DataTypeTok{X =}\NormalTok{ p, }\DataTypeTok{FUN =} \ControlFlowTok{function}\NormalTok{(i) \{caret}\OperatorTok{::}\KeywordTok{confusionMatrix}\NormalTok{(}\KeywordTok{table}\NormalTok{(i,} 
+	                                             \NormalTok{yitest))}\OperatorTok{\$}\NormalTok{overall[}\DecValTok{1}\NormalTok{]\})}
+
+\KeywordTok{names}\NormalTok{(acc) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"SelfT"}\NormalTok{,}\StringTok{"SNNRCE"}\NormalTok{,}\StringTok{"SETRED"}\NormalTok{,}\StringTok{"TriT"}\NormalTok{, }\StringTok{"coBC"}\NormalTok{,}\StringTok{"Demo"}\NormalTok{)}
+\KeywordTok{barplot}\NormalTok{(acc, }\DataTypeTok{beside =}\NormalTok{ T, }\DataTypeTok{ylim =} \KeywordTok{c}\NormalTok{(}\FloatTok{0.80}\NormalTok{,}\DecValTok{1}\NormalTok{), }\DataTypeTok{xpd =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{las =} \DecValTok{2}\NormalTok{,}
+        \DataTypeTok{col=}\KeywordTok{rainbow}\NormalTok{(}\DataTypeTok{n =} \DecValTok{6}\NormalTok{, }\DataTypeTok{start =} \DecValTok{3}\OperatorTok{/}\DecValTok{6}\NormalTok{, }\DataTypeTok{end =} \DecValTok{4}\OperatorTok{/}\DecValTok{6}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.6}\NormalTok{) ,}
+        \DataTypeTok{ylab =} \StringTok{"Accuracy"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The bar plot generated with the evaluation is shown in Figure~\ref{fig:comparison}. Tri-training obtains the most accurate results for the wine problem.
+
+Another useful analysis is the comparison with the supervised paradigm. For this we train a supervised classifier (for simplicity SVM) to obtain a baseline of the classification results. The SVM classifier trained from the initial labeled instances in \texttt{xtrain} can be used as a lower bound of accuracy. We evaluate the supervised classifier in the test set \texttt{xitest} and compare this result with the semi-supervised performance. In the following code we train and evaluate the SVM classifier:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{labeled.idx <-}\StringTok{ }\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(ytrain))}\CommentTok{# indices of the initially labeled instances}
+\NormalTok{xilabeled <-}\StringTok{ }\NormalTok{xtrain[labeled.idx,] }\CommentTok{# labeled instances}
+\NormalTok{yilabeled <-}\StringTok{ }\NormalTok{ytrain[labeled.idx] }\CommentTok{# related classes}
+
+\NormalTok{svmBL <-}\StringTok{ }\KeywordTok{ksvm}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ xilabeled, }\DataTypeTok{y =}\NormalTok{ yilabeled, }\DataTypeTok{prob.model =} \OtherTok{TRUE}\NormalTok{) }\CommentTok{# build SVM}
+\NormalTok{p.svmBL <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(}\DataTypeTok{object =}\NormalTok{ svmBL, }\DataTypeTok{newdata =}\NormalTok{ xitest) }\CommentTok{# classify with SVM}
+
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =}\NormalTok{ caret}\OperatorTok{::}\KeywordTok{confusionMatrix}\NormalTok{(}\KeywordTok{table}\NormalTok{(p.svmBL, yitest))}\OperatorTok{\$}\NormalTok{overall[}\DecValTok{1}\NormalTok{], }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{, }
+       \DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\KeywordTok{legend}\NormalTok{(}\DataTypeTok{x =} \DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \FloatTok{1.0}\NormalTok{, }\DataTypeTok{col =} \KeywordTok{c}\NormalTok{(}\StringTok{"red"}\NormalTok{), }\DataTypeTok{legend=}\KeywordTok{c}\NormalTok{(}\StringTok{"Base line"}\NormalTok{), }\DataTypeTok{lty =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The baseline generated is shown in Figure~\ref{fig:comparison}. Most self-labeled methods obtain an accuracy gain by taking into account the unlabeled instances during the training. In particular, \texttt{triTraining} obtains an accuracy gain of 0.05.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[scale=0.7]{ModelsC}
+	\caption{Comparison between various semi-supervised models evaluated for the wine problem.}
+	\label{fig:comparison}
+\end{figure}
+
+\FloatBarrier
+\subsection{Empirical evaluation of performance}
+\label{sec:ExperimentalResults}
+
+In this section, we illustrate the performance of some methods implemented in the \CRANpkg{ssc} package. We show the comparison between the baseline and the semi-supervised accuracy results applied to five datasets taken from the UCI repository.
+The \texttt{SVM} with the RBF kernel function is used as base classifier and benchmark supervised classifier in all comparisons.
+The semi-supervised methods evaluated are: \texttt{selfTraining}, \texttt{setred}, \texttt{coBC} and \texttt{triTraining}.
+
+In the preparation process, we follow the same procedure used in Section~\ref{sec:SettingUpTheData} to split the wine dataset: 50\% of the instances to train ($L \cup U$) and 50\% of the instances to test ($T$).
+The set $L$ represents 30\% of the training instances.
+To train the supervised method we use only the avaliable instances from $L$. To test all methods we use the set $T$.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l|c|cccc}
+		\toprule
+		Datasets      & \texttt{SVM} & \texttt{selfTraining} & \texttt{setred} & \texttt{coBC} & \texttt{triTraining}\\
+		\midrule
+		Iris             & 0.68 & \textbf{0.88}  &  \textbf{0.88} & \textbf{0.88} & \textbf{0.90} \\
+		Parkinsons       & 0.86 & 0.86           &  \textbf{0.87} & \textbf{0.87} & 0.86 \\
+		Wine             & 0.95 & \textbf{0.97}  &  \textbf{0.97} & 0.95          & \textbf{0.97} \\
+		Vertebral column & 0.77 & 0.75           &  0.77          & \textbf{0.78} & \textbf{0.78} \\
+		Fertility        & 0.90 & 0.90           &  0.90          & 0.72          & 0.90  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Accuracy classification results.}
+	\label{tab:results}
+\end{table}
+
+The results of our experiment are shown in Table~\ref{tab:results}. All results that represent an accuracy gain in the semi-supervised paradigm are printed in a boldface font.
+The results show that, in general, self-labeled techniques show competitive results to face classification problems from diverse domains. Specifically, in the presence of a reduced set of labeled examples.
+
+\section{Conclusions}
+
+We have presented the R package \CRANpkg{ssc} which provides a collection of self-labeled techniques to deal with the semi-supervised classification problem that occurs in multiple domains.
+The implemented techniques can take advantage of partially labeled datasets during the training phase to create a classifier.
+The classifiers obtained can be used to perform either transductive or inductive classification.
+The \CRANpkg{ssc} package offers a wrapper framework to train models. Depending on the base classifier selected, the models can be trained from instances or directly from a precomputed distance or kernel matrix.
+In addition, the \CRANpkg{ssc} package supports a generic interface for base classifiers with other specifications, increasing the flexibility of this approach.
+We have shown in the experimental results that these techniques can provide better results than supervised classification at low ratios of labeled data.
+
+\section{Acknowledgments}
+
+This work was supported in part by ``Proyecto de Investigaci\'on de Excelencia de la Junta de Andaluc\'ia, P12-TIC-2958'' and ``Proyecto de Investigaci\'on del Ministerio de Econom\'ia y Competitividad, TIN2013-47210-P''. This work was partly performed while M. Gonz\'alez held a travel grant from the Asociaci\'on Iberoamericana de Postgrado (AUIP), supported by Junta de Andaluc\'ia, to undertake a research stay at University of Granada.
+
+\bibliography{references}
+
+\address{Mabel González\\
+	Department of Computer Science, Universidad Central ``Marta Abreu" de Las Villas\\
+	Camajuaní road Km. 5 y 1/2, Santa Clara 50100\\
+	Cuba\\
+	ORCiD 0000-0003-0152-444X\\
+	\email{mabelc@correo.ugr.es}}
+
+\address{Osmani Rosado\\
+  Department of Computer Science, Universidad Central ``Marta Abreu" de Las Villas\\
+  Camajuaní road Km. 5 y 1/2, Santa Clara 50100\\
+  Cuba\\
+  ORCiD 0000-0002-2639-3354\\
+  \email{osmanir@uclv.cu}}
+
+\address{José D. Rodríguez\\
+  Department of Computer Science, Universidad Central ``Marta Abreu" de Las Villas\\
+  Camajuaní road Km. 5 y 1/2, Santa Clara 50100\\
+  Cuba\\
+  ORCiD 0000-0002-8489-4106\\
+  \email{josedaniel@uclv.cu}}
+
+\address{Christoph Bergmeir\\
+	Faculty of Information Technology, Monash University, Melbourne\\
+	P.O. Box 63 Monash University, Victoria 3800\\
+	Australia\\
+	ORCiD 0000-0002-3665-9021\\
+	\email{christoph.bergmeir@monash.edu}}
+
+\address{Isaac Triguero\\
+	School of Computer Science, University of Nottingham\\
+	Jubilee Campus, Wollaton Road, Nottingham NG8 1BB\\
+	United Kingdom\\
+	ORCiD 0000-0002-0150-0651\\
+	\email{isaac.triguero@nottingham.ac.uk}}
+
+
+\address{José M. Benítez\\
+	Department of Computer Science and Artificial Intelligence, University of Granada\\
+	 C/ Periodista Daniel Saucedo Aranda s/n, 18071, Granada\\
+	Spain\\
+	ORCiD 0000-0002-2346-0793\\
+	\email{j.m.benitez@decsai.ugr.es}}
+\end{article}
+
+\end{document}

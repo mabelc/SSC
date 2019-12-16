@@ -5,9 +5,6 @@
 \alias{coffee}
 \title{Time series data set}
 \format{A data frame with 56 rows and 287 variables including the class.}
-\source{
-\url{www.cs.ucr.edu/~eamonn/time_series_data/}
-}
 \usage{
 data(coffee)
 }

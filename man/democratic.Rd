@@ -72,6 +72,8 @@ produced via a weigthed majority voting.
 }
 \examples{
 
+\dontrun{
+
 library(ssc)
 
 ## Load Wine data set
@@ -129,5 +131,7 @@ m <- democratic(x = xtrain, y = ytrain,
 # predict classes
 m.pred <- predict(m, xitest)
 table(m.pred, yitest)
+
+}
 
 }

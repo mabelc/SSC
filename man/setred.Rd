@@ -5,8 +5,8 @@
 \title{SETRED method}
 \usage{
 setred(x, y, x.inst = TRUE, dist = "Euclidean", learner,
-  learner.pars = NULL, pred = "predict", pred.pars = NULL, theta = 0.1,
-  max.iter = 50, perc.full = 0.7)
+  learner.pars = NULL, pred = "predict", pred.pars = NULL,
+  theta = 0.1, max.iter = 50, perc.full = 0.7)
 }
 \arguments{
 \item{x}{A object that can be coerced as matrix. This object has two possible 

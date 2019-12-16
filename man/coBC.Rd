@@ -4,8 +4,9 @@
 \alias{coBC}
 \title{CoBC method}
 \usage{
-coBC(x, y, x.inst = TRUE, learner, learner.pars = NULL, pred = "predict",
-  pred.pars = NULL, N = 3, perc.full = 0.7, u = 100, max.iter = 50)
+coBC(x, y, x.inst = TRUE, learner, learner.pars = NULL,
+  pred = "predict", pred.pars = NULL, N = 3, perc.full = 0.7,
+  u = 100, max.iter = 50)
 }
 \arguments{
 \item{x}{An object that can be coerced to a matrix. This object has two possible 
